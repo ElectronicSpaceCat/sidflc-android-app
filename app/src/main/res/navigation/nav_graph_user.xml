@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_user"
+    app:startDestination="@id/homeFragment">
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.android.greentech.plink.fragments.home.HomeFragment"
+        android:label="" >
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_privacyFragment"
+            app:destination="@id/privacyFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_deviceScannerFragment"
+            app:destination="@id/deviceScannerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.android.greentech.plink.fragments.about.AboutFragment"
+        android:label="About" />
+    <fragment
+        android:id="@+id/privacyFragment"
+        android:name="com.android.greentech.plink.fragments.privacy.PrivacyFragment"
+        android:label="Privacy Policy" />
+    <fragment
+        android:id="@+id/deviceScannerFragment"
+        android:name="com.android.greentech.plink.fragments.device.deviceScanner.DeviceScannerFragment"
+        android:label="Device Scanner" >
+        <action
+            android:id="@+id/action_deviceScannerFragment_to_deviceConnectedFragment"
+            app:destination="@id/deviceConnectedFragment"
+            app:popUpTo="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.android.greentech.plink.fragments.settings.SettingsFragment"
+        android:label="Settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_unitEditorFragment"
+            app:destination="@id/unitEditorFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_projectileEditFragment"
+            app:destination="@id/projectileEditFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_gyroCalFragment"
+            app:destination="@id/gyroCalFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/gyroCalFragment"
+        android:name="com.android.greentech.plink.fragments.gyroCal.GyroCalFragment"
+        android:label="Gyro Calibrate" />
+    <fragment
+        android:id="@+id/unitEditorFragment"
+        android:name="com.android.greentech.plink.fragments.unitEditor.UnitEditorFragment"
+        android:label="Units" />
+    <fragment
+        android:id="@+id/projectileEditFragment"
+        android:name="com.android.greentech.plink.fragments.projectileEditor.ProjectileEditFragment"
+        android:label="Projectiles" />
+    <fragment
+        android:id="@+id/deviceTunerFragment"
+        android:name="com.android.greentech.plink.fragments.device.deviceTuner.DeviceTunerFragment"
+        android:label="Device Tuner" />
+    <fragment
+        android:id="@+id/deviceConnectedFragment"
+        android:name="com.android.greentech.plink.fragments.device.deviceConnected.DeviceConnectedFragment"
+        android:label="Device Connected" >
+        <action
+            android:id="@+id/action_deviceConnectedFragment_to_deviceInfoFragment"
+            app:destination="@id/deviceInfoFragment" />
+        <action
+            android:id="@+id/action_deviceConnectedFragment_to_deviceTunerFragment"
+            app:destination="@id/deviceTunerFragment" />
+        <action
+            android:id="@+id/action_deviceConnectedFragment_to_deviceCalibrateFragment"
+            app:destination="@id/deviceCalibrateFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/deviceCalibrateFragment"
+        android:name="com.android.greentech.plink.fragments.device.deviceCalibrate.DeviceCalibrateFragment"
+        android:label="Device Calibrate" />
+    <fragment
+        android:id="@+id/deviceInfoFragment"
+        android:name="com.android.greentech.plink.fragments.device.deviceInfo.DeviceInfoFragment"
+        android:label="Device Info" />
+</navigation>

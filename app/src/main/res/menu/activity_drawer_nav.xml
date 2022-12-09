@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/homeFragment"
+            android:icon="@drawable/ic_camera"
+            android:title="@string/menu_home" />
+        <item
+            android:id="@+id/deviceScannerFragment"
+            android:icon="@drawable/ic_bluetooth_searching"
+            android:title="@string/menu_device" />
+        <item
+            android:id="@+id/settingsFragment"
+            android:icon="@drawable/ic_gears"
+            android:title="@string/menu_settings" />
+        <item
+            android:id="@+id/aboutFragment"
+            android:icon="@drawable/ic_document"
+            android:title="@string/menu_about" />
+        <item
+            android:id="@+id/privacyFragment"
+            android:icon="@drawable/ic_visibility_off_24"
+            android:title="@string/menu_privacy" />
+    </group>
+</menu>

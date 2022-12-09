@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="red">#FF0000</color>
+    <color name="green">#00FF0A</color>
+    <color name="gray">#656565</color>
+    <color name="darkgray">#494949</color>
+    <color name="lightgray">#A1A1A1</color>
+    <color name="iconBackground">#FFFFFF</color>
+    <color name="textShadow">#80000000</color>
+    <color name="textShadow2">#66000000</color>
+    <color name="textprimary">#FFE38F</color>
+    <color name="textprimary2">#00E1FF</color>
+    <color name="primaryBackground">#232323</color>
+    <color name="ic_dial_bounds_1">#00FF55</color>
+    <color name="ic_dial_bounds_2">#FF0000</color>
+</resources>

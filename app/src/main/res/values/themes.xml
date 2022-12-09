@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.PlinkApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+        <!-- Main theme settings -->
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <item name="seekBarStyle">@style/MySeekBarStyle</item>
+
+
+        <!-- Main background color -->
+        <item name="android:colorBackground">@color/primaryBackground</item>
+
+        <!-- Override dialog theme -->
+        <item name="alertDialogTheme">@style/MyDialogTheme</item>
+        <!-- Override menu icon -->
+        <item name="android:actionOverflowButtonStyle">@style/MyActionMenuIcon</item>
+        <!-- Override menu list style -->
+        <item name="actionOverflowMenuStyle">@style/MyMenuStyle</item>
+        <!-- Override spinner -->
+        <item name="android:dropDownSpinnerStyle">@style/MySpinnerDropdownStyle</item>
+        <!-- Override spinner list item style -->
+        <item name="android:spinnerDropDownItemStyle">@style/MySpinnerItemStyle</item>
+
+        <!-- Override button style -->
+        <item name="materialButtonStyle">@style/MyButtonStyle</item>
+        <!-- Override floating action button style -->
+        <item name="android:actionButtonStyle">@style/MyFloatingActionButtonStyle</item>
+        <!-- Override nav drawer style -->
+        <item name="navigationViewStyle">@style/MyNavigationViewStyle</item>
+        <!-- Override preference screen style -->
+        <item name="preferenceTheme">@style/MyPreferenceStyle</item>
+
+        <!-- Color of accents..ie switch buttons -->
+        <item name="colorAccent">@color/textprimary</item>
+        <!-- Color of highlighted item backgrounds -->
+        <item name="android:colorControlHighlight">@color/lightgray</item>
+        <!-- Color of top/bottom pull down bubble thingy -->
+        <item name="android:colorPrimary">@color/lightgray</item>
+
+        <item name="android:itemBackground">@color/gray</item>
+
+        <!-- Primary text -->
+        <item name="android:textColorPrimary">@color/text_primary_color_selector</item>
+        <item name="android:textColorPrimaryInverse">@color/text_primary_color_selector</item>
+        <!-- Preference summary text -->
+        <item name="android:textColorSecondary">@color/text_secondary_color_selector</item>
+        <item name="android:textColorSecondaryInverse">@color/text_primary_color_selector</item>
+        <!-- Other text -->
+        <item name="android:textColorTertiary">@color/text_secondary_color_selector</item>
+        <item name="android:textColorTertiaryInverse">@color/text_primary_color_selector</item>
+    </style>
+</resources>

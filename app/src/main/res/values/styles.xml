@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MyActionMenuIcon">
+        <item name="android:src">@drawable/ic_gears</item>
+        <item name="android:paddingRight">15dp</item>
+    </style>
+
+    <style name="MyMenuStyle" parent="Theme.MaterialComponents.CompactMenu">
+        <item name="android:textColor">@color/text_primary_color_selector</item>
+        <item name="android:background">@color/gray</item>
+        <item name="android:dropDownVerticalOffset">10dp</item>
+    </style>
+
+    <style name="MySpinnerDropdownStyle" parent="Widget.AppCompat.Spinner.DropDown">
+        <item name="android:overlapAnchor">true</item>
+        <item name="android:popupBackground">@color/gray</item>
+    </style>
+
+    <style name="MySpinnerItemStyle" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
+        <item name="android:textAppearance">@style/MySpinnerItemTextStyle</item>
+    </style>
+
+    <style name="MySpinnerItemTextStyle" parent="TextAppearance.AppCompat.Widget.DropDownItem">
+        <item name="android:textColor">@color/text_primary_color_selector</item>
+    </style>
+
+    <style name="MyFloatingActionButtonStyle" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">@color/action_button_color_selector</item>
+        <item name="colorSecondary">@color/textprimary</item>
+        <item name="tint">@color/text_primary_color_selector</item>
+    </style>
+
+    <style name="MyDialogTheme" parent="Theme.MaterialComponents.Dialog">
+        <!-- Color of background -->
+        <item name="android:colorBackground">@color/darkgray</item>
+        <!-- Color of filled radio icon -->
+        <item name="colorSecondary">@color/textprimary</item>
+        <!-- Color of title text -->
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <!-- Color positive/negative button text -->
+        <item name="colorPrimary">?android:attr/textColorPrimary</item>
+        <!-- Color of highlighted item -->
+        <item name="colorControlHighlight">@color/lightgray</item>
+        <!-- Color of empty radio icon -->
+        <item name="colorControlNormal">@color/lightgray</item>
+        <!-- Color of filled radio icon -->
+        <item name="colorControlActivated">@color/textprimary</item>
+    </style>
+
+    <style name="MyNavigationViewStyle" parent="Widget.MaterialComponents.NavigationView">
+        <!-- Color of text -->
+        <item name="itemTextColor">@color/nav_item_text_color_selector</item>
+        <!-- Color of icon -->
+        <item name="itemIconTint">@color/nav_item_icon_tint_color_selector</item>
+        <!-- Color of background -->
+        <item name="android:background">@color/primaryBackground</item>
+        <!-- Color of highlighted item -->
+        <item name="itemShapeFillColor">@color/nav_item_background_color_selector</item>
+    </style>
+
+    <style name="MyPreferenceStyle" parent="PreferenceThemeOverlay">
+        <!-- Color if section titles -->
+        <item name="preferenceCategoryTitleTextColor">@color/textprimary</item>
+        <item name="preferenceCategoryTitleTextAppearance">@style/MyPreferenceCategoryTitleTextAppearance</item>
+    </style>
+
+    <style name="MyPreferenceCategoryTitleTextAppearance" parent="@style/TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="MyButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/gray</item>
+    </style>
+
+    <style name="MySwitchButtonStyle" parent="@style/Widget.AppCompat.CompoundButton.Switch">
+        <!-- Preference switch -->
+        <item name="controlBackground">@color/textprimary</item>
+    </style>
+
+    <style name="MySeekBarStyle" parent="Widget.AppCompat.SeekBar">
+<!--        <item name="android:progressBackgroundTint">@android:color/transparent</item>-->
+<!--        <item name="android:progressTint">@android:color/transparent</item>-->
+        <item name="android:thumbTint">@color/textprimary</item>
+    </style>
+
+    <style name="MyActionBarTheme">
+        <item name="elevation">0dp</item>
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="TextShadow">
+        <item name="android:shadowColor">@color/textShadow</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+</resources>

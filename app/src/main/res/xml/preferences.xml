@@ -1,0 +1,86 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:visibility="visible"
+    tools:visibility="visible">
+
+    <PreferenceCategory
+        app:title="@string/header_display"
+        app:iconSpaceReserved="false">
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_UNITS_EDIT"
+            app:persistent="true"
+            app:title="@string/pref_title_edit_units"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Ballistics">
+        <EditTextPreference
+            app:key="@string/PREFERENCE_FILTER_LENS_OFFSET"
+            app:persistent="false"
+            app:title="@string/pref_title_lens_offset"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="@string/PREFERENCE_FILTER_EFFICIENCY"
+            app:persistent="false"
+            app:title="@string/pref_title_efficiency"
+            app:defaultValue="1.0"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_PROJECTILE_EDIT"
+            app:persistent="true"
+            app:title="@string/pref_title_projectile_edit"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+        <Preference
+            android:id="@+id/preference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
+            app:persistent="true"
+            app:summary="spring selected"
+            app:title="@string/pref_title_spring_edit"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Sensors">
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"
+            app:persistent="true"
+            app:title="@string/pref_title_calibrate_sensors"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_PHONE"
+            app:persistent="true"
+            app:title="@string/pref_title_calibrate_gyro"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+    </PreferenceCategory>
+
+<!--    <PreferenceCategory-->
+<!--        app:iconSpaceReserved="false"-->
+<!--        app:title="Advanced">-->
+<!--        <Preference-->
+<!--            app:iconSpaceReserved="false"-->
+<!--            app:key="@string/PREFERENCE_FILTER_DEVICE_CONFIGURATION"-->
+<!--            app:persistent="true"-->
+<!--            app:title="@string/pref_title_advanced"-->
+<!--            app:useSimpleSummaryProvider="true"-->
+<!--            app:widgetLayout="@layout/widget_open_window" />-->
+<!--    </PreferenceCategory>-->
+
+</PreferenceScreen>
