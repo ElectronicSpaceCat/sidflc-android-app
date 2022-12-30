@@ -48,6 +48,11 @@ object CalcTrig {
 
     /**
      * Find angle ά given side A and side C (Hypotenuse) of right triangle
+     *
+     * ά = asin(a/c)
+     *
+     * @param sideA
+     * @param sideC
      */
     fun getAngleAGivenSideASideC(sideA: Double, sideC: Double): Double {
         return Math.toDegrees(asin(sideA / sideC))

@@ -80,6 +80,8 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
         val projectileName: Editable = SpannableStringBuilder(projectile.name)
         val projectileWeight: Editable = SpannableStringBuilder(projectile.weight.toString())
         val projectileDiameter: Editable = SpannableStringBuilder(projectile.diameter.toString())
+        val projectileDrag: Editable = SpannableStringBuilder(projectile.drag.toString())
+
         // Show/hide the selection arrow
         if(projectile.name == _projectileSelected){
             holder.itemProjectileBinding.iconArrowSelect.visibility = View.VISIBLE
@@ -99,6 +101,8 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
         holder.itemProjectileBinding.projectileWeight.text = projectileWeight
         // Set the projectile diameter
         holder.itemProjectileBinding.projectileDiameter.text = projectileDiameter
+        // Set the projectile drag
+        holder.itemProjectileBinding.projectileDrag.text = projectileDrag
     }
 
     override fun getItemId(position: Int): Long {
@@ -149,7 +153,7 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
     private fun showProjectileEditorDialog(context: Context, projectile: ProjectileData, position: Int, isNew: Boolean){
         val listener: ProjectileInputDialogFragment.ProjectileInputDialogListener =
             object : ProjectileInputDialogFragment.ProjectileInputDialogListener {
-                override fun onDialogPositiveClick(name: String, weight: Double, diameter: Double) {
+                override fun onDialogPositiveClick(name: String, weight: Double, diameter: Double, drag: Double) {
                     // Does projectile name already exist in list?
                     val item = _projectiles.find {
                         it.name == name
@@ -160,6 +164,7 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
                         projectile.setName(name)
                         projectile.setWeight(weight)
                         projectile.setDiameter(diameter)
+                        projectile.setDrag(drag)
                         if(isNew){
                             addProjectileToList(projectile)
                         }
@@ -186,6 +191,7 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
                 projectile.name,
                 projectile.weight,
                 projectile.diameter,
+                projectile.drag,
                 listener
             ).show(fragmentManager, null)
         } catch (e: ClassCastException) {

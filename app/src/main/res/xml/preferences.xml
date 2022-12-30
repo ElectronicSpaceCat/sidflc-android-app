@@ -27,6 +27,20 @@
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
+            app:key="@string/PREFERENCE_FILTER_FORCE_OFFSET"
+            app:persistent="false"
+            app:title="@string/pref_title_force_offset"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+<!--        <EditTextPreference-->
+<!--            app:key="@string/PREFERENCE_FILTER_FRICTION_COEFFICIENT"-->
+<!--            app:persistent="false"-->
+<!--            app:title="@string/pref_title_friction_coefficient"-->
+<!--            app:defaultValue="0.0"-->
+<!--            app:iconSpaceReserved="false"-->
+<!--            app:useSimpleSummaryProvider="true" />-->
+        <EditTextPreference
             app:key="@string/PREFERENCE_FILTER_EFFICIENCY"
             app:persistent="false"
             app:title="@string/pref_title_efficiency"

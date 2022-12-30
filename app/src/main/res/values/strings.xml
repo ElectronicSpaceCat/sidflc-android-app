@@ -31,9 +31,12 @@
     <string name="PREFERENCE_FILTER_PROJECTILE_NAMES">projectile_names</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_WEIGHTS">projectile_weights</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_DIAMETERS">projectile_diameters</string>
+    <string name="PREFERENCE_FILTER_PROJECTILE_DRAGS">projectile_drags</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED">projectile_selected</string>
     <string name="PREFERENCE_FILTER_SPRING_SELECTED">spring_selected</string>
     <string name="PREFERENCE_FILTER_LENS_OFFSET">lens_offset</string>
+    <string name="PREFERENCE_FILTER_FORCE_OFFSET">force_offset</string>
+    <string name="PREFERENCE_FILTER_FRICTION_COEFFICIENT">friction_coefficient</string>
     <string name="PREFERENCE_FILTER_EFFICIENCY">efficiency</string>
     <string name="PREFERENCE_FILTER_CARRIAGE_POSITION_MODE">carriage_pos_mode</string>
     <string name="PREFERENCE_FILTER_ENGINEERING_VIEW">engineering_view</string>
@@ -119,6 +122,8 @@
     <string name="pref_title_projectile_edit">Projectiles</string>
     <string name="pref_title_spring_edit">Spring</string>
     <string name="pref_title_lens_offset">Lens Offset</string>
+    <string name="pref_title_force_offset">Force Offset (N)</string>
+    <string name="pref_title_friction_coefficient">Friction Coefficient</string>
     <string name="pref_title_efficiency">Efficiency Factor</string>
     <string name="pref_title_calibrate_gyro">Calibrate Gyro</string>
     <string name="pref_title_calibrate_sensors">Calibrate Device</string>

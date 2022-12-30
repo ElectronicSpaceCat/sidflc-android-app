@@ -40,6 +40,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private lateinit var editProjectileList: Preference
     private lateinit var editSpringList: Preference
     private lateinit var lensOffset: EditTextPreference
+    private lateinit var forceOffset: EditTextPreference
+//    private lateinit var frictionCoefficient: EditTextPreference
     private lateinit var efficiency: EditTextPreference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -50,6 +52,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         editProjectileList = findPreference(getString(R.string.PREFERENCE_FILTER_PROJECTILE_EDIT))!!
         editSpringList = findPreference(getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED))!!
         lensOffset = findPreference(getString(R.string.PREFERENCE_FILTER_LENS_OFFSET))!!
+        forceOffset = findPreference(getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET))!!
+//        frictionCoefficient = findPreference(getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT))!!
         efficiency = findPreference(getString(R.string.PREFERENCE_FILTER_EFFICIENCY))!!
 
         // Navigate to the units editor when preference clicked
@@ -125,6 +129,34 @@ class SettingsFragment : PreferenceFragmentCompat() {
         lensOffset.setOnBindEditTextListener(lensOffsetFilter)
 
         // Create generic text input listener with filters
+        val forceOffsetFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
+            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            val filters = arrayOf(
+                InputFilter.LengthFilter(7),
+                TextInputFilter.MinMax(0, 2)
+            )
+            editText.filters = filters
+            editText.setSelection(editText.text.length)
+        }
+
+        // Configure input dialog for the forceOffset
+        forceOffset.setOnBindEditTextListener(forceOffsetFilter)
+
+//        // Create generic text input listener with filters
+//        val frictionCoefficientFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
+//            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+//            val filters = arrayOf(
+//                InputFilter.LengthFilter(7),
+//                TextInputFilter.MinMax(0, 1)
+//            )
+//            editText.filters = filters
+//            editText.setSelection(editText.text.length)
+//        }
+//
+//        // Configure input dialog for the Friction Coefficient
+//        frictionCoefficient.setOnBindEditTextListener(frictionCoefficientFilter)
+
+        // Create generic text input listener with filters
         val efficiencyFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
@@ -162,6 +194,44 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
                 retVal
             }
+
+        /**
+         * Force Offset
+         */
+        forceOffset.text = String.format(
+            Locale.getDefault(),
+            "%.3f",
+            DataShared.device.ballistics.forceOffset
+        )
+        forceOffset.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+                var retVal = false
+                if (forceOffset.text != newValue as String) {
+                    val value = Utils.convertStrToDouble(newValue)
+                    DataShared.device.ballistics.forceOffset = value
+                    retVal = true
+                }
+                retVal
+            }
+
+//        /**
+//         * Friction Coefficient
+//         */
+//        frictionCoefficient.text = String.format(
+//            Locale.getDefault(),
+//            "%.3f",
+//            DataShared.device.ballistics.frictionCoefficient
+//        )
+//        frictionCoefficient.onPreferenceChangeListener =
+//            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+//                var retVal = false
+//                if (frictionCoefficient.text != newValue as String) {
+//                    val value = Utils.convertStrToDouble(newValue)
+//                    DataShared.device.ballistics.frictionCoefficient = value
+//                    retVal = true
+//                }
+//                retVal
+//            }
 
         /**
          * Efficiency Factor

@@ -3,7 +3,7 @@ package com.android.greentech.plink.utils.calculators
 import kotlin.math.*
 
 object CalcBallistics {
-    private const val ACCELERATION_OF_GRAVITY = 9.81
+    const val ACCELERATION_OF_GRAVITY = 9.80665
     /**
      * Get target distance from device height and pitch
      *

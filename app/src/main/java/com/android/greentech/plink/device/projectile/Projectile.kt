@@ -9,10 +9,25 @@ object Projectile {
     }
 
     private val projectiles : Map<String, ProjectileData> = mapOf(
-        getName(Name.Penny) to ProjectileData(getName(Name.Penny),    2.5,  19.05),
-        getName(Name.Nickel) to ProjectileData(getName(Name.Nickel),  5.0, 21.21),
-        getName(Name.Dime) to ProjectileData(getName(Name.Dime),    2.268, 17.91),
-        getName(Name.Quarter) to ProjectileData(getName(Name.Quarter),  5.67, 24.26)
+        getName(Name.Penny) to ProjectileData(getName(Name.Penny),
+            2.5,
+            19.05,
+            0.0),
+
+        getName(Name.Nickel) to ProjectileData(getName(Name.Nickel),
+            5.0,
+            21.21,
+            0.0),
+
+        getName(Name.Dime) to ProjectileData(getName(Name.Dime),
+            2.268,
+            17.91,
+            0.0),
+
+        getName(Name.Quarter) to ProjectileData(getName(Name.Quarter),
+            5.67,
+            24.26,
+            0.035)
     )
 
     /**

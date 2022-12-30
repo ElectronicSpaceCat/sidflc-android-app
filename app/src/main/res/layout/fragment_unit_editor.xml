@@ -59,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@+id/header_items" />
+            app:layout_constraintTop_toBottomOf="@+id/projectile_header" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/item_lens_offset"

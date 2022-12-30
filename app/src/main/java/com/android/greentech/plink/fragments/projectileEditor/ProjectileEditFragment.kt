@@ -56,8 +56,10 @@ class ProjectileEditFragment: Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         // Setup header
-        fragmentProjectileBinding.headerItems.heaaderWeight.text = "Weight (g)"
-        fragmentProjectileBinding.headerItems.headerDiameter.text = "Diameter (mm)"
+        fragmentProjectileBinding.projectileHeader.projectileWeight.text = "Weight (g)"
+        fragmentProjectileBinding.projectileHeader.projectileDiameter.text = "Diameter (mm)"
+        fragmentProjectileBinding.projectileHeader.iconEdit.visibility = View.INVISIBLE
+        fragmentProjectileBinding.projectileHeader.iconDelete.visibility = View.INVISIBLE
 
         // Configure the recycler view
         fragmentProjectileBinding.recyclerViewProjectiles.layoutManager = LinearLayoutManager(requireActivity())

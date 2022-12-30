@@ -241,10 +241,6 @@ object Utils {
         bytes[loffset] = (value shr 24).toByte()
     }
 
-    fun map(x: Double, in_min: Double, in_max: Double, out_min: Double, out_max: Double): Double {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    }
-
     fun showToast(context: Context, message: CharSequence, duration: Int, gravity: Int, xOffset: Int, yOffset: Int) {
         val toast = Toast.makeText(context, message, duration)
         toast.setGravity(gravity, xOffset, yOffset)

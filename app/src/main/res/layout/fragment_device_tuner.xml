@@ -832,10 +832,13 @@
                 android:layout_height="match_parent">
 
                 <include
-                    android:id="@+id/include"
-                    layout="@layout/item_config_header"
+                    android:id="@+id/config_header"
+                    layout="@layout/item_config"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerView"
@@ -844,7 +847,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/include"
+                    app:layout_constraintTop_toBottomOf="@+id/config_header"
                     tools:listitem="@layout/item_config" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

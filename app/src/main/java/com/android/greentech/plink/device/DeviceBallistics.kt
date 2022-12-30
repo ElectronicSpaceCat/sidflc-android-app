@@ -3,9 +3,11 @@ package com.android.greentech.plink.device
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.device.model.ModelData
 import com.android.greentech.plink.utils.calculators.CalcBallistics
+import com.android.greentech.plink.utils.calculators.CalcMisc
 import com.android.greentech.plink.utils.calculators.CalcTrig
 import com.android.greentech.plink.utils.converters.ConvertLength
 import kotlin.math.*
@@ -14,13 +16,41 @@ class DeviceBallistics(context: Context, model: ModelData) {
     private val _prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val _model = model
     private var _pos = 0.0
+    private var _forceOffset = 0.0
+    private var _frictionCoefficient = 0.0
     private var _efficiency = 0.0
-    private var _flightTime = 0.0
     private var _impactDistance = 0.0
     private var _impactHeight = 0.0
-    private val _efficiencyKey = "efficiency"
+
+    private val _forceOffsetKey = context.getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET)
+    private val _frictionCoefficientKey = context.getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT)
+    private val _efficiencyKey = context.getString(R.string.PREFERENCE_FILTER_EFFICIENCY)
 
     inner class ImpactData(var distance: Double = 0.0, var height: Double = 0.0)
+
+    var forceOffset: Double
+        set(value) {
+            _forceOffset = if(value in 0.0..2.0){
+                value
+            } else{
+                0.0
+            }
+            // Store the value to preferences
+            _prefs.edit().putFloat(_forceOffsetKey, _forceOffset.toFloat()).apply()
+        }
+        get() = _forceOffset
+
+    var frictionCoefficient : Double
+        set(value) {
+            _frictionCoefficient = if(value in 0.0..1.0){
+                value
+            } else{
+                0.0
+            }
+            // Store the value to preferences
+            _prefs.edit().putFloat(_frictionCoefficientKey, _frictionCoefficient.toFloat()).apply()
+        }
+        get() = _frictionCoefficient
 
     var efficiency: Double
         set(value) {
@@ -61,15 +91,14 @@ class DeviceBallistics(context: Context, model: ModelData) {
         // Cap the position to the max allowed position
         _pos = min(position, _model.getMaxCarriagePosition())
 
-//        // Total distance traveled from current position to max
-//        val distanceTraveled = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, abs(_model.getMaxCarriagePosition() - _pos))
-//
-//        // Work (N/mm) required to move the (carriage + projectile) up an incline
-//        val workRequiredUpIncline = CalcBallistics.getWorkRequiredUpIncline(_model.getTotalWeight(), launchAngle, distanceTraveled, 0.0)
-//
-//        // Net potential energy (N/mm) is the spring compression force over the carriage position distance minus the work required to move
-//        // the (carriage + projectile) up an incline
-//        val netPotentialEnergy = abs(_model.getPotentialEnergyAtPosition(_pos) - workRequiredUpIncline)
+        val deltaPos = _model.getMaxCarriagePosition() - _pos
+
+        // Distance times the energy loss due to gravity and friction at an angle
+        val kineticEnergyLoss = deltaPos * (_forceOffset + (0.001 * DataShared.device.model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * sin(Math.toRadians(launchAngle)))
+        + (0.001 * DataShared.device.model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * cos(Math.toRadians(launchAngle))) * _frictionCoefficient)
+
+        // Total potential energy multiplied by an efficiency factor
+        val netPotentialEnergy = max(0.0, (_model.getPotentialEnergyAtPosition(_pos) - kineticEnergyLoss) * _efficiency)
 
         // Get the approximate launch height which is the value of the (device height + max carriage pos + projectile center of gravity offset)
         // and then adjusted by the launch angle where the vertex starts at the device height.
@@ -80,8 +109,9 @@ class DeviceBallistics(context: Context, model: ModelData) {
                         ____/)__|__-____________________
                              ^.__ Device Angle      ^.__ Device height
          */
-        val heightOffset = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, getProjectileHeightOffsetAtAngle(_model.getMaxCarriagePosition(), launchAngle))
-        _adjustedLaunchHeight = (launchHeight + heightOffset)
+        val heightOffsetMM = getProjectileHeightOffsetAtAngle(_model.getMaxCarriagePosition(), launchAngle)
+        val heightOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, heightOffsetMM)
+        _adjustedLaunchHeight = (launchHeight + heightOffsetM)
 
         // Get the adjusted target distance which is the calculated target distance plus the distance behind the lens
         // at which the projectile will be launched.
@@ -98,26 +128,77 @@ class DeviceBallistics(context: Context, model: ModelData) {
         }
 
         // Calculate the velocity from the stored energy and apply an efficiency factor
-        // Note: Passing weight and potential energy in terms of g and mJ instead of kg and J still gives velocity as m/s
-//        _velocity = (CalcBallistics.getVelocity(_model.getTotalWeight(), netPotentialEnergy) * _efficiency)
-        _velocity = (CalcBallistics.getVelocity(_model.getTotalWeight(), _model.getPotentialEnergyAtPosition(_pos)) * _efficiency)
+        _velocity = CalcBallistics.getVelocity(_model.getTotalWeight(), netPotentialEnergy)
 
         // If velocity <= zero then return zero for both impact distance and height
         if(_velocity <= 0.0){
             return ImpactData(0.0, 0.0)
         }
 
-        // Calculate the impact distance
-        _impactDistance = max(0.0, CalcBallistics.getImpactDistance(_velocity, _adjustedLaunchHeight, launchAngle))
-
-        // Calculate the flight time of the projectile to find the impact height
-        _flightTime = CalcBallistics.getFlightTime(_adjustedTargetDistance, launchAngle, _velocity)
-
-        // Calculate the impact height
-        _impactHeight = max(0.0, CalcBallistics.getImpactHeight(_adjustedLaunchHeight, launchAngle, _velocity, _flightTime))
+        // Blocking routine
+        calculateProjectileWithQuadraticDrag(_velocity, _adjustedLaunchHeight, launchAngle, DEFAULT_DELTA_TIME_SECONDS)
 
         // Return the impact distance and height
-        return ImpactData(_impactDistance, _impactHeight)
+        return ImpactData(_impactDistance, max(0.0,_impactHeight))
+    }
+
+    /**
+     * (Blocking function)
+     *
+     * Run an ODE (ordinary differential equation) to pre-path the projectile with air drag
+     * until the height is less or equal to zero, meaning the projectile hit the ground.
+     */
+    private fun calculateProjectileWithQuadraticDrag(velocity : Double, height: Double, launchAngle: Double, deltaTimeSeconds : Double) {
+        val vXinit = velocity * cos(Math.toRadians(launchAngle))
+        val vYinit = velocity * sin(Math.toRadians(launchAngle))
+
+        var v: Double
+
+        var vX = vXinit
+        var vY = vYinit
+
+        var vXprev: Double
+        var vYprev: Double
+
+        var x = 0.0
+        var y = height
+
+        var xPrev: Double
+        var yPrev: Double
+
+        var gotImpactHeight = false
+
+        val dragCoefficient = DataShared.device.model.projectile!!.drag
+
+        do{
+            v = sqrt(vX.pow(2) + vY.pow(2))
+
+            vXprev = vX
+            vYprev = vY
+
+            vX -= (dragCoefficient * vX * v * deltaTimeSeconds)
+            vY -= (CalcBallistics.ACCELERATION_OF_GRAVITY * deltaTimeSeconds) - (dragCoefficient * vY * v * deltaTimeSeconds)
+
+            xPrev = x
+            yPrev = y
+
+            x += 0.5 * (vX + vXprev) * deltaTimeSeconds
+            y += 0.5 * (vY + vYprev) * deltaTimeSeconds
+
+            // Get impact height when x crosses the target distance
+            if(!gotImpactHeight && x >= _adjustedTargetDistance){
+                gotImpactHeight = true
+                _impactHeight = CalcMisc.interpolate(_adjustedTargetDistance, x, xPrev, y, yPrev)
+            }
+        }while (y > 0.0)
+
+        // Set height to zero if it was not found
+        if(!gotImpactHeight){
+            _impactHeight = 0.0
+        }
+
+        // Get distance when y hits zero (ie projectile hit the ground)
+        _impactDistance = CalcMisc.interpolate(0.0, y, yPrev, x, xPrev)
     }
 
     /**
@@ -133,11 +214,14 @@ class DeviceBallistics(context: Context, model: ModelData) {
     }
 
     companion object {
-        private const val DEFAULT_EFFICIENCY_FACTOR = 0.70f
+        private const val DEFAULT_DELTA_TIME_SECONDS = 0.01
+        private const val DEFAULT_EFFICIENCY_FACTOR = 0.65f
     }
 
     init {
         // Load the efficiency value on init
+        _forceOffset = _prefs.getFloat(_forceOffsetKey, 0.0f).toDouble()
+        _frictionCoefficient = _prefs.getFloat(_frictionCoefficientKey, 0.0f).toDouble()
         _efficiency = _prefs.getFloat(_efficiencyKey, DEFAULT_EFFICIENCY_FACTOR).toDouble()
     }
 }

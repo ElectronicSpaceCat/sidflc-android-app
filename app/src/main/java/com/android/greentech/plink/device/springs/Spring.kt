@@ -11,10 +11,37 @@ object Spring {
     }
 
     private val springs : Map<String, SpringData> = mapOf(
-        getName(Name.MC9287K33) to SpringData(getName(Name.MC9287K33),    1.016,  7.8486, 3.25, 31.75,31.75, Material.Name.STAINLESS_302_304),
-        getName(Name.MC9287K141) to SpringData(getName(Name.MC9287K141),  0.045, 0.357, 3.25, 1.25,1.25, Material.Name.STAINLESS_302_304),
-        getName(Name.MC9287K83) to SpringData(getName(Name.MC9287K83),    0.048, 0.375, 3.25, 1.25,1.25, Material.Name.STAINLESS_302_304),
-        getName(Name.MC9287K155) to SpringData(getName(Name.MC9287K155),  0.051, 0.408, 2.25, 2.0, 2.0,  Material.Name.STAINLESS_302_304)
+        getName(Name.MC9287K33) to SpringData(getName(Name.MC9287K33),
+            1.016,
+            7.8486,
+            3.25,
+            31.75,
+            31.75,
+            Material.Name.STAINLESS_302_304),
+
+        getName(Name.MC9287K141) to SpringData(getName(Name.MC9287K141),
+            0.045,
+            0.357,
+            3.25,
+            1.25,
+            1.25,
+            Material.Name.STAINLESS_302_304),
+
+        getName(Name.MC9287K83) to SpringData(getName(Name.MC9287K83),
+            0.048,
+            0.375,
+            3.25,
+            1.25,
+            1.25,
+            Material.Name.STAINLESS_302_304),
+
+        getName(Name.MC9287K155) to SpringData(getName(Name.MC9287K155),
+            0.051,
+            0.408,
+            2.25,
+            2.0,
+            2.0,
+            Material.Name.STAINLESS_302_304)
     )
 
     /**

@@ -15,10 +15,11 @@ class ProjectileInputDialogFragment(
     private val _Name: String,
     private val _Weight: Double,
     private val _Diameter: Double,
+    private val _Drag: Double,
     private val _listener: ProjectileInputDialogListener
 ) : DialogFragment() {
     interface ProjectileInputDialogListener {
-        fun onDialogPositiveClick(name: String, weight: Double, diameter: Double)
+        fun onDialogPositiveClick(name: String, weight: Double, diameter: Double, drag: Double)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -30,8 +31,7 @@ class ProjectileInputDialogFragment(
 
         /** Add a TextView for the projectile name */
         val projectileName = EditText(context)
-        projectileName.inputType =
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        projectileName.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
         projectileName.hint = "Name"
         projectileName.setText(_Name)
         projectileName.setSelection(projectileName.text.length)
@@ -45,8 +45,7 @@ class ProjectileInputDialogFragment(
 
         /** Add a TextView for the projectile weight */
         val projectileWeight = EditText(context)
-        projectileWeight.inputType =
-            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        projectileWeight.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         projectileWeight.hint = "Weight"
         projectileWeight.setText(_Weight.toString())
         projectileWeight.setSelection(projectileWeight.text.length)
@@ -54,13 +53,11 @@ class ProjectileInputDialogFragment(
             InputFilter.LengthFilter(7)
         )
         projectileWeight.filters = projectileWeightFilters
-
         layout.addView(projectileWeight)
 
         /** Add a TextView for the projectile diameter */
         val projectileDiameter = EditText(context)
-        projectileDiameter.inputType =
-            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        projectileDiameter.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         projectileDiameter.hint = "Diameter"
         projectileDiameter.setText(_Diameter.toString())
         projectileDiameter.setSelection(projectileDiameter.text.length)
@@ -68,9 +65,19 @@ class ProjectileInputDialogFragment(
             InputFilter.LengthFilter(7)
         )
         projectileDiameter.filters = projectileDiameterFilters
-
         layout.addView(projectileDiameter)
 
+        /** Add a TextView for the projectile drag */
+        val projectileDrag = EditText(context)
+        projectileDrag.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        projectileDrag.hint = "Drag"
+        projectileDrag.setText(_Drag.toString())
+        projectileDrag.setSelection(projectileDrag.text.length)
+        val projectileDragFilters = arrayOf<InputFilter>(
+            InputFilter.LengthFilter(7)
+        )
+        projectileDrag.filters = projectileDragFilters
+        layout.addView(projectileDrag)
 
         builder.setView(layout)
 
@@ -87,7 +94,12 @@ class ProjectileInputDialogFragment(
             } catch (e: NumberFormatException) {
                 _Diameter
             }
-            _listener.onDialogPositiveClick(name, weight, diameter)
+            val drag: Double = try {
+                projectileDrag.text.toString().toDouble()
+            } catch (e: NumberFormatException) {
+                _Drag
+            }
+            _listener.onDialogPositiveClick(name, weight, diameter, drag)
         }
 
         // Setup the negative button

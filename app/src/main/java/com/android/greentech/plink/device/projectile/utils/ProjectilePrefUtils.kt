@@ -24,14 +24,17 @@ object ProjectilePrefUtils {
             context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_WEIGHTS),";")
         val setDiameters: List<String>? = PrefUtils.getStringArrayFromPrefs(
             context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),";")
-        if (setNames != null && setWeights != null && setDiameters != null
-            && setNames.size == setWeights.size && setNames.size == setDiameters.size) {
+        val setDrags: List<String>? = PrefUtils.getStringArrayFromPrefs(
+            context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),";")
+        if (setNames != null && setWeights != null && setDiameters != null && setDrags != null
+            && setNames.size == setWeights.size && setNames.size == setDiameters.size && setNames.size == setDrags.size) {
             for (i in setNames.indices) {
                 list.add(
                     ProjectileData(
                         setNames[i],
                         Utils.convertStrToDouble(setWeights[i]),
-                        Utils.convertStrToDouble(setDiameters[i]))
+                        Utils.convertStrToDouble(setDiameters[i]),
+                        Utils.convertStrToDouble(setDrags[i]))
                 )
             }
         }
@@ -48,23 +51,27 @@ object ProjectilePrefUtils {
         var names: MutableList<String> ?= mutableListOf()
         var weights: MutableList<String> ?= mutableListOf()
         var diameters: MutableList<String> ?= mutableListOf()
+        var drags: MutableList<String> ?= mutableListOf()
 
         if(list.isNotEmpty()) {
             list.forEach { data ->
                 names?.add(data.name)
                 weights?.add(data.weight.toString())
                 diameters?.add(data.diameter.toString())
+                drags?.add(data.drag.toString())
             }
         }
         else{
             names = null
             weights = null
             diameters = null
+            drags = null
         }
         // Update projectile names/weights list in preferences
         PrefUtils.addStringArrayToPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_NAMES), names, ";")
         PrefUtils.addStringArrayToPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_WEIGHTS), weights, ";")
         PrefUtils.addStringArrayToPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS), diameters, ";")
+        PrefUtils.addStringArrayToPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS), drags, ";")
     }
 
     /**
@@ -127,9 +134,15 @@ object ProjectilePrefUtils {
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),
             ";"
         )
-        if(null != names && null != weights && null != diameters
+        val drags = PrefUtils.getStringArrayFromPrefs(
+            context,
+            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),
+            ";"
+        )
+        if(null != names && null != weights && null != diameters && null != drags
             && (names.size == weights.size)
-            && (names.size == diameters.size)){
+            && (names.size == diameters.size)
+            && (names.size == drags.size)){
             val idx = names.indexOf(projectile)
             if(-1 != idx){
                 projectileData =
@@ -144,6 +157,7 @@ object ProjectilePrefUtils {
         val names: MutableList<String> = mutableListOf()
         val weights: MutableList<String> = mutableListOf()
         val diameters: MutableList<String> = mutableListOf()
+        val drags: MutableList<String> = mutableListOf()
 
         // Create the default list
         val projectiles: MutableList<ProjectileData> = mutableListOf()
@@ -157,6 +171,7 @@ object ProjectilePrefUtils {
             names.add(projectile.name)
             weights.add(projectile.weight.toString())
             diameters.add(projectile.diameter.toString())
+            drags.add(projectile.drag.toString())
         }
 
         // Override the names list in preferences
@@ -178,6 +193,13 @@ object ProjectilePrefUtils {
             context,
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),
             diameters,
+            ";"
+        )
+        // Override the diameters list in preferences
+        PrefUtils.addStringArrayToPrefs(
+            context,
+            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),
+            drags,
             ";"
         )
 

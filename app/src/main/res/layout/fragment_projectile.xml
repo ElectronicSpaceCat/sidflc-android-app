@@ -10,8 +10,8 @@
     android:paddingBottom="@dimen/item_padding_bottom">
 
     <include
-        android:id="@+id/header_items"
-        layout="@layout/item_projectile_header"
+        android:id="@+id/projectile_header"
+        layout="@layout/item_projectile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="visible"
@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
-        app:layout_constraintTop_toBottomOf="@+id/header_items" />
+        app:layout_constraintTop_toBottomOf="@+id/projectile_header" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_projectiles"

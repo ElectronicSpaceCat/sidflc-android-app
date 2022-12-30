@@ -605,7 +605,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         DataShared.carriagePosition.valueOnChange.observe(viewLifecycleOwner) {
             if(!viewModel.isPositionAutoMode) return@observe
             // Calculate ballistics
-            if(isReadyToFire()) {
+            if(viewModel.isReadyToFire()) {
                 viewModel.calcBallistics(it)
                 updateEngBallisticsData()
                 updateEngData(DataShared.carriagePosition.getConverted(Unit.MM))
@@ -622,7 +622,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             fragmentCameraOverlayBinding.carriagePositionValueOverride.text = DataShared.carriagePositionOverride.valueStr()
 
             // Calculate ballistics
-            if(isReadyToFire()) {
+            if(viewModel.isReadyToFire()) {
                 viewModel.calcBallistics(it)
                 updateEngBallisticsData()
             }
@@ -757,16 +757,16 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private fun runCarriageOverrideTask() {
         Timer(LOOPER_TASK, false).schedule(object : TimerTask() {
             override fun run() {
-                if(_fragmentCameraOverlayBinding != null){
-                    if(!viewModel.isPositionAutoMode){
-                        DataShared.carriagePositionOverride.postValue(Unit.MM, fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress.toDouble())
-                    }
-                    else{
-                        this.cancel()
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            clearEngData()
-                            clearEngBallisticsData()
-                        }
+                if(_fragmentCameraOverlayBinding == null) return
+
+                if(!viewModel.isPositionAutoMode){
+                    DataShared.carriagePositionOverride.postValue(Unit.MM, fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress.toDouble())
+                }
+                else{
+                    this.cancel()
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        clearEngData()
+                        clearEngBallisticsData()
                     }
                 }
             }
@@ -829,13 +829,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 viewModel.isEngViewActive = pref!!.getBoolean(key, true)
             }
         }
-    }
-
-    /**
-     * Check if device is ready to fire
-     */
-    private fun isReadyToFire() : Boolean {
-        return (!viewModel.isCalculationPaused && viewModel.dataToGet == DataType.NONE)
     }
 
     private fun updateEngData(position : Double) {

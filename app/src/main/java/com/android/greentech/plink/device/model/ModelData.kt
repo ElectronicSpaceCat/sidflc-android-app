@@ -3,7 +3,9 @@ package com.android.greentech.plink.device.model
 import com.android.greentech.plink.device.projectile.ProjectileData
 import com.android.greentech.plink.device.springs.Spring
 import com.android.greentech.plink.device.springs.SpringData
+import com.android.greentech.plink.utils.calculators.CalcMisc
 import com.android.greentech.plink.utils.calculators.CalcTrig
+import no.nordicsemi.android.ble.common.profile.csc.CyclingSpeedAndCadenceCallback
 import kotlin.math.*
 
 /**
@@ -71,11 +73,21 @@ import kotlin.math.*
     private var _projectileOffset : Double = 0.0
     private var _totalWeight : Double = 0.0 // Total weight of (carriage + projectile)
 
-    private var _unloadedRefAngle : Double = 0.0 // Used as base reference
-    private var _unloadedLeverArmLength : Double = 0.0 // Used as base reference
     private var _unloadedSpringAngle : Double = 0.0
-    private var _sensorToSpringPointUnloaded : Double = 0.0
     private var _carriageBackFaceToSpringPointAdj : Double = 0.0
+
+    // Center point of the spring
+    private var _cX = 0.0
+    private var _cY = 0.0
+    // Vertex point of the unloaded spring
+    private var _pXunloaded = 0.0
+    private var _pYunloaded = 0.0
+    // Max x/y of the unloaded spring as a grid
+    private var _xMax = 0.0
+    private var _yMax = 0.0
+    // Offset from the spring stud center to the spring center
+    private var _xOffset = 0.0
+    private var _yOffset = 0.0
 
     /**
      * Look up table with position and potential energy
@@ -89,6 +101,8 @@ import kotlin.math.*
     val defaultSpringName : Spring.Name
         get() = _defaultSpringName
 
+    inner class Point(val x : Double = 0.0, val y : Double = 0.0)
+
     /**
      * Set the spring and updates spring related parameters
      *
@@ -100,10 +114,7 @@ import kotlin.math.*
 
         // Reset data if spring is null or both unload ref values are not valid
         if(_spring == null) {
-            _unloadedRefAngle = 0.0
-            _unloadedLeverArmLength = 0.0
             _unloadedSpringAngle = 0.0
-            _sensorToSpringPointUnloaded = 0.0
             _carriageBackFaceToSpringPointAdj = 0.0
 
             _lookUpTable.clear()
@@ -114,23 +125,59 @@ import kotlin.math.*
         // Get adjusted distance from carriage back face to the spring leg center when springs are loaded in the carriage
         _carriageBackFaceToSpringPointAdj = _carriageBackFaceToSpringPoint - CalcTrig.getSideGiven1Side2Angles(_spring!!.wireDiameter/2.0, 90.0 , _carriageSpringGripAngle/2.0)
 
-        // Set the distance from sensor face to the horizontal line where the spring pivot point sits
-        val sensorToStudCenterPlusSpringMeanRadius = (_sensorToStudCenter + ((_spring!!.outerDiameter + _spring!!.wireDiameter) / 2.0))
+        // Case dimension reference data
+        val r1 = _springStudRadius
+        val r2 = _spring!!.meanDiameter / 2.0
+        val d1 = _spring!!.wireDiameter / 2.0
+        val d2 = r1 + d1
+        val d3 = r2 - d2
 
-        // Get the unloaded spring angle based on case dimensions and how the spring sits, also depends on wire diameter
-        val angleLoc = 90.0 - CalcTrig.getAngleAGivenSideASideC((_springStudRadius + _springSupportRadius + _spring!!.wireDiameter), _studCenterToSpringSupportCenter)
-        _unloadedSpringAngle = (180.0 - _springSupportAngleFromHorizontal - angleLoc)
+        // Hourglass 1
+        val h1angleA = CalcTrig.getAngleAGivenSideASideC((_springStudRadius + _springSupportRadius + spring!!.wireDiameter), _studCenterToSpringSupportCenter)
+        val h1angleB = 90.0 - h1angleA
+        val h1angleC = CalcTrig.getAngleGiven2Angles(_springSupportAngleFromHorizontal, h1angleB)
 
-        // Calculate references needed to calculate the look up table
-        val angleA = 90.0
-        val angleC = _unloadedSpringAngle
-        val angleB = CalcTrig.getAngleGiven2Angles(angleA, angleC)
-        val sideB = _studCenterToVerticalCenterLine
-        val sideC = CalcTrig.getSideGiven1Side2Angles(sideB, angleC, angleB)
-        val sideA = CalcTrig.getSideGiven1Side2Angles(sideB, angleA, angleB)
-        _unloadedRefAngle = angleB
-        _unloadedLeverArmLength = sideA
-        _sensorToSpringPointUnloaded = (sideC + sensorToStudCenterPlusSpringMeanRadius)
+        _unloadedSpringAngle = h1angleC
+
+        // Hourglass 2
+        val h2a1a2 = r2
+        val h2b1 = d3
+        val h2angleC = 90.0
+        val h2angleB = h1angleC
+        val h2angleA = CalcTrig.getAngleGiven2Angles(h2angleC, h2angleB)
+        val h2a1 = CalcTrig.getSideGiven1Side2Angles(h2b1, h2angleA, h2angleB)
+        val h2a2 = h2a1a2 - h2a1
+        val h2b2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleB, h2angleC)
+        val h2c1 = CalcTrig.getSideGiven1Side2Angles(h2a1, h2angleC, h2angleA)
+        val h2c2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleA, h2angleC)
+        val h2c1c2 = h2c1 + h2c2
+
+        // Offsets from spring stud center to spring coil center
+        _yOffset = CalcTrig.getSideGiven1Side2Angles(d3, h1angleC, 90.0)
+        _xOffset = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, 90.0)
+
+        // Point of spring vertex to vertical center when spring is unloaded
+        _xMax = _studCenterToVerticalCenterLine + h2b2
+
+        // Hourglass 3
+        val h3c1 = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, h1angleC)
+        val h3c2 = r2 - h3c1
+//        val h3c1c2 = h3c1 + h3c2
+//        val h3b1 = CalcTrig.getSideGiven1Side2Angles(h2b1, 90.0, h1angleC)
+        val h3b2 = CalcTrig.getSideGiven1Side2Angles(h3c2, h2angleA, 90.0)
+//        val h3a1 = d3
+        val h3a2 = CalcTrig.getSideGiven1Side2Angles(h3b2, h1angleC, h2angleA)
+
+        // Unloaded spring point
+        _cX = h3a2 + _xOffset
+        _cY = 0.0
+        _pXunloaded = 0.0
+        _pYunloaded = h2c1c2 - _yOffset
+        val slopeRadius = (_pYunloaded-_cY)/(_pXunloaded-_cX)
+        val slopeTangentLine = -1.0/slopeRadius
+
+        // Height of spring vertex point to point where spring leg crosses vertical line when unloaded
+        _yMax = (slopeTangentLine * (_xMax-_pXunloaded)) + _pYunloaded
 
         // Regenerate potential energy table
         generatePotentialEnergyTable()
@@ -190,6 +237,8 @@ import kotlin.math.*
 
     /**
      * Get total weight which combines the carriage weight with the projectile weight
+     *
+     * @return mass (g)
      */
     fun getTotalWeight(): Double{
         return _totalWeight
@@ -202,22 +251,28 @@ import kotlin.math.*
      * @return potential energy (N-mm)
      */
     fun getPotentialEnergyAtPosition(position: Double): Double{
-        if(_lookUpTable.size > 0) {
-            // Get potential energy at position if within range
-            if (position in 0.0.._lookUpTable[0].position) {
-                // Search list for match
-                for (i in 1.._lookUpTable.size) {
-                    // Position found?
-                    if (position >= _lookUpTable[i].position) {
-                        // Yes - Now interpolate between the two points
-                        return _lookUpTable[i - 1].potentialEnergy +
-                                ((position - _lookUpTable[i - 1].position) * (_lookUpTable[i].potentialEnergy - _lookUpTable[i - 1].potentialEnergy)) /
-                                (_lookUpTable[i].position - _lookUpTable[i - 1].position)
+        if(_lookUpTable.size <= 0) {
+            return 0.0
+        }
 
-                    }
-                }
+        if (position !in 0.0.._lookUpTable[0].position) {
+            return 0.0
+        }
+
+        // Search list for match
+        for (i in 1.._lookUpTable.size) {
+            // Position found?
+            if (position >= _lookUpTable[i].position) {
+                // Yes - Now interpolate between the two points
+                return CalcMisc.interpolate(
+                    position,
+                    _lookUpTable[i].position,
+                    _lookUpTable[i - 1].position,
+                    _lookUpTable[i].potentialEnergy,
+                    _lookUpTable[i - 1].potentialEnergy)
             }
         }
+
         return 0.0
     }
 
@@ -236,16 +291,27 @@ import kotlin.math.*
     private fun getForwardForce(position: Double) : Double{
         if(_spring == null) return 0.0
 
-        // Get reference length to complete triangle
-        val springPointLoadedToSpringPointUnloaded = (_sensorToSpringPointUnloaded - getSensorToSpringPoint(position))
-        // Get spring leg length
-        val springLeverArmLength = CalcTrig.getSideGiven2Sides1Angle(_unloadedLeverArmLength, springPointLoadedToSpringPointUnloaded, _unloadedRefAngle)
-        // Get spring angle
-        val springAngle = CalcTrig.getAngleGiven3Sides(springPointLoadedToSpringPointUnloaded, _unloadedLeverArmLength, springLeverArmLength)
+        val springMeanRadius = _spring!!.meanDiameter/2.0
+
+        val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
+        val pX = _xMax
+        val pY = _yMax - pointUnloadedToLoaded
+        val tangentPoint = getTangentPoint(springMeanRadius, _cX, _cY, pX, pY)
+        val springMomentArmLength = sqrt((pX - tangentPoint.x).pow(2) + (pY - tangentPoint.y).pow(2))
+        val springOppositeArmLength = sqrt((tangentPoint.x - pX).pow(2) + (tangentPoint.y - tangentPoint.y).pow(2))
+        val springAdjacentArmLength = sqrt(springMomentArmLength.pow(2) - springOppositeArmLength.pow(2))
+
+        val ref = sqrt((_pXunloaded - tangentPoint.x).pow(2) + (_pYunloaded - tangentPoint.y).pow(2))
+
+        val springAngle = CalcTrig.getAngleGiven3Sides(ref, springMeanRadius, springMeanRadius)
+
         // Get resultant force acting on carriage from single spring
-        val netForce = spring!!.getForceAtDegree(springAngle, springLeverArmLength)
+        val netForce = spring!!.getForceAtDegree(springAngle, springMomentArmLength)
+
+        val angleRefToHorizontal = CalcTrig.getAngleGiven3Sides(springAdjacentArmLength, springMomentArmLength, springOppositeArmLength)
+
         // Return the vertical directional force
-        return getForceInVerticalDirection(netForce, abs(_unloadedSpringAngle - springAngle))
+        return getForceInVerticalDirection(netForce, angleRefToHorizontal)
     }
 
     /**
@@ -257,13 +323,18 @@ import kotlin.math.*
      * @return activeAngle (deg)
      */
     fun getSpringAngleAtPosition(position: Double): Double {
-        val pos = min(position, _sensorToCarriageBackFace)
-        // Get reference length to complete triangle
-        val springPointLoadedToSpringPointUnloaded = (_sensorToSpringPointUnloaded - getSensorToSpringPoint(pos))
-        // Get spring leg length
-        val springLeverArmLength = CalcTrig.getSideGiven2Sides1Angle(_unloadedLeverArmLength, springPointLoadedToSpringPointUnloaded, _unloadedRefAngle)
-        // Get spring angle
-        return CalcTrig.getAngleGiven3Sides(springPointLoadedToSpringPointUnloaded, _unloadedLeverArmLength, springLeverArmLength)
+        if(_spring == null) return 0.0
+
+        val springMeanRadius = _spring!!.meanDiameter/2.0
+
+        val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
+        val pX = _xMax
+        val pY = _yMax - pointUnloadedToLoaded
+        val tangentPoint = getTangentPoint(springMeanRadius, _cX, _cY, pX, pY)
+
+        val ref = sqrt((_pXunloaded - tangentPoint.x).pow(2) + (_pYunloaded - tangentPoint.y).pow(2))
+
+        return CalcTrig.getAngleGiven3Sides(ref, springMeanRadius, springMeanRadius)
     }
 
     /**
@@ -290,6 +361,25 @@ import kotlin.math.*
      */
     private fun getForceInVerticalDirection(netForce: Double, springAngle: Double): Double {
         return (netForce * cos(Math.toRadians(springAngle)))
+    }
+
+    /**
+     * Get tangent point where the active spring point to the spring
+     */
+    private fun getTangentPoint(radius : Double, cX : Double, cY : Double, pX : Double, pY : Double) : Point {
+        val dx = pX - cX
+        val dy = pY - cY
+        val dxr = -1.0 * dy
+        val dyr = dx
+        val d = sqrt(dx.pow(2) + dy.pow(2))
+        val rho = radius/d
+        val ad = rho.pow(2)
+        val bd = rho * sqrt(1 - ad)
+
+        val tX = cX + ad * dx + bd * dxr
+        val tY = cY + ad * dy + bd * dyr
+
+        return Point(tX, tY)
     }
 
     /**

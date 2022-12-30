@@ -26,12 +26,15 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewModelScope
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.utils.converters.ConvertLength.Unit
 import com.android.greentech.plink.utils.calculators.CalcBallistics
 import com.android.greentech.plink.utils.calculators.CalcTrig
 import com.android.greentech.plink.utils.converters.ConvertLength
 import com.android.greentech.plink.utils.sensors.SensorGyro
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 enum class DataType{
     DEVICE_HEIGHT,
@@ -179,6 +182,10 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
                 calcDefaultBounds(pitch, roll)
             }
         }
+    }
+
+    fun isReadyToFire() : Boolean {
+        return (!isCalculationPaused && dataToGet == DataType.NONE)
     }
 
     fun calcBallistics(position : Double){

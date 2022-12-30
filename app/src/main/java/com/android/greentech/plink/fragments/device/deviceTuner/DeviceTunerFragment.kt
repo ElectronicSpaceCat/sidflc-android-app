@@ -60,6 +60,10 @@ class DeviceTunerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        fragmentDeviceTunerBinding.configHeader.iconEditConfig.visibility = View.INVISIBLE
+        fragmentDeviceTunerBinding.configHeader.iconGetConfig.visibility = View.INVISIBLE
+        fragmentDeviceTunerBinding.configHeader.iconResetConfig.visibility = View.INVISIBLE
+
         // Configure the recycler view
         fragmentDeviceTunerBinding.recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         fragmentDeviceTunerBinding.recyclerView.addItemDecoration(

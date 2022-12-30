@@ -23,6 +23,7 @@ object Model {
             3.4875,
             95.822,
             9.98146),
+
         getName(Name.V24) to ModelData(
             getName(Name.V24),
             Spring.Name.MC9287K33,
