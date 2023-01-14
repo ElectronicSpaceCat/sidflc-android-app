@@ -159,26 +159,31 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
                         it.name == name
                     }
 
-                    // No - Add new projectile to list
-                    if(item == null){
-                        projectile.setName(name)
-                        projectile.setWeight(weight)
-                        projectile.setDiameter(diameter)
-                        projectile.setDrag(drag)
-                        if(isNew){
-                            addProjectileToList(projectile)
-                        }
-                        else{
-                            updateProjectileInList(position)
-                        }
-                    }
-                    else{
-                        // Show message indicating projectile already exists
+                    // Show message indicating projectile already exists
+                    if(isNew && item != null){
                         Toast.makeText(
                             context,
                             "Projectile name already exists in list",
                             Toast.LENGTH_SHORT
                         ).show()
+
+                        return
+                    }
+
+                    // Update projectile data
+                    projectile.setName(name)
+                    projectile.setWeight(weight)
+                    projectile.setDiameter(diameter)
+                    projectile.setDrag(drag)
+
+                    // Is this a new item to add?
+                    if(isNew){
+                        // Yes - add item to list
+                        addProjectileToList(projectile)
+                    }
+                    else{
+                        // No - update item in list
+                        updateProjectileInList(position)
                     }
                 }
             }

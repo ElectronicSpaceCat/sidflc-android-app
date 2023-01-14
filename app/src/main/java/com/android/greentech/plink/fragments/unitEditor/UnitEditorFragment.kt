@@ -46,39 +46,39 @@ class UnitEditorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Unit selections - Lengths
-        val unitLengthsLong : MutableList<String> = mutableListOf()
+        val unitLengthsDefault : MutableList<String> = mutableListOf()
         ConvertLength.Unit.values().forEach {
-            unitLengthsLong.add(it.name.lowercase())
+            unitLengthsDefault.add(it.name.lowercase())
         }
 
         // Unit selections - Lengths Reduced
-        val unitLengthsShort : MutableList<String> = mutableListOf()
-        unitLengthsShort.add(ConvertLength.Unit.MM.name.lowercase())
-        unitLengthsShort.add(ConvertLength.Unit.CM.name.lowercase())
-        unitLengthsShort.add(ConvertLength.Unit.IN.name.lowercase())
+        val unitLengthsReduced : MutableList<String> = mutableListOf()
+        unitLengthsReduced.add(ConvertLength.Unit.MM.name.lowercase())
+        unitLengthsReduced.add(ConvertLength.Unit.CM.name.lowercase())
+        unitLengthsReduced.add(ConvertLength.Unit.IN.name.lowercase())
 
         // Set up simple spinner adapter with selection list
-        val adapterLengthsLong = ArrayAdapter(requireContext(), simple_spinner_dropdown_item, unitLengthsLong)
-        val adapterLengthsShort = ArrayAdapter(requireContext(), simple_spinner_dropdown_item, unitLengthsShort)
+        val adapterLengthsLong = ArrayAdapter(requireContext(), simple_spinner_dropdown_item, unitLengthsDefault)
+        val adapterLengthsShort = ArrayAdapter(requireContext(), simple_spinner_dropdown_item, unitLengthsReduced)
 
         // Assign the adapter to the spinners - lengths
-        var idx = unitLengthsShort.indexOf(DataShared.lensOffset.unitStr())
+        var idx = unitLengthsReduced.indexOf(DataShared.lensOffset.unitStr())
         fragmentUnitEditorBinding.lensOffsetUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.lensOffsetUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsShort.indexOf(DataShared.carriagePosition.unitStr())
+        idx = unitLengthsReduced.indexOf(DataShared.carriagePosition.unitStr())
         fragmentUnitEditorBinding.carriagePositionUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.carriagePositionUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsLong.indexOf(DataShared.deviceHeight.unitStr())
+        idx = unitLengthsDefault.indexOf(DataShared.deviceHeight.unitStr())
         fragmentUnitEditorBinding.deviceHeightUnitSelector.adapter = adapterLengthsLong
         fragmentUnitEditorBinding.deviceHeightUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsLong.indexOf(DataShared.targetDistance.unitStr())
+        idx = unitLengthsDefault.indexOf(DataShared.targetDistance.unitStr())
         fragmentUnitEditorBinding.targetDistanceUnitSelector.adapter = adapterLengthsLong
         fragmentUnitEditorBinding.targetDistanceUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsLong.indexOf(DataShared.targetHeight.unitStr())
+        idx = unitLengthsDefault.indexOf(DataShared.targetHeight.unitStr())
         fragmentUnitEditorBinding.targetHeightUnitSelector.adapter = adapterLengthsLong
         fragmentUnitEditorBinding.targetHeightUnitSelector.setSelection(0.coerceAtLeast(idx))
 
@@ -88,7 +88,7 @@ class UnitEditorFragment : Fragment() {
 
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsShort[p2].uppercase())
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
                 if(selectedUnit != DataShared.lensOffset.unit){
                     val valuePrev = DataShared.lensOffset.getValueFromPrefs(requireContext())
                     val valueNew = ConvertLength.convert(DataShared.lensOffset.unit, selectedUnit, valuePrev)
@@ -104,7 +104,7 @@ class UnitEditorFragment : Fragment() {
 
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsShort[p2].uppercase())
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
                 if(selectedUnit != DataShared.carriagePosition.unit){
                     val valuePrev = DataShared.carriagePosition.getValueFromPrefs(requireContext())
                     val valueNew = ConvertLength.convert(DataShared.carriagePosition.unit, selectedUnit, valuePrev)
@@ -120,7 +120,7 @@ class UnitEditorFragment : Fragment() {
 
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsLong[p2].uppercase())
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.deviceHeight.unit){
                     val valuePrev = DataShared.deviceHeight.getValueFromPrefs(requireContext())
                     val valueNew = ConvertLength.convert(DataShared.deviceHeight.unit, selectedUnit, valuePrev)
@@ -136,7 +136,7 @@ class UnitEditorFragment : Fragment() {
 
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsLong[p2].uppercase())
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.targetDistance.unit){
                     val valuePrev = DataShared.targetDistance.getValueFromPrefs(requireContext())
                     val valueNew = ConvertLength.convert(DataShared.targetDistance.unit, selectedUnit, valuePrev)
@@ -152,7 +152,7 @@ class UnitEditorFragment : Fragment() {
 
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsLong[p2].uppercase())
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.targetHeight.unit){
                     val valuePrev = DataShared.targetHeight.getValueFromPrefs(requireContext())
                     val valueNew = ConvertLength.convert(DataShared.targetHeight.unit, selectedUnit, valuePrev)

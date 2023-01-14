@@ -118,8 +118,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val lensOffsetFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
-                InputFilter.LengthFilter(7),
-                TextInputFilter.MinMax(0, 10)
+                InputFilter.LengthFilter(7)
             )
             editText.filters = filters
             editText.setSelection(editText.text.length)

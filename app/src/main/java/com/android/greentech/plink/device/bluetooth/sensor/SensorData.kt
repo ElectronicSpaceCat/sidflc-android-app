@@ -2,6 +2,11 @@ package com.android.greentech.plink.device.bluetooth.sensor
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**
@@ -47,7 +52,7 @@ class SensorData {
     /**
      * Get/Set for data: _range
      */
-    val range: LiveData<Int>
+    val range: MutableLiveData<Int>
         get() = _range
 
     fun setRange(range: Int) {

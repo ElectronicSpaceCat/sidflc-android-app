@@ -306,7 +306,9 @@ class Sensor(
             SensorData.Status.READY -> {
                 // Leave off where we were in the boot config
                 // process if it was interrupted.
-                setConfigCommand(SensorData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+                if(!_isInitialized) {
+                    setConfigCommand(SensorData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+                }
             }
             SensorData.Status.BOOTING -> {
                 _isInitialized = false

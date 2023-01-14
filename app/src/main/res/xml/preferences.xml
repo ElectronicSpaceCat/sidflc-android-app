@@ -10,7 +10,7 @@
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_UNITS_EDIT"
-            app:persistent="true"
+            app:persistent="false"
             app:title="@string/pref_title_edit_units"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
@@ -50,19 +50,17 @@
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_PROJECTILE_EDIT"
-            app:persistent="true"
+            app:persistent="false"
             app:title="@string/pref_title_projectile_edit"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
         <Preference
-            android:id="@+id/preference"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
-            app:persistent="true"
+            app:persistent="false"
             app:summary="spring selected"
             app:title="@string/pref_title_spring_edit"
+            app:defaultValue=""
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
@@ -72,14 +70,14 @@
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"
-            app:persistent="true"
+            app:persistent="false"
             app:title="@string/pref_title_calibrate_sensors"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_PHONE"
-            app:persistent="true"
+            app:persistent="false"
             app:title="@string/pref_title_calibrate_gyro"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />

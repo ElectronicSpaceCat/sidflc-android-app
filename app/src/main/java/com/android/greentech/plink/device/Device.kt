@@ -7,12 +7,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
+import com.android.greentech.plink.R
 import com.android.greentech.plink.device.bluetooth.DeviceBluetoothManager
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.greentech.plink.device.bluetooth.sensor.SensorData
 import com.android.greentech.plink.device.model.Model
 import com.android.greentech.plink.device.model.ModelData
 import com.android.greentech.plink.device.sensor.Sensor
+import com.android.greentech.plink.device.springs.Spring
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.log.Logger
@@ -61,16 +63,8 @@ class Device(context: Context) {
     var model: ModelData
         get() = _model.value!!
         set(value) {
-            // Get prev spring/projectile
-            val prevSpring = _model.value!!.spring
-            val prevProjectile = _model.value!!.projectile
-
             // Set the new model
             _model.value = value
-
-            // Set the spring and projectile data as well
-            _model.value!!.setSpring(prevSpring)
-            _model.value!!.setProjectile(prevProjectile)
 
             // Set the calibration offset reference for the carrier position sensor
             sensors[SensorData.Sensor.Id.SHORT.ordinal].offsetRef = model.getMaxCarriagePosition().toInt()
@@ -299,6 +293,14 @@ class Device(context: Context) {
         val model = Model.getData(idModel)
         _model = MutableLiveData(model)
 
+        // NOTE: Currently the selected spring is set in the Preference Settings screen
+        val idSpring = _prefs.getString(
+            context.getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED),
+            _model.value?.defaultSpringName?.name
+        )!!
+        val spring = Spring.getData(idSpring)
+        _model.value!!.setSpring(spring)
+
         // Set model
         this.model = _model.value!!
 
@@ -307,6 +309,7 @@ class Device(context: Context) {
 
         /**
          * Observe the device model data and set the model if not the same
+         * This would happen if connecting to another device with a different model.
          */
         versionModel.observe(context as LifecycleOwner) {
             // Don't update model if name is the same

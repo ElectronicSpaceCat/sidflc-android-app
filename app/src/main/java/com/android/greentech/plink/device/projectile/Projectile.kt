@@ -27,7 +27,7 @@ object Projectile {
         getName(Name.Quarter) to ProjectileData(getName(Name.Quarter),
             5.67,
             24.26,
-            0.035)
+            0.04)
     )
 
     /**

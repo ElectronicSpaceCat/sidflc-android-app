@@ -36,7 +36,6 @@ import com.android.greentech.plink.databinding.FragmentCameraOverlayBinding
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.greentech.plink.device.bluetooth.sensor.SensorData
 import com.android.greentech.plink.device.projectile.utils.ProjectilePrefUtils
-import com.android.greentech.plink.device.springs.Spring
 import com.android.greentech.plink.fragments.dialogs.InputDialogFragment
 import com.android.greentech.plink.fragments.dialogs.ProjectileSelectDialogFragment
 import com.android.greentech.plink.utils.converters.ConvertLength
@@ -126,15 +125,13 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                         ) {
                             viewModel.dataToGet = DataType.TARGET_DISTANCE
                             btnTrgtDist.enable(true)
-                        }
-                        else if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
+                        } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
                             (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
                         ) {
                             btnTrgtHeight.dataStatus = DataStatus.NOT_SET
                             viewModel.dataToGet = DataType.TARGET_HEIGHT
                             btnTrgtHeight.enable(true)
-                        }
-                        else {
+                        } else {
                             viewModel.dataToGet = DataType.NONE
                         }
                     }
@@ -147,8 +144,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     viewModel.dataToGet = DataType.DEVICE_HEIGHT
                     if (DataShared.device.connectionState.value?.isReady!!) {
                         btnDeviceHeight.dataStatus = DataStatus.NOT_SET
-                    }
-                    else {
+                    } else {
                         btnDeviceHeight.enable(false)
                     }
 
@@ -168,12 +164,10 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                         viewModel.dataToGet = DataType.TARGET_DISTANCE
 
                         btnTrgtHeight.enable(false)
-                    }
-                    else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET) {
+                    } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET) {
                         btnTrgtHeight.enable(true)
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
-                    }
-                    else if (btnTrgtDist.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
+                    } else if (btnTrgtDist.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
                         viewModel.dataToGet = DataType.NONE
                     }
                 }
@@ -210,8 +204,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                         ) {
                             btnTrgtHeight.enable(false)
                         }
-                    }
-                    else if (!viewModel.isCalculationPaused) {
+                    } else if (!viewModel.isCalculationPaused) {
                         btnTrgtDist.dataStatus = DataStatus.SET
                         if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
                             (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
@@ -230,8 +223,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 if (btnTrgtDist.acquisitionMode == Mode.AUTO) {
                     if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET) {
                         btnTrgtDist.enable(false)
-                    }
-                    else {
+                    } else {
                         btnTrgtDist.dataStatus = DataStatus.NOT_SET
                         viewModel.dataToGet = DataType.TARGET_DISTANCE
                     }
@@ -241,13 +233,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     ) {
                         btnTrgtHeight.enable(false)
                     }
-                }
-                else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET
-                    && btnDeviceHeight.dataStatus == DataStatus.SET) {
+                } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET
+                    && btnDeviceHeight.dataStatus == DataStatus.SET
+                ) {
                     btnTrgtHeight.enable(true)
                     viewModel.dataToGet = DataType.TARGET_HEIGHT
-                }
-                else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
+                } else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
                     viewModel.dataToGet = DataType.NONE
                 }
             }
@@ -274,8 +265,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     if (viewModel.dataToGet != DataType.TARGET_HEIGHT) {
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
                         btnTrgtHeight.dataStatus = DataStatus.NOT_SET
-                    }
-                    else if (!viewModel.isCalculationPaused) {
+                    } else if (!viewModel.isCalculationPaused) {
                         btnTrgtHeight.dataStatus = DataStatus.SET
                         viewModel.dataToGet = DataType.NONE
                     }
@@ -287,14 +277,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 if (btnTrgtHeight.acquisitionMode == Mode.AUTO) {
                     if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET || btnTrgtDist.dataStatus == DataStatus.NOT_SET) {
                         btnTrgtHeight.enable(false)
-                    }
-                    else {
+                    } else {
                         btnTrgtHeight.dataStatus = DataStatus.NOT_SET
                         btnTrgtHeight.enable(true)
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
                     }
-                }
-                else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtDist.dataStatus == DataStatus.SET) {
+                } else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtDist.dataStatus == DataStatus.SET) {
                     btnTrgtHeight.dataStatus = DataStatus.SET
                     viewModel.dataToGet = DataType.NONE
                 }
@@ -323,7 +311,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * OnLongClick for opening Projectile Editor screen
          */
         fragmentCameraOverlayBinding.projectileSelected.setOnLongClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(R.id.projectileEditFragment)
+            Navigation.findNavController(requireActivity(), R.id.container_nav)
+                .navigate(R.id.projectileEditFragment)
             true
         }
 
@@ -331,7 +320,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * OnClick shortcut for opening the Scanner screen
          */
         fragmentCameraOverlayBinding.deviceConnectionStatus.setOnClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(R.id.deviceScannerFragment)
+            Navigation.findNavController(requireActivity(), R.id.container_nav)
+                .navigate(R.id.deviceScannerFragment)
         }
 
         /**
@@ -341,7 +331,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             viewModel.isEngViewActive = !viewModel.isEngViewActive
             val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
             prefs.edit()
-                .putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_ENGINEERING_VIEW), viewModel.isEngViewActive)
+                .putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_ENGINEERING_VIEW),
+                    viewModel.isEngViewActive)
                 .apply()
 
             true
@@ -350,11 +341,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Observe the carriage position unit type
          */
-        DataShared.carriagePosition.unitOnChange.observe(viewLifecycleOwner){ unit ->
+        DataShared.carriagePosition.unitOnChange.observe(viewLifecycleOwner) { unit ->
             // Set unit text
-            fragmentCameraOverlayBinding.carriagePositionUnit.text = ("(").plus(DataShared.carriagePosition.unitStr() + ")")
+            fragmentCameraOverlayBinding.carriagePositionUnit.text =
+                ("(").plus(DataShared.carriagePosition.unitStr() + ")")
             // Set data precision
-            when(unit){
+            when (unit) {
                 Unit.MM -> {
                     DataShared.carriagePosition.precision = 0
                 }
@@ -367,6 +359,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 else -> {}
             }
 
+            // Copy the unit type from carriagePosition
             DataShared.carriagePositionOverride.setUnit(unit)
             DataShared.carriagePositionOverride.precision = DataShared.carriagePosition.precision
         }
@@ -391,7 +384,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             fragmentCameraOverlayBinding.carriagePositionMax.text = str
             fragmentCameraOverlayBinding.carriagePositionOverrideMax.text = str
 
-            when(it){
+            when (it) {
                 false -> { // Manual mode
                     // Set the position value to match the manual seek bar value
                     fragmentCameraOverlayBinding.carriagePositionValueOverride.text = DataShared.carriagePositionOverride.valueStr()
@@ -418,7 +411,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * Observe engineering view enable
          */
         viewModel.isEngViewActiveOnChange.observe(viewLifecycleOwner) {
-            if(it){
+            if (it) {
                 fragmentCameraOverlayBinding.engineerView.visibility = View.VISIBLE
                 fragmentCameraOverlayBinding.efficiency.visibility = View.VISIBLE
                 fragmentCameraOverlayBinding.efficiencyValue.text = String.format(
@@ -426,8 +419,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     "%.3f",
                     DataShared.device.ballistics.efficiency
                 )
-            }
-            else{
+            } else {
                 fragmentCameraOverlayBinding.engineerView.visibility = View.INVISIBLE
                 fragmentCameraOverlayBinding.efficiency.visibility = View.INVISIBLE
             }
@@ -439,9 +431,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.carriagePosition.setOnLongClickListener {
             viewModel.isPositionAutoMode = !viewModel.isPositionAutoMode
             val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            prefs.edit()
-                .putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE), viewModel.isPositionAutoMode)
-                .apply()
+            prefs.edit().putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE), viewModel.isPositionAutoMode).apply()
             true
         }
 
@@ -456,20 +446,21 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * Set onClick for editing the efficiency value
          */
         fragmentCameraOverlayBinding.efficiency.setOnClickListener {
-            val listener : InputDialogFragment.InputDialogListener = object : InputDialogFragment.InputDialogListener{
-                override fun onDialogPositiveClick(value: Number) {
-                    DataShared.device.ballistics.efficiency = value.toDouble()
-                    fragmentCameraOverlayBinding.efficiencyValue.text = String.format(
-                        Locale.getDefault(),
-                        "%.3f",
-                        DataShared.device.ballistics.efficiency
-                    )
-                }
+            val listener: InputDialogFragment.InputDialogListener =
+                object : InputDialogFragment.InputDialogListener {
+                    override fun onDialogPositiveClick(value: Number) {
+                        DataShared.device.ballistics.efficiency = value.toDouble()
+                        fragmentCameraOverlayBinding.efficiencyValue.text = String.format(
+                            Locale.getDefault(),
+                            "%.3f",
+                            DataShared.device.ballistics.efficiency
+                        )
+                    }
 
-                override fun onDialogNegativeClick(value: Number) {
-                    // Do nothing..
+                    override fun onDialogNegativeClick(value: Number) {
+                        // Do nothing..
+                    }
                 }
-            }
 
             InputDialogFragment(
                 "Set Efficiency",
@@ -484,13 +475,14 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * Observe the dataToGet for enabling/disabling the button data
          * NOTE: This only updates when value is different than last
          */
-        viewModel.dataToGetLive.observe(viewLifecycleOwner){ data ->
+        viewModel.dataToGetLive.observe(viewLifecycleOwner) { data ->
             // Update the button visuals and select sensor if needed
-            when(data!!){
+            when (data!!) {
                 DataType.DEVICE_HEIGHT -> {
                     fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(1)
-                    if(DataShared.device.connectionState.value?.isReady!!
-                        && btnDeviceHeight.acquisitionMode == BallisticsButton.Mode.AUTO){
+                    if (DataShared.device.connectionState.value?.isReady!!
+                        && btnDeviceHeight.acquisitionMode == BallisticsButton.Mode.AUTO
+                    ) {
                         DataShared.device.setSensor(SensorData.Sensor.Id.LONG)
                         DataShared.device.setSensorEnable(true)
                     }
@@ -504,7 +496,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 }
                 DataType.NONE -> {
                     fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
-                    if(DataShared.device.connectionState.value?.isReady!!){
+                    if (DataShared.device.connectionState.value?.isReady!!) {
                         DataShared.device.setSensor(SensorData.Sensor.Id.SHORT)
                         DataShared.device.setSensorEnable(true)
                     }
@@ -515,11 +507,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             }
 
             // Clear the carriage position data
-            if(data != DataType.NONE){
+            if (data != DataType.NONE) {
                 fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
                 if (viewModel.isPositionAutoMode) {
                     fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
-                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
+                    fragmentCameraOverlayBinding.carriagePositionValue.text =
+                        getString(R.string.value_unknown)
                 }
             }
 
@@ -532,9 +525,9 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * Observe the calculation flag which drives visual effects
          * NOTE: This only updates when value is different than last
          */
-        viewModel.isCalculationPausedLive.observe(viewLifecycleOwner){ paused ->
+        viewModel.isCalculationPausedLive.observe(viewLifecycleOwner) { paused ->
             // Update the button visuals
-            when(viewModel.dataToGet){
+            when (viewModel.dataToGet) {
                 DataType.DEVICE_HEIGHT -> {
                     btnDeviceHeight.dataUpdateEnable = !paused
                 }
@@ -582,51 +575,44 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         }
 
         /**
-         * Observe carriage position sensor
+         * Observe carriage position sensor and update the shared data for carriage position
          */
-        DataShared.device.sensorCarriagePosition.rangeFiltered.observe(viewLifecycleOwner) { value ->
+        DataShared.device.sensorCarriagePosition.rangeFiltered.observe(viewLifecycleOwner) {
             if (viewModel.dataToGet == DataType.NONE
                 // This prevents updating the value when navigating off screen and back and no sensor connected
-                && DataShared.device.connectionState.value!!.isReady) {
-
-                DataShared.carriagePosition.setValue(Unit.MM, value.roundToInt().toDouble())
-                fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = DataShared.carriagePosition.getConverted(Unit.MM).toInt()
-                fragmentCameraOverlayBinding.carriagePositionValue.text = DataShared.carriagePosition.valueStr()
-                if(viewModel.isPositionAutoMode) {
-                    fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = DataShared.carriagePosition.getConverted(Unit.MM).toInt()
-                }
+                && DataShared.device.connectionState.value!!.isReady
+            ) {
+                DataShared.carriagePosition.setValue(Unit.MM, it.roundToInt().toDouble())
             }
         }
 
         /**
-         * Observe the carriage position value to calculate ballistics
-         * and update the related data on screen
+         * Observe carriage position
          */
         DataShared.carriagePosition.valueOnChange.observe(viewLifecycleOwner) {
-            if(!viewModel.isPositionAutoMode) return@observe
-            // Calculate ballistics
-            if(viewModel.isReadyToFire()) {
-                viewModel.calcBallistics(it)
-                updateEngBallisticsData()
+            if (viewModel.isPositionAutoMode) {
                 updateEngData(DataShared.carriagePosition.getConverted(Unit.MM))
+                fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = DataShared.carriagePosition.getConverted(Unit.MM).toInt()
+            }
+            fragmentCameraOverlayBinding.carriagePositionValue.text = DataShared.carriagePosition.valueStr()
+            fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = DataShared.carriagePosition.getConverted(Unit.MM).toInt()
+        }
+
+        /**
+         * Observe carriage position override
+         */
+        DataShared.carriagePositionOverride.valueOnChange.observe(viewLifecycleOwner) {
+            if (!viewModel.isPositionAutoMode) {
+                updateEngData(DataShared.carriagePositionOverride.getConverted(Unit.MM))
+                fragmentCameraOverlayBinding.carriagePositionValueOverride.text = DataShared.carriagePositionOverride.valueStr()
             }
         }
 
         /**
-         * Observer the carriage position override value to calculate ballistics
-         * and update the related data on screen
+         * Observe if ballisticsDataReady to update the visual data
          */
-        DataShared.carriagePositionOverride.valueOnChange.observe(viewLifecycleOwner) {
-            if(viewModel.isPositionAutoMode) return@observe
-
-            fragmentCameraOverlayBinding.carriagePositionValueOverride.text = DataShared.carriagePositionOverride.valueStr()
-
-            // Calculate ballistics
-            if(viewModel.isReadyToFire()) {
-                viewModel.calcBallistics(it)
-                updateEngBallisticsData()
-            }
-            updateEngData(DataShared.carriagePositionOverride.getConverted(Unit.MM))
+        viewModel.hitConfidence.observe(viewLifecycleOwner) {
+            updateEngBallisticsData()
         }
 
         /**
@@ -785,10 +771,10 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
         // Setup an on-change listener
         prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { pref: SharedPreferences?, key: String ->
-                if (pref != null) {
-                    preferencesHandler(context, pref, key)
-                }
+            if (pref != null) {
+                preferencesHandler(context, pref, key)
             }
+        }
     }
 
     /**
@@ -796,18 +782,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
      */
     private fun preferencesHandler(context: Context, pref: SharedPreferences?, key: String) {
         when(key){
-            /** Preference - Selected Spring */
-            context.getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED) -> {
-                val springName = try{
-                    pref!!.getString(key, DataShared.device.model.defaultSpringName.name)
-                }
-                catch(e : Exception){
-                    ""
-                }
-                val spring = Spring.getData(springName!!)
-                DataShared.device.model.setSpring(spring)
-            }
-
             /** Preference - Selected Projectile */
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED) -> {
                 val projectile = ProjectilePrefUtils.getProjectileSelectedData(context)
@@ -834,14 +808,11 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private fun updateEngData(position : Double) {
         // If engineering view is visible then display the data
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.heightData.text =
-                DataShared.deviceHeight.valueStr()
+            fragmentCameraOverlayBinding.engineerData.heightData.text = DataShared.deviceHeight.valueStr()
 
-            fragmentCameraOverlayBinding.engineerData.targetDistanceData.text =
-                DataShared.targetDistance.valueStr()
+            fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = DataShared.targetDistance.valueStr()
 
-            fragmentCameraOverlayBinding.engineerData.targetHeightData.text =
-                DataShared.targetHeight.valueStr()
+            fragmentCameraOverlayBinding.engineerData.targetHeightData.text = DataShared.targetHeight.valueStr()
 
             fragmentCameraOverlayBinding.engineerData.springAngleData.text = String.format(
                 Locale.getDefault(),
@@ -858,12 +829,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
     private fun updateEngBallisticsData() {
         // Update the hit confidence progress bar
-        fragmentCameraOverlayBinding.hitConfidenceBar.progress = viewModel.hitConfidence.toInt()
+        fragmentCameraOverlayBinding.hitConfidenceBar.progress = viewModel.hitConfidence.value!!.toInt()
         // Update the hit confidence text value
         fragmentCameraOverlayBinding.hitConfidenceValue.text = String.format(
             Locale.getDefault(),
             "%.1f%%",
-            viewModel.hitConfidence
+            viewModel.hitConfidence.value!!
         )
 
         // If engineering view is visible then display the data

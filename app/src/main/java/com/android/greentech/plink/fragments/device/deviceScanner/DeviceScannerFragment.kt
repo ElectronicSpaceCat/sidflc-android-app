@@ -94,7 +94,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
         // Initialize the scanner search-by filters
         viewModel.filterByUuid(true)
-        viewModel.filterByDistance(true)
+        viewModel.filterByDistance(false) // TODO: Had this fail to show device even when on..might need to adjust the rssi value to compare against
 
         // Create view model containing utility methods for scanning
         viewModel.deviceScannerState.observe(viewLifecycleOwner) { state: DeviceScannerStateLiveData ->
@@ -208,13 +208,6 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
     private fun startScan(state: DeviceScannerStateLiveData) {
         // Check device connection status
         val connState = DataShared.device.connectionState.value!!
-        // NOTE: Disconnect reason REASON_SUCCESS is set if user disconnected the device
-        var disconnectReason = ConnectionObserver.REASON_SUCCESS
-
-        // Get disconnect reason if any
-        if (connState is ConnectionState.Disconnected) {
-            disconnectReason = connState.reason
-        }
 
         // Determine which scan state to be in
         if (!state.isBluetoothEnabled()) {
@@ -231,6 +224,14 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
             scanState = ScanState.SCAN_DEVICES_FOUND
         }
         else {
+            // NOTE: Disconnect reason REASON_SUCCESS is set if user disconnected the device
+            var disconnectReason = ConnectionObserver.REASON_SUCCESS
+
+            // Get disconnect reason if any
+            if (connState is ConnectionState.Disconnected) {
+                disconnectReason = connState.reason
+            }
+
             when (disconnectReason) {
                 ConnectionObserver.REASON_NOT_SUPPORTED -> {
                     scanState = ScanState.SCAN_DEVICE_NOT_SUPPORTED

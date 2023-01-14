@@ -23,16 +23,14 @@ package com.android.greentech.plink.fragments.cameraOverlay
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.utils.converters.ConvertLength.Unit
 import com.android.greentech.plink.utils.calculators.CalcBallistics
 import com.android.greentech.plink.utils.calculators.CalcTrig
 import com.android.greentech.plink.utils.converters.ConvertLength
 import com.android.greentech.plink.utils.sensors.SensorGyro
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -49,6 +47,8 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     private val _dataToGet = MutableLiveData(DataType.NA)
     private var _totalLengthTarget = 0.0
     private var _totalLengthEst = 0.0
+
+    val carriagePosMerger = MediatorLiveData<Double>()
 
     val gyro = SensorGyro()
 
@@ -78,7 +78,10 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
 
     var impactDistance = 0.0
     var impactHeight = 0.0
-    var hitConfidence = 0.0
+
+    private var _hitConfidence = MutableLiveData(0.0)
+    val hitConfidence : LiveData<Double>
+        get() = _hitConfidence
 
     var isRollInRange = false
     var isPitchInRange = false
@@ -184,11 +187,14 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun isReadyToFire() : Boolean {
+    private fun isReadyToFire() : Boolean {
         return (!isCalculationPaused && dataToGet == DataType.NONE)
     }
 
-    fun calcBallistics(position : Double){
+    /**
+     * This should be called on a background thread since it blocks
+     */
+    private fun calcBallistics(position : Double) {
         // Get impact data
         val impactData = DataShared.device.ballistics.getImpactData(
             position,
@@ -214,7 +220,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         _totalLengthTarget = (DataShared.targetDistance.value + DataShared.targetHeight.value)
 
         // Calculate the hit confidence percentage based on the total length
-        hitConfidence = if(_totalLengthEst == 0.0 || _totalLengthTarget == 0.0){
+        _hitConfidence.postValue(if(_totalLengthEst == 0.0 || _totalLengthTarget == 0.0){
             0.0 // Return 0 if no target or estimate length = 0
         } else{
             // Flip the percentage calculation if the estimate length is above or below the target length
@@ -223,9 +229,9 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
             } else {
                 (_totalLengthEst / _totalLengthTarget) * 100.0
             }
-        }
+        })
     }
-    
+
     fun onActive(context: Context) {
         gyro.onActive(context)
         gyro.setOnSensorChangedListener { _, pitch, roll -> calcData(pitch, roll) }
@@ -245,5 +251,30 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
 
     fun onDestroy(){
         gyro.onDestroy()
+    }
+
+    init {
+        // Merged carriage position liveData sources (auto and manual modes)
+        carriagePosMerger.addSource(DataShared.carriagePosition.valueOnChange) {
+            if (isPositionAutoMode) {
+                carriagePosMerger.value = it
+            }
+        }
+
+        carriagePosMerger.addSource(DataShared.carriagePositionOverride.valueOnChange) {
+            if (!isPositionAutoMode) {
+                carriagePosMerger.value = it
+            }
+        }
+
+        // Launch background coroutine to process the ballistics data
+        // which will update the hitConfidence liveData when finished.
+        CoroutineScope(Dispatchers.IO).launch {
+            carriagePosMerger.asFlow().collect {
+                if(isReadyToFire()) {
+                    calcBallistics(it)
+                }
+            }
+        }
     }
 }
