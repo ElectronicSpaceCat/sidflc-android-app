@@ -192,8 +192,8 @@
         \nPress the <b>Calibrate</b> button to zero out the sensors.</string>
 
     <!-- DFU zip file -->
-    <string name="fw_file_version">https://github.com/ElectronicSpaceCat/plink-device-firmware/blob/main/extra/dfu/version</string>
-    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/plink-device-firmware/blob/main/extra/dfu/plink.zip</string>
+    <string name="fw_file_version">https://raw.githubusercontent.com/ElectronicSpaceCat/plink-device-firmware/main/extra/dfu/version</string>
+    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/plink-device-firmware/raw/main/extra/dfu/plink.zip</string>
     <string name="fw_file_name">plink.zip</string>
 
     <!-- DFU Screen -->
