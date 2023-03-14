@@ -23,15 +23,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentModelTunerBinding
-import java.util.*
-import kotlin.math.roundToInt
-
+import com.android.greentech.plink.utils.converters.ConvertDispUnits
 import com.android.greentech.plink.utils.misc.Utils
 import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
+import java.util.*
+import kotlin.math.roundToInt
 
 class DeviceModelFragment : Fragment() {
     private var _deviceModelBinding: FragmentModelTunerBinding? = null
@@ -51,17 +50,21 @@ class DeviceModelFragment : Fragment() {
 
         /**
          * Get the scale factor to get a close representation of
-         * the the carrier position in relation to the physical model.
+         * the the carriage position in relation to the physical model.
          */
         // Width of the actual drawable (height could also be used)
-        val drawableWidthStr = parseXmlForWidthValue("res/drawable/ic_plink_v24_top_bottom.xml")
+        val drawableWidthStr = parseXmlForWidthValue(MODEL_DRAWABLE, MODEL_DRAWABLE_WIDTH_XML_ATTR)
         val drawableWidthMm = Utils.convertStrToDouble(drawableWidthStr).toFloat()
 
-        // Width in pixels of container that holds the model drawable
-        val widthPx = requireContext().resources.getDimension(R.dimen.device_model_width)
+        // Width in Dp of container that holds the model drawable
+        //val widthDp = requireContext().resources.getDimension(R.dimen.device_model_width)
+        val widthStr = parseXmlForWidthValue(MODEL_LAYOUT, MODEL_LAYOUT_WIDTH_XML_ATTR)
+        val widthDp = Utils.convertStrToDouble(widthStr).toFloat()
+        // Convert to px
+        val widthPx = ConvertDispUnits.dpToPx(requireContext(), widthDp)
 
         // Width in mm of container that holds the model drawable
-        val widthMM = convertPxToMm(widthPx)
+        val widthMM = ConvertDispUnits.pxToMm(requireContext(), widthPx)
         // Scaling factor
         val scale = (widthMM / drawableWidthMm)
 
@@ -72,9 +75,9 @@ class DeviceModelFragment : Fragment() {
             if(_lastPosition != position){
                 _lastPosition = position
 
-                // Convert carrier position from mm to an offset amount in pixels
+                // Convert carriage position from mm to an offset amount in pixels
                 val offsetPX = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, position.toFloat(), resources.displayMetrics)
-                // Translate the image of the carrier by the offset with the scale applied
+                // Translate the image of the carriage by the offset with the scale applied
                 deviceModelBinding.plinkSlider.translationY = (-offsetPX * scale)
 
                 val angle = DataShared.device.model.getSpringAngleAtPosition(position).toFloat()
@@ -108,15 +111,15 @@ class DeviceModelFragment : Fragment() {
             }
     }
 
-    private fun parseXmlForWidthValue(xml : String) : String {
-        var widthStr = "0.0"
+    private fun parseXmlForWidthValue(xml : String, attr : String) : String? {
+        var str : String ?= "0.0"
         val parser : XmlResourceParser
 
         try{
             parser = resources.assets.openXmlResourceParser(xml)
         }
         catch (e : IOException) {
-            return widthStr
+            return str
         }
 
         // Work with the input stream
@@ -124,23 +127,32 @@ class DeviceModelFragment : Fragment() {
         while (event != XmlPullParser.END_DOCUMENT) {
             when (event) {
                 XmlPullParser.START_TAG -> {
-                    // Get the value from the attribute "android:viewportWidth"
-                    widthStr = parser.getAttributeValue(2)
+                    // Get the value from the attribute
+                    // Note: "http://schemas.android.com/apk/res/android" needs to be used in place of "android" in the xml
+                    str = parser.getAttributeValue("http://schemas.android.com/apk/res/android", attr)
+                    if (str != null && str.length > 1 && str[0] == '@') {
+                        val id: Int = str.substring(1).toInt()
+                        str = getString(id).removeSuffix("dip")
+                    }
                     break
                 }
             }
             event = parser.next()
         }
 
-        return widthStr
-    }
-
-    private fun convertPxToMm(value : Float) : Float {
-        return value / resources.displayMetrics.xdpi * 25.4f
+        return str
     }
 
     override fun onDestroyView() {
         _deviceModelBinding = null
         super.onDestroyView()
+    }
+
+    companion object{
+        private const val MODEL_DRAWABLE = "res/drawable/ic_plink_v24_top_bottom.xml"
+        private const val MODEL_DRAWABLE_WIDTH_XML_ATTR = "viewportWidth"
+
+        private const val MODEL_LAYOUT = "res/layout/fragment_model_tuner.xml"
+        private const val MODEL_LAYOUT_WIDTH_XML_ATTR = "layout_width"
     }
 }

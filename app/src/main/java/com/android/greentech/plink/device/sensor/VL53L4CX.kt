@@ -14,7 +14,7 @@ open class VL53L4CX(
         TIME_BUDGET,
         OFFSET_MODE,
         DISTANCE_MODE,
-        SMUDGE_CORR_EN,
+        SMUDGE_CORR_MODE,
         XTALK_COMP_EN,
         RECT_OF_INTEREST,
         CAL_REFSPAD,
@@ -93,7 +93,7 @@ open class VL53L4CX(
                     Config.PHS_CAL_PCH_PWR.ordinal-> {
                         when(sensor.lastConfigReceived.status) {
                             SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.SMUDGE_CORR_EN.ordinal, 0)
+                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.SMUDGE_CORR_MODE.ordinal, 0)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
@@ -102,7 +102,7 @@ open class VL53L4CX(
                         }
                         setCalMessage(sensor.lastConfigReceived)
                     }
-                    Config.SMUDGE_CORR_EN.ordinal-> {
+                    Config.SMUDGE_CORR_MODE.ordinal-> {
                         when(sensor.lastConfigReceived.status) {
                             SensorData.Config.Status.OK -> {
                                 sensor.setConfigCommand(SensorData.Config.Command.SET, Config.XTALK_COMP_EN.ordinal, 0)
@@ -147,18 +147,6 @@ open class VL53L4CX(
                         setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.CAL_REFSPAD.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.CAL_XTALK.ordinal, 0)
-                                state = State.WAIT_FOR_RESPONSE
-                            }
-                            else -> {
-                                state = State.ERROR
-                            }
-                        }
-                        setCalMessage(sensor.lastConfigReceived)
-                    }
-                    Config.CAL_XTALK.ordinal-> {
                         when(sensor.lastConfigReceived.status) {
                             SensorData.Config.Status.OK -> {
                                 when(sensor.id){
@@ -301,9 +289,9 @@ open class VL53L4CX(
     companion object {
         const val OFFSET_CORRECTION_MODE_STANDARD = 1
         const val OFFSET_CORRECTION_MODE_PERVCSEL = 3
-        const val POWER_LEVEL_LOW = 30 // Position sensor seems better at this level
+        const val POWER_LEVEL_LOW = 35 // Position sensor seems better at this level
         const val POWER_LEVEL_DEFAULT = 60
-        const val SENSOR_SHORT_TIME_BUDGET = 35000 // Seems like reasonable reaction speed
+        const val SENSOR_SHORT_TIME_BUDGET = 40000 // Seems like reasonable reaction speed
         const val PHS_CAL_PCH_PWR = 2 // Supposedly helps
         const val SENSOR_SHORT_ROI = 101255430 // This sets a 4x4 (minimum allowed) out of 15x15 SPAD array
     }

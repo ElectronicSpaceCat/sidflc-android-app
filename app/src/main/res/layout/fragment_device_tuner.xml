@@ -36,6 +36,7 @@
             android:id="@+id/graph_view_plotter"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -93,6 +94,7 @@
 
                         <ImageView
                             android:id="@+id/btn_edit_queue_size"
+                            tools:ignore="ContentDescription"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             app:srcCompat="@drawable/ic_edit" />
@@ -121,6 +123,7 @@
 
                         <ImageView
                             android:id="@+id/btn_edit_increments"
+                            tools:ignore="ContentDescription"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             app:srcCompat="@drawable/ic_edit" />
@@ -154,7 +157,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             app:srcCompat="@drawable/ic_keyboard_arrow_up_24"
-                            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+                            tools:ignore="ContentDescription,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
                     </TableRow>
 
                     <TableRow
@@ -175,7 +178,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             app:srcCompat="@drawable/ic_keyboard_arrow_down_24"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                     </TableRow>
 
@@ -208,7 +211,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             app:srcCompat="@drawable/ic_keyboard_arrow_up_24"
-                            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                     </TableRow>
 
@@ -230,7 +233,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             app:srcCompat="@drawable/ic_keyboard_arrow_down_24"
-                            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                     </TableRow>
                 </TableLayout>
@@ -262,7 +265,8 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_fit_24" />
+                        app:srcCompat="@drawable/ic_fit_24"
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
                 </TableRow>
 
                 <TableRow
@@ -293,7 +297,8 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_rotation_24" />
+                        app:srcCompat="@drawable/ic_rotation_24"
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
                 </TableRow>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -418,7 +423,7 @@
                         android:id="@+id/textView28"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sensor Type"
+                        android:text="Sensor"
                         android:textColor="@color/textprimary"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -436,7 +441,7 @@
                     android:id="@+id/sensor_status_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="54dp"
                     app:layout_constraintStart_toEndOf="@+id/sensor_type_info"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -500,7 +505,8 @@
                         android:textColor="@color/text_primary_color_selector"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="@+id/textView5"
-                        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                        app:layout_constraintTop_toBottomOf="@+id/textView5"
+                        tools:ignore="TouchTargetSizeCheck"/>
 
                     <RadioButton
                         android:id="@+id/btnSensor2"
@@ -511,7 +517,8 @@
                         android:textColor="@color/text_primary_color_selector"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="@+id/btnSensor1"
-                        app:layout_constraintTop_toBottomOf="@+id/btnSensor1" />
+                        app:layout_constraintTop_toBottomOf="@+id/btnSensor1"
+                        tools:ignore="TouchTargetSizeCheck"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -519,7 +526,7 @@
                     android:id="@+id/switch_sensor_enable"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enable"
+                    android:text="Enable "
                     android:textColor="@color/text_primary_color_selector"
                     app:layout_constraintStart_toStartOf="@+id/sensor_selector"
                     app:layout_constraintTop_toBottomOf="@+id/sensor_selector" />
@@ -671,7 +678,8 @@
                                 android:id="@+id/btn_edit_ref"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                app:srcCompat="@drawable/ic_edit" />
+                                app:srcCompat="@drawable/ic_edit"
+                                tools:ignore="ContentDescription" />
 
                         </TableRow>
 
@@ -698,6 +706,7 @@
 
                             <ImageView
                                 android:id="@+id/btn_edit_sample_size"
+                                tools:ignore="ContentDescription"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 app:srcCompat="@drawable/ic_edit" />
@@ -723,7 +732,8 @@
                         android:text="Reset\nSD"
                         android:textColor="@color/textprimary"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck"/>
 
                     <ImageButton
                         android:id="@+id/btn_reset_sd"
@@ -733,7 +743,8 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView2"
-                        app:srcCompat="@drawable/ic_rotation_24" />
+                        app:srcCompat="@drawable/ic_rotation_24"
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -752,7 +763,8 @@
                         android:textColor="@color/textprimary"
                         app:layout_constraintBottom_toTopOf="@+id/btn_store_configs"
                         app:layout_constraintStart_toStartOf="@+id/btn_store_configs"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck"/>
 
                     <ImageButton
                         android:id="@+id/btn_store_configs"
@@ -765,7 +777,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView17"
                         app:srcCompat="@drawable/ic_baseline_arrow_downward_24"
-                        tools:ignore="SpeakableTextPresentCheck" />
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                     <TextView
                         android:id="@+id/textView13"
@@ -788,7 +800,7 @@
                         app:layout_constraintStart_toEndOf="@+id/btn_store_configs"
                         app:layout_constraintTop_toBottomOf="@+id/textView13"
                         app:srcCompat="@drawable/ic_rotation_24"
-                        tools:ignore="SpeakableTextPresentCheck" />
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                     <TextView
                         android:id="@+id/textView15"
@@ -811,7 +823,7 @@
                         app:layout_constraintStart_toEndOf="@+id/btn_reset_sensor_default"
                         app:layout_constraintTop_toBottomOf="@+id/textView15"
                         app:srcCompat="@drawable/ic_rotation_24"
-                        tools:ignore="SpeakableTextPresentCheck" />
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

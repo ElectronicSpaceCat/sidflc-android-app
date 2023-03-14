@@ -182,12 +182,13 @@ class Device(context: Context) {
     /**
      * Send a configuration command
      *
+     * @param target
      * @param command
      * @param id
      * @param value
      */
-    fun sendConfigCommand(command: SensorData.Config.Command, id: Int, value: Int) {
-        _bleDeviceManager.setSensorConfigCommand(command, id, value)
+    fun sendConfigCommand(target : SensorData.Config.Target, command: SensorData.Config.Command, id: Int, value: Int) {
+        _bleDeviceManager.setSensorConfigCommand(target, command, id, value)
     }
 
     /**

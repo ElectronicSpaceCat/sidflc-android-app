@@ -28,10 +28,11 @@ interface SensorConfigCallback {
      * Called when the data has been sent to the connected device.
      *
      * @param device target device
+     * @param trgt configuration target
      * @param cmd configuration command
      * @param id configuration id
      * @param value configuration value
      * @param status configuration status
      */
-    fun onSensorConfigChanged(device: BluetoothDevice, cmd : Int, id: Int, value: Int, status: Int)
+    fun onSensorConfigChanged(device: BluetoothDevice, trgt : Int, cmd : Int, id: Int, value: Int, status: Int)
 }

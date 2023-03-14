@@ -106,10 +106,6 @@ class Sensor(
      */
     private fun setSensorType(type: SensorData.Sensor.Type) {
         _sensor = when (type) {
-            SensorData.Sensor.Type.VL6180X ->
-                VL6180X(this)
-            SensorData.Sensor.Type.VL53L0X ->
-                VL53L0X(this)
             SensorData.Sensor.Type.VL53L4CD ->
                 VL53L4CD(this)
             SensorData.Sensor.Type.VL53L4CX ->
@@ -207,7 +203,7 @@ class Sensor(
      * on a valid config response.
      */
     fun invalidateLastConfigData() {
-        device.sensorData.setConfig(SensorData.Config.Command.NA, 0xFF, Int.MAX_VALUE, SensorData.Config.Status.NA)
+        device.sensorData.setConfig(SensorData.Config.Target.SENSOR, SensorData.Config.Command.NA, 0xFF, Int.MAX_VALUE, SensorData.Config.Status.NA)
     }
 
     /**
@@ -217,7 +213,7 @@ class Sensor(
      * @param value
      */
     fun setConfigCommand(command: SensorData.Config.Command, id: Int, value: Int) {
-        device.setSensorConfigCommand(command, id, value)
+        device.setSensorConfigCommand(SensorData.Config.Target.SENSOR, command, id, value)
     }
 
     /**
@@ -225,7 +221,7 @@ class Sensor(
      * into permanent storage internal to the device
      */
     fun storeConfigData() {
-        device.setSensorConfigCommand(SensorData.Config.Command.STORE, 0xFF, Int.MAX_VALUE)
+        device.setSensorConfigCommand(SensorData.Config.Target.SENSOR,  SensorData.Config.Command.STORE, 0xFF, Int.MAX_VALUE)
     }
 
     /**
@@ -278,6 +274,9 @@ class Sensor(
      * @param config
      */
     private fun onConfigUpdate(config : SensorData.Config) {
+        // Ignore configurations not intended for the sensor
+        if(config.trgt != SensorData.Config.Target.SENSOR) return
+
         when (config.status) {
             SensorData.Config.Status.OK,
             SensorData.Config.Status.UPDATED,

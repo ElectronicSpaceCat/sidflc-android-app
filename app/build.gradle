@@ -23,7 +23,7 @@ android {
     // Note: Need the NDK attribute to ensure library debug symbols get removed.
     //       The version can be found in SDK Manager -> SDK Tools -> NDK (Side by side)
     //       Click "Show package details" to view the versions.
-    ndkVersion "25.0.8775105"
+    ndkVersion "25.2.9519653"
 
     defaultConfig {
         applicationId "com.android.greentech.plink"
@@ -101,7 +101,7 @@ dependencies {
     implementation 'no.nordicsemi.android:log:2.3.0'
 
     // BLE library
-    //implementation 'no.nordicsemi.android:ble-livedata:2.5.1'
+//    implementation 'no.nordicsemi.android:ble-livedata:2.6.0'
     implementation project(':ble-livedata')
 
     // To add BLE Library as a module, replace the above dependency with the following
@@ -118,7 +118,7 @@ dependencies {
 
     // Import the BLE Common Library.
     // The BLE Common Library depends on BLE Library. It is enough to include the first one.
-    //implementation 'no.nordicsemi.android:ble-common:2.5.1'
+//    implementation 'no.nordicsemi.android:ble-common:2.6.0'
     // The BLE Common Library may be included from jcenter. If you want to modify the code,
     // clone both projects from GitHub and replace the line above with the following
     // (and also the according lines in the settings.gradle):

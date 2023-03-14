@@ -36,7 +36,7 @@ abstract class SensorConfigDataCallback : ProfileDataCallback, DataSentCallback,
     }
 
     private fun parse(device: BluetoothDevice, data: Data) {
-        if (data.size() != 7) {
+        if (data.size() != 8) {
             onInvalidDataReceived(device, data)
             return
         }
@@ -45,7 +45,8 @@ abstract class SensorConfigDataCallback : ProfileDataCallback, DataSentCallback,
             device,
             data.getIntValue(Data.FORMAT_UINT8, 0)!!,
             data.getIntValue(Data.FORMAT_UINT8, 1)!!,
-            data.getIntValue(Data.FORMAT_SINT32_LE, 2)!!,
-            data.getIntValue(Data.FORMAT_UINT8, 6)!!)
+            data.getIntValue(Data.FORMAT_UINT8, 2)!!,
+            data.getIntValue(Data.FORMAT_SINT32_LE, 3)!!,
+            data.getIntValue(Data.FORMAT_UINT8, 7)!!)
     }
 }

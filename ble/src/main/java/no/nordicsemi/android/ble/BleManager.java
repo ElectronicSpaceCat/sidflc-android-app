@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattServer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +55,7 @@ import no.nordicsemi.android.ble.annotation.PhyMask;
 import no.nordicsemi.android.ble.annotation.PhyOption;
 import no.nordicsemi.android.ble.annotation.WriteType;
 import no.nordicsemi.android.ble.callback.ConnectionParametersUpdatedCallback;
+import no.nordicsemi.android.ble.data.DataProvider;
 import no.nordicsemi.android.ble.observer.BondingObserver;
 import no.nordicsemi.android.ble.observer.ConnectionObserver;
 import no.nordicsemi.android.ble.callback.ConnectionPriorityCallback;
@@ -182,6 +184,117 @@ public abstract class BleManager implements ILogger {
 	}
 
 	/**
+	 * This method should set up the request queue needed to initialize the profile.
+	 * Enabling Service Change indications for bonded devices is handled before executing this
+	 * queue. The queue may have requests that are not available, e.g. read an optional
+	 * service when it is not supported by the connected device. Such call will trigger
+	 * {@link Request#fail(FailCallback)}.
+	 * <p>
+	 * This method is called when the services has been discovered and the device is supported
+	 * (has required service).
+	 * <p>
+	 * Remember to call {@link Request#enqueue()} for each request.
+	 * <p>
+	 * A sample initialization should look like this:
+	 * <pre>
+	 * &#64;Override
+	 * protected void initialize() {
+	 *    requestMtu(MTU)
+	 *       .with((device, mtu) -> {
+	 *           ...
+	 *       })
+	 *       .enqueue();
+	 *    setNotificationCallback(characteristic)
+	 *       .with((device, data) -> {
+	 *           ...
+	 *       });
+	 *    enableNotifications(characteristic)
+	 *       .done(device -> {
+	 *           ...
+	 *       })
+	 *       .fail((device, status) -> {
+	 *           ...
+	 *       })
+	 *       .enqueue();
+	 * }
+	 * </pre>
+	 */
+	protected void initialize() {
+		// Don't call super.initialize() when overriding this method.
+		requestHandler.initialize();
+	}
+
+	/**
+	 * This method should return <code>true</code> when the gatt device supports the
+	 * required services.
+	 *
+	 * @param gatt the gatt device with services discovered
+	 * @return <code>True</code> when the device has the required service.
+	 */
+	protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
+		// Don't call super.isRequiredServiceSupported(gatt) when overriding this method.
+		return requestHandler.isRequiredServiceSupported(gatt);
+	}
+
+	/**
+	 * This method should return <code>true</code> when the gatt device supports the
+	 * optional services. The default implementation returns <code>false</code>.
+	 *
+	 * @param gatt the gatt device with services discovered
+	 * @return <code>True</code> when the device has the optional service.
+	 */
+	protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+		// Don't call super.isOptionalServiceSupported(gatt) when overriding this method.
+		return requestHandler.isOptionalServiceSupported(gatt);
+	}
+
+	/**
+	 * In this method the manager should get references to server characteristics and descriptors
+	 * that will use. The method is called after the service discovery of a remote device has
+	 * finished and {@link #isRequiredServiceSupported(BluetoothGatt)} returned true.
+	 * <p>
+	 * The references obtained in this method should be released in {@link #onServicesInvalidated()}.
+	 * <p>
+	 * This method is called only when the server was set by
+	 * {@link BleManager#useServer(BleServerManager)} and opened using {@link BleServerManager#open()}.
+	 *
+	 * @param server The GATT Server instance. Use {@link BluetoothGattServer#getService(UUID)} to
+	 *               obtain service instance.
+	 */
+	protected void onServerReady(@NonNull final BluetoothGattServer server) {
+		// Don't call super.onServerReady(server) when overriding this method.
+		requestHandler.onServerReady(server);
+	}
+
+	/**
+	 * This method should nullify all services and characteristics of the device.
+	 * <p>
+	 * It's called when the services were invalidated and can no longer be used. Most probably the
+	 * device has disconnected, Service Changed indication was received, or
+	 * {@link #refreshDeviceCache()} request was executed, which has invalidated cached services.
+	 */
+	protected void onServicesInvalidated() {
+		// Don't call super.onServicesInvalidated() when overriding this method.
+		requestHandler.onServicesInvalidated();
+	}
+
+	/**
+	 * Called when the initialization queue is complete.
+	 */
+	protected void onDeviceReady() {
+		// Don't call super.onDeviceReady() when overriding this method.
+		requestHandler.onDeviceReady();
+	}
+
+	/**
+	 * Called each time the task queue gets cleared.
+	 */
+	protected void onManagerReady() {
+		// Don't call super.onManagerReady() when overriding this method.
+		requestHandler.onManagerReady();
+	}
+
+	/**
 	 * Closes and releases resources. This method will be called automatically after
 	 * calling {@link #disconnect()}. When the device disconnected with link loss and
 	 * {@link ConnectRequest#shouldAutoConnect()} returned true you have to call this method to
@@ -302,16 +415,29 @@ public abstract class BleManager implements ILogger {
 	}
 
 	/**
-	 * This method must return the GATT callback used by the manager.
+	 * This method returns the GATT callback used by the manager.
 	 *
-	 * The object must exist when this method is called, that is in the BleManager's constructor.
-	 * Therefore, it cannot return a local field in the extending manager, as this is created after
-	 * the constructor finishes.
+	 * Since version 2.6 this method is private. The manager just can implement all inner methods
+	 * directly, without additional object.
 	 *
 	 * @return The gatt callback object.
+	 * @deprecated Implement all methods directly in your manager.
 	 */
+	@Deprecated
 	@NonNull
-	protected abstract BleManagerGattCallback getGattCallback();
+	protected BleManagerGattCallback getGattCallback() {
+		return new BleManagerGattCallback() {
+			@Override
+			protected boolean isRequiredServiceSupported(@NonNull BluetoothGatt gatt) {
+				return false;
+			}
+
+			@Override
+			protected void onServicesInvalidated() {
+				// empty default implementation
+			}
+		};
+	}
 
 	/**
 	 * Returns the context that the manager was created with.
@@ -543,9 +669,6 @@ public abstract class BleManager implements ILogger {
 	 */
 	@NonNull
 	public final ConnectRequest connect(@NonNull final BluetoothDevice device) {
-		if (device == null) {
-			throw new NullPointerException("Bluetooth device not specified");
-		}
 		return Request.connect(device)
 				.useAutoConnect(shouldAutoConnect())
 				.setRequestHandler(requestHandler);
@@ -581,9 +704,6 @@ public abstract class BleManager implements ILogger {
 	@NonNull
 	@Deprecated
 	public final ConnectRequest connect(@NonNull final BluetoothDevice device, @PhyMask final int phy) {
-		if (device == null) {
-			throw new NullPointerException("Bluetooth device not specified");
-		}
 		return Request.connect(device)
 				.usePreferredPhy(phy)
 				.useAutoConnect(shouldAutoConnect())
@@ -601,6 +721,14 @@ public abstract class BleManager implements ILogger {
 	@NonNull
 	public final DisconnectRequest disconnect() {
 		return Request.disconnect().setRequestHandler(requestHandler);
+	}
+
+	/**
+	 * "Server only" alternative to using connect() in onDeviceConnectedToServer.
+	 * This simply associates the connection to the passed client.
+	 */
+	public void attachClientConnection(BluetoothDevice client) {
+		requestHandler.attachClientConnection(client);
 	}
 
 	/**
@@ -1003,8 +1131,10 @@ public abstract class BleManager implements ILogger {
 	/**
 	 * Waits until the given characteristic is read by the remote device. The data must have been set
 	 * to the characteristic before the request is executed.
-	 * Use {@link #setCharacteristicValue(BluetoothGattCharacteristic, Data)} to set data, or
-	 * {@link #waitForRead(BluetoothGattCharacteristic, byte[], int, int)} to set the data immediately.
+	 * Use {@link #setCharacteristicValue(BluetoothGattCharacteristic, Data)} to set data,
+	 * {@link #waitForRead(BluetoothGattCharacteristic, byte[], int, int)} to set the data immediately,
+	 * or {@link #setCharacteristicValue(BluetoothGattCharacteristic, DataProvider)} to set the
+	 * data on demand.
 	 * <p>
 	 * The returned request must be either enqueued using {@link Request#enqueue()} for
 	 * asynchronous use, or awaited using await() in synchronous execution.
@@ -1059,8 +1189,9 @@ public abstract class BleManager implements ILogger {
 	/**
 	 * Waits until the given descriptor is read by the remote device. The data must have been set
 	 * to the descriptor before the request is executed.
-	 * Use {@link #setDescriptorValue(BluetoothGattDescriptor, byte[])} to set data, or
-	 * {@link #waitForRead(BluetoothGattDescriptor, byte[], int, int)} to set the data immediately.
+	 * Use {@link #setDescriptorValue(BluetoothGattDescriptor, byte[])} to set data,
+	 * {@link #waitForRead(BluetoothGattDescriptor, byte[], int, int)} to set the data immediately,
+	 * or {@link #setDescriptorValue(BluetoothGattDescriptor, DataProvider)} to set the
 	 * <p>
 	 * The returned request must be either enqueued using {@link Request#enqueue()} for
 	 * asynchronous use, or awaited using await() in synchronous execution.
@@ -1110,6 +1241,24 @@ public abstract class BleManager implements ILogger {
 											 @Nullable final byte[] data, final int offset, final int length) {
 		return Request.newWaitForReadRequest(serverDescriptor, data, offset, length)
 				.setRequestHandler(requestHandler);
+	}
+
+	/**
+	 * Sets the data provider to the given readable server characteristic.
+	 * <p>
+	 * The provider will be called when the remote device sends a read command to the given
+	 * characteristic. This allows returning current value without the need to update the value
+	 * periodically.
+	 * <p>
+	 * If the provider is not set, the value set using
+	 * {@link #setCharacteristicValue(BluetoothGattCharacteristic, Data)} will be returned.
+	 *
+	 * @param serverCharacteristic the target characteristic to provide data for.
+	 * @param provider the data provider for the given characteristic.
+	 */
+	protected void setCharacteristicValue(@Nullable final BluetoothGattCharacteristic serverCharacteristic,
+										  @Nullable final DataProvider provider) {
+		requestHandler.setCharacteristicValue(serverCharacteristic, provider);
 	}
 
 	/**
@@ -1167,6 +1316,24 @@ public abstract class BleManager implements ILogger {
 													 @Nullable final byte[] data, final int offset, final int length) {
 		return Request.newSetValueRequest(serverCharacteristic, data, offset, length)
 				.setRequestHandler(requestHandler);
+	}
+
+	/**
+	 * Sets the data provider to the given readable server descriptor.
+	 * <p>
+	 * The provider will be called when the remote device sends a read command to the given
+	 * descriptor. This allows returning current value without the need to update the value
+	 * periodically.
+	 * <p>
+	 * If the provider is not set, the value set using
+	 * {@link #setDescriptorValue(BluetoothGattDescriptor, Data)} will be returned.
+	 *
+	 * @param serverDescriptor the target descriptor to provide data for.
+	 * @param provider the data provider for the given characteristic.
+	 */
+	protected void setDescriptorValue(@Nullable final BluetoothGattDescriptor serverDescriptor,
+									  @Nullable final DataProvider provider) {
+		requestHandler.setDescriptorValue(serverDescriptor, provider);
 	}
 
 	/**
@@ -1964,8 +2131,8 @@ public abstract class BleManager implements ILogger {
 	 * There is no callback indicating when the cache has been cleared. This library assumes
 	 * some time and waits. After the delay, it will start service discovery and clear the
 	 * task queue. When the service discovery finishes, the
-	 * {@link BleManager.BleManagerGattCallback#isRequiredServiceSupported(BluetoothGatt)} and
-	 * {@link BleManager.BleManagerGattCallback#isOptionalServiceSupported(BluetoothGatt)} will
+	 * {@link BleManager#isRequiredServiceSupported(BluetoothGatt)} and
+	 * {@link BleManager#isOptionalServiceSupported(BluetoothGatt)} will
 	 * be called and the initialization will be performed as if the device has just connected.
 	 * <p>
 	 * The returned request must be either enqueued using {@link Request#enqueue()} for

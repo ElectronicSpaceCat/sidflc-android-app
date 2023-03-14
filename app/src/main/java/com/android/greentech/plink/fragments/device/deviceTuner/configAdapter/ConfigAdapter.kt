@@ -122,7 +122,7 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
     private fun getConfig(position: Int) {
         val sensor = _device.getActiveSensor()
         if(sensor != null){
-            _device.sendConfigCommand(SensorData.Config.Command.GET, position, Int.MAX_VALUE)
+            _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.GET, position, Int.MAX_VALUE)
 
             // Set the sensor status to NA
             if(position < _configs.size) {
@@ -139,7 +139,7 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
     private fun resetConfig(position: Int) {
         val sensor = _device.getActiveSensor()
         if(sensor != null){
-            _device.sendConfigCommand(SensorData.Config.Command.RESET, position, Int.MAX_VALUE)
+            _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.RESET, position, Int.MAX_VALUE)
 
             // Set the sensor status to NA
             if(position < _configs.size) {
@@ -152,7 +152,7 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
         val listener : InputDialogFragment.InputDialogListener = object : InputDialogFragment.InputDialogListener{
                 override fun onDialogPositiveClick(value: Number) {
                     // Send configuration command
-                    _device.sendConfigCommand(SensorData.Config.Command.SET, position, value.toInt())
+                    _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.SET, position, value.toInt())
                     // Set the sensor status to NA
                     if(position < _configs.size) {
                         configModify(position, _configs[position].value, SensorData.Config.Status.NA.name)

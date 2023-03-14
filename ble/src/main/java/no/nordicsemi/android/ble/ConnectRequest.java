@@ -32,6 +32,7 @@ import android.os.Handler;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import no.nordicsemi.android.ble.annotation.PhyMask;
 import no.nordicsemi.android.ble.callback.AfterCallback;
 import no.nordicsemi.android.ble.callback.BeforeCallback;
@@ -161,8 +162,7 @@ public class ConnectRequest extends TimeoutableRequest {
 	 * @param count how many times should the BleManager retry to connect.
 	 * @param delay the delay between each connection attempt, in milliseconds.
 	 *              The real delay will be 200 ms longer than specified, as
-	 *              {@link BluetoothGatt#clone()} is estimated to last
-	 *              {@link BleManagerHandler#internalConnect(BluetoothDevice, ConnectRequest) 200 ms}.
+	 *              {@link BluetoothGatt#close()} is estimated to last 200 ms.
 	 * @return The request.
 	 * @see #retry(int)
 	 */
@@ -200,7 +200,7 @@ public class ConnectRequest extends TimeoutableRequest {
 	 *
 	 * @param autoConnect true to use autoConnect feature on the second and following connections.
 	 *                    The first connection is always done with autoConnect parameter equal to
-	 *                    false, to make it faster and allow to timeout if the device is unreachable.
+	 *                    false, to make it faster and allow to timeout it the device is unreachable.
 	 *                    Default value is false.
 	 * @return The request.
 	 */
@@ -238,8 +238,28 @@ public class ConnectRequest extends TimeoutableRequest {
 	 * with an error.
 	 */
 	public void cancelPendingConnection() {
-		if (started && !finished) {
-			this.requestHandler.cancelQueue();
+		cancel();
+	}
+
+	/**
+	 * This method cancels the pending connection attempt. All requests enqueued after this one
+	 * will be removed form the queue.
+	 * <p>
+	 * This method does nothing if the connection request has finished successfully, or
+	 * with an error.
+	 */
+	@Override
+	public void cancel() {
+		// DO NOT CALL super.cancel()!
+		// Below cancelQueue() is called, not cancelCurrent()!
+
+		if (!started) {
+			// The request has not been started yet. Remove it from the queue.
+			cancelled = true;
+			finished = true;
+		} else if (!finished) {
+			cancelled = true;
+			requestHandler.cancelQueue();
 		}
 	}
 

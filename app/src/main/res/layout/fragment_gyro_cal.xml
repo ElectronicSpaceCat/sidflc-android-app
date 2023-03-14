@@ -116,6 +116,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/value_unknown"
                 android:textAlignment="textEnd" />
+
         </TableRow>
 
     </TableLayout>

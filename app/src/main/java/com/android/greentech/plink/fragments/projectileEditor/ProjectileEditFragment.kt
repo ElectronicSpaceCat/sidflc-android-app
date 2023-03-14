@@ -56,8 +56,9 @@ class ProjectileEditFragment: Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         // Setup header
-        fragmentProjectileBinding.projectileHeader.projectileWeight.text = "Weight (g)"
-        fragmentProjectileBinding.projectileHeader.projectileDiameter.text = "Diameter (mm)"
+        fragmentProjectileBinding.projectileHeader.projectileWeight.text = "Weight\n(g)"
+        fragmentProjectileBinding.projectileHeader.projectileDiameter.text = "Diameter\n(mm)"
+        fragmentProjectileBinding.projectileHeader.projectileDrag.text = "Drag\n---"
         fragmentProjectileBinding.projectileHeader.iconEdit.visibility = View.INVISIBLE
         fragmentProjectileBinding.projectileHeader.iconDelete.visibility = View.INVISIBLE
 

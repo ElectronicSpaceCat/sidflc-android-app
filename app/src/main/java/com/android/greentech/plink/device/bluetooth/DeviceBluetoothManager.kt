@@ -516,10 +516,16 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
 
     private val sensorConfigCallback: SensorConfigDataCallback =
         object : SensorConfigDataCallback() {
-            override fun onSensorConfigChanged(device: BluetoothDevice, cmd : Int, id: Int, value: Int, status: Int) {
+            override fun onSensorConfigChanged(device: BluetoothDevice, trgt : Int, cmd : Int, id: Int, value: Int, status: Int) {
                 log(
-                    Log.VERBOSE,"ToF: " + _tofSensor.sensor.toString() + " id: " + id + " status: " + status +" value: " + value
+                    Log.VERBOSE,"ToF: " + _tofSensor.sensor.toString() + "trgt" + trgt + "cmd" + cmd +" id: " + id + " status: " + status +" value: " + value
                 )
+
+                val configTrgt = if(trgt < SensorData.Config.Target.values().size){
+                    SensorData.Config.Target.values()[trgt]
+                } else{
+                    SensorData.Config.Target.NA
+                }
 
                 val configCmd = if(cmd < SensorData.Config.Command.values().size){
                     SensorData.Config.Command.values()[cmd]
@@ -533,7 +539,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
                     SensorData.Config.Status.INVALID
                 }
 
-                _tofSensor.setConfig(configCmd, id, value, configStatus)
+                _tofSensor.setConfig(configTrgt, configCmd, id, value, configStatus)
             }
 
             override fun onInvalidDataReceived(device: BluetoothDevice, data: Data) {
@@ -748,24 +754,27 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
 
     /**
      * Sends a request to the device to set a configuration.
-     *
+     * @param target
      * @param command
      * @param id for the sensor.
      * @param value for the sensor.
      */
-    fun setSensorConfigCommand(command: SensorData.Config.Command, id: Int, value: Int) {
+    fun setSensorConfigCommand(target: SensorData.Config.Target, command: SensorData.Config.Command, id: Int, value: Int) {
         // Does characteristic exist?
         if (tofConfigCharacteristic == null) return
 
-        log(Log.VERBOSE, "ToF: " + _tofSensor.sensor.toString() + "requested config: " + id + " value: " + value)
+        log(Log.VERBOSE, "ToF: " + _tofSensor.sensor.toString() + "target" + target + "cmd" + command + "config: " + id + " value: " + value)
 
-        val data = ByteArray(6)
-        // Byte 0 is the config command
-        data[0] = command.ordinal.toByte()
-        // Byte 1 is the config id
-        data[1] = id.toByte()
-        // Bytes 2-5 is the config value
-        Utils.intToBytes(data, 2, value)
+        val data = ByteArray(7)
+
+        // Byte 0 is the config target
+        data[0] = target.ordinal.toByte()
+        // Byte 1 is the config command
+        data[1] = command.ordinal.toByte()
+        // Byte 2 is the config id
+        data[2] = id.toByte()
+        // Bytes 3-6 is the config value
+        Utils.intToBytes(data, 3, value)
 
         writeCharacteristic(
             tofConfigCharacteristic,

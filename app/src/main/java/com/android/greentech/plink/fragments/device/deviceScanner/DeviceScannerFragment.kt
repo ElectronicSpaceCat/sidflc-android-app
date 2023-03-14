@@ -218,7 +218,6 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         }
         else if (connState.isConnected) {
             scanState = ScanState.SCAN_DEVICE_CONNECTING
-
         }
         else if (state.hasRecords()) {
             scanState = ScanState.SCAN_DEVICES_FOUND

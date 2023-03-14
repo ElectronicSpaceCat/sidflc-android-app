@@ -16,11 +16,13 @@ class DeviceBallistics(context: Context, model: ModelData) {
     private val _prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val _model = model
     private var _pos = 0.0
-    private var _forceOffset = 0.0
-    private var _frictionCoefficient = 0.0
-    private var _efficiency = 0.0
+
     private var _impactDistance = 0.0
     private var _impactHeight = 0.0
+
+    private var _forceOffset = 0.0
+    private var _frictionCoefficient = 0.0 // Currently set to 0.0 since it's almost negligible
+    private var _efficiency = 0.0
 
     private val _forceOffsetKey = context.getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET)
     private val _frictionCoefficientKey = context.getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT)
@@ -146,7 +148,7 @@ class DeviceBallistics(context: Context, model: ModelData) {
      * (Blocking function)
      *
      * Run an ODE (ordinary differential equation) to pre-path the projectile with air drag
-     * until the height is less or equal to zero, meaning the projectile hit the ground.
+     * until the height is less or equal to zero (when the projectile hit the ground).
      */
     private fun calculateProjectileWithQuadraticDrag(velocity : Double, height: Double, launchAngle: Double, deltaTimeSeconds : Double) {
         val vXinit = velocity * cos(Math.toRadians(launchAngle))
@@ -182,6 +184,7 @@ class DeviceBallistics(context: Context, model: ModelData) {
             xPrev = x
             yPrev = y
 
+			// Get displacement from avg velocity
             x += 0.5 * (vX + vXprev) * deltaTimeSeconds
             y += 0.5 * (vY + vYprev) * deltaTimeSeconds
 

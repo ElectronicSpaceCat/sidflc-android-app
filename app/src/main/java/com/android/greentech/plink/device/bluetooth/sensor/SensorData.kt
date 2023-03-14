@@ -19,7 +19,7 @@ class SensorData {
     private val _range = MutableLiveData(0xFFFF)
     private val _status = MutableLiveData(Status.NA)
     private val _enable = MutableLiveData(false)
-    private val _config = MutableLiveData(Config(Config.Command.NA, 0xFF, Int.MAX_VALUE, Config.Status.INVALID))
+    private val _config = MutableLiveData(Config(Config.Target.NA, Config.Command.NA, 0xFF, Int.MAX_VALUE, Config.Status.INVALID))
 
     class Sensor(var id: Id, var type: Type){
         enum class Id {
@@ -30,8 +30,6 @@ class SensorData {
         }
 
         enum class Type {
-            VL6180X,
-            VL53L0X,
             VL53L4CD,
             VL53L4CX,
             NUM_TYPES,
@@ -85,11 +83,18 @@ class SensorData {
     val config: LiveData<Config>
         get() = _config
 
-    fun setConfig(cmd : Config.Command, id: Int, value: Int, status: Config.Status) {
-        _config.value = Config(cmd, id, value, status)
+    fun setConfig(trgt : Config.Target, cmd : Config.Command, id: Int, value: Int, status: Config.Status) {
+        _config.value = Config(trgt, cmd, id, value, status)
     }
 
-    class Config(var cmd : Command, var id: Int, var value: Int, var status: Status){
+    class Config(var trgt : Target, var cmd : Command, var id: Int, var value: Int, var status: Status){
+        enum class Target{
+            SENSOR,
+            EXT_STORE,
+            NUM_TARGETS,
+            NA
+        }
+
         enum class Command{
             GET,
             SET,
