@@ -19,17 +19,42 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
+import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
+import no.nordicsemi.android.ble.callback.DataSentCallback
+import no.nordicsemi.android.ble.data.Data
 
-interface SensorSelectCallback {
-    /**
-     * Called when the data has been sent to the connected device.
-     *
-     * @param device the target device.
-     * @param id
-     * @param type
-     */
-    fun onSensorSelectChanged(device: BluetoothDevice, id: Int, type : Int)
+abstract class SensorRangeEnableDataCallback : ProfileDataCallback, DataSentCallback, SensorRangeEnableCallback {
+    override fun onDataReceived(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    override fun onDataSent(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    private fun parse(device: BluetoothDevice, data: Data) {
+        if (data.size() != 1) {
+            onInvalidDataReceived(device, data)
+            return
+        }
+        when (data.getIntValue(Data.FORMAT_UINT8, 0)!!) {
+            RANGING_ENABLE.toInt() -> {
+                onSampleEnableChanged(device, true)
+            }
+            RANGING_DISABLE.toInt() -> {
+                onSampleEnableChanged(device, false)
+            }
+            else -> {
+                onInvalidDataReceived(device, data)
+            }
+        }
+    }
+
+    companion object {
+        private const val RANGING_DISABLE: Byte = 0x00
+        private const val RANGING_ENABLE: Byte = 0x01
+    }
 }

@@ -1,13 +1,12 @@
 package com.android.greentech.plink.device.sensor
 
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.device.sensor.ISensorCalibrate.State
 
-open class VL53L4CX(
-    override val sensor: Sensor,
-    override val type: SensorData.Sensor.Type = SensorData.Sensor.Type.VL53L4CX
-) : ISensor, SensorCalibrate() {
-
+open class VL53L4CX(override val sensor: Sensor) : ISensor {
+    
+    override val type: DeviceData.Sensor.Type = DeviceData.Sensor.Type.VL53L4CX
+    
     enum class Config{
         POWER_LEVEL,
         PHS_CAL_PCH_PWR,
@@ -24,15 +23,21 @@ open class VL53L4CX(
         CAL_XTALK
     }
 
-//    private var _sampleCount = 0
-//    private val _maxCount = 35 // Run enough samples to level out the moving average
-
     override val configs: Array<ISensor.Config> = Array(Config.values().size) {
         ISensor.Config(Config.values()[it].name, Int.MAX_VALUE)
     }
 
-    override fun runCalibration() {
-        when (calibrationState) {
+    override fun stopCalibration() {
+        state = State.NA
+    }
+    override fun startCalibration() {
+        state = State.PREPARE
+        // Calling this will trigger a response which is used to drive the state machine
+        sensor.setConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
+    }
+
+    override fun runCalibration(config : DeviceData.Config) {
+        when (state) {
             State.PREPARE -> {
                 if(sensor.isEnabled) {
                     sensor.enable(false)
@@ -41,120 +46,134 @@ open class VL53L4CX(
                     state = State.START
                 }
                 // Calling this will trigger a response which is used to drive the state machine
-                sensor.setConfigCommand(SensorData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
+                sensor.setConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
             }
             State.START -> {
                 when(sensor.id){
-                    SensorData.Sensor.Id.SHORT -> {
-                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_LOW)
+                    DeviceData.Sensor.Id.SHORT -> {
+                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_LOW)
                     }
-                    SensorData.Sensor.Id.LONG -> {
-                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_DEFAULT)
+                    DeviceData.Sensor.Id.LONG -> {
+                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_DEFAULT)
                     }
                     else -> {}
                 }
-
+                setCalMessage(Config.POWER_LEVEL.ordinal)
                 state = State.WAIT_FOR_RESPONSE
             }
+            State.CALIBRATING -> {
+                // Do nothing..
+            }
             State.WAIT_FOR_RESPONSE -> {
-                when(sensor.lastConfigReceived.id) {
+                when(config.id) {
                     Config.POWER_LEVEL.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
-                                    SensorData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
+                                    DeviceData.Sensor.Id.SHORT -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
                                     }
-                                    SensorData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_STANDARD)
+                                    DeviceData.Sensor.Id.LONG -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_STANDARD)
                                     }
                                     else -> {}
                                 }
+                                setCalMessage(Config.OFFSET_MODE.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
+
                     }
                     Config.OFFSET_MODE.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.PHS_CAL_PCH_PWR.ordinal, PHS_CAL_PCH_PWR)
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.PHS_CAL_PCH_PWR.ordinal, PHS_CAL_PCH_PWR)
+                                setCalMessage(Config.PHS_CAL_PCH_PWR.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.PHS_CAL_PCH_PWR.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.SMUDGE_CORR_MODE.ordinal, 0)
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.SMUDGE_CORR_MODE.ordinal, 0)
+                                setCalMessage(Config.SMUDGE_CORR_MODE.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.SMUDGE_CORR_MODE.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.XTALK_COMP_EN.ordinal, 0)
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.XTALK_COMP_EN.ordinal, 0)
+                                setCalMessage(Config.XTALK_COMP_EN.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
+                        setCalResponseMessage(config)
                     }
                     Config.XTALK_COMP_EN.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
-                                    SensorData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.RECT_OF_INTEREST.ordinal, SENSOR_SHORT_ROI)
+                                    DeviceData.Sensor.Id.SHORT -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.RECT_OF_INTEREST.ordinal, SENSOR_SHORT_ROI)
                                     }
-                                    SensorData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.RESET, Config.RECT_OF_INTEREST.ordinal, Int.MAX_VALUE)
+                                    DeviceData.Sensor.Id.LONG -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.RESET, Config.RECT_OF_INTEREST.ordinal, Int.MAX_VALUE)
                                     }
                                     else -> {}
                                 }
+                                setCalMessage(Config.RECT_OF_INTEREST.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.RECT_OF_INTEREST.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.CAL_REFSPAD.ordinal, 0)
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_REFSPAD.ordinal, 0)
+                                setCalMessage(Config.CAL_REFSPAD.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.CAL_REFSPAD.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
-                                    SensorData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.offsetRef)
+                                    DeviceData.Sensor.Id.SHORT -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.offsetRef - 2)
+                                        setCalMessage(Config.CAL_OFFSET_VCSEL.ordinal)
                                     }
-                                    SensorData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(SensorData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
+                                    DeviceData.Sensor.Id.LONG -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
+                                        setCalMessage(Config.CAL_OFFSET_ZERO.ordinal)
                                     }
                                     else -> {}
                                 }
@@ -164,134 +183,92 @@ open class VL53L4CX(
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
-                    Config.CAL_OFFSET_ZERO.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                state = State.FINISHED
-                            }
-                            else -> {
-                                state = State.ERROR
-                            }
-                        }
-                        setCalMessage(sensor.lastConfigReceived)
-                    }
+                    Config.CAL_OFFSET_ZERO.ordinal,
                     Config.CAL_OFFSET_VCSEL.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(SensorData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_SHORT_TIME_BUDGET)
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                when(sensor.id){
+                                    DeviceData.Sensor.Id.SHORT -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_SHORT_TIME_BUDGET)
+                                    }
+                                    DeviceData.Sensor.Id.LONG -> {
+                                        sensor.setConfigCommand(DeviceData.Config.Command.GET, Config.TIME_BUDGET.ordinal, Int.MAX_VALUE)
+                                    }
+                                    else -> {}
+                                }
+                                setCalMessage(Config.TIME_BUDGET.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
                     }
                     Config.TIME_BUDGET.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK,
-                            SensorData.Config.Status.MISMATCH-> {
-                                state = State.FINISHED
+                        setCalResponseMessage(config)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK,
+                            DeviceData.Config.Status.MISMATCH-> {
+                                sensor.storeConfigData()
+                                stateMsg = "Sensor: " + sensor.id.toString() + "\nStoring data..."
+                                state = State.WAIT_FOR_RESPONSE
                             }
-                            SensorData.Config.Status.UPDATED-> {
-                                // Ignore..
+                            DeviceData.Config.Status.UPDATED-> {
+                                return
                             }
                             else -> {
                                 state = State.ERROR
                             }
                         }
-                        setCalMessage(sensor.lastConfigReceived)
+                    }
+                    STORE_DATA_CONFIG_ID-> { // ID used for storing data (any value would work)
+                        when(config.status) {
+                            DeviceData.Config.Status.OK -> {
+                                stateMsg = "Sensor: " + sensor.id.toString() + "\nData stored"
+                                state = State.FINISHED
+                            }
+                            else -> {
+                                state = State.ERROR
+                            }
+                        }
+
                     }
                 }
+            }
+            State.FINISHED -> {
+                // Do nothing..
             }
             State.ERROR -> {
-                stateMsg = "Sensor: " + sensor.id.toString() + "Timeout"
+                stateMsg = "Sensor: " + sensor.id.toString() + "\nTimeout"
             }
-            else -> {}
+            State.NA -> {
+                // Do nothing..
+            }
         }
     }
 
-    /** // Note: block has logic for setting a manual offset by doing our own averaging
-    private fun runCalShortSimple () {
-        when (sensor.calState) {
-            SensorCalibrate.State.START -> {
-                sensor.setConfigCommand(Config.POWER_LEVEL.ordinal, SensorData.Config.Command.SET, VCSEL_POWER_LEVEL)
-                sensor.calState = SensorCalibrate.State.WAIT_FOR_RESPONSE
-            }
-            SensorCalibrate.State.CALIBRATING -> {
-                if(_sampleCount >= _maxCount){
-                    sensor.device.setSensorEnable(false)
-                    val rangeDelta = (sensor.offsetRef - sensor.rangeFiltered.value!!)
-                    val offset = sensor.getConfigByName(Config.OFFSET.name).value + rangeDelta
-                    sensor.setConfigCommand(Config.OFFSET.ordinal, SensorData.Config.Command.SET, offset.roundToInt())
-                    sensor.calState = SensorCalibrate.State.WAIT_FOR_RESPONSE
-                }
-                else {
-                    _sampleCount += 1
-                    sensor.calStateMsg = "Sensor: " + sensor.id.toString() + "\nSample: " + _sampleCount.toString() + "/" + _maxCount
-                }
-            }
-            SensorCalibrate.State.WAIT_FOR_RESPONSE -> {
-                when(sensor.lastConfigReceived.id) {
-                    Config.POWER_LEVEL.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                _sampleCount = 0
-                                sensor.device.setSensorEnable(true)
-                                sensor.calState = SensorCalibrate.State.CALIBRATING
-                            }
-                            else -> {
-                                sensor.calState = SensorCalibrate.State.ERROR
-                            }
-                        }
-                        setCalMessage(sensor.lastConfigReceived)
-                    }
-                    Config.OFFSET.ordinal-> {
-                        when(sensor.lastConfigReceived.status) {
-                            SensorData.Config.Status.OK -> {
-                                sensor.setConfigCommand(Config.CAL_XTALK.ordinal, SensorData.Config.Command.SET, 0)
-                                sensor.calState = SensorCalibrate.State.WAIT_FOR_RESPONSE
-                            }
-                            else -> {
-                                sensor.calState = SensorCalibrate.State.ERROR
-                            }
-                        }
-                        setCalMessage(sensor.lastConfigReceived)
-                    }
-                    Config.CAL_XTALK.ordinal -> {
-                        when(sensor.lastConfigReceived.status){
-                            SensorData.Config.Status.OK -> {
-                                sensor.calState = SensorCalibrate.State.FINISHED
-                            }
-                            else -> {
-                                sensor.calState = SensorCalibrate.State.ERROR
-                            }
-                        }
-                        setCalMessage(sensor.lastConfigReceived)
-                    }
-                }
-            }
-            else -> {}
+    private fun setCalMessage(configId: Int){
+        if(configId < Config.values().size){
+            stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.values()[configId].name
         }
     }
-*/
 
-    private fun setCalMessage(config: SensorData.Config){
+    private fun setCalResponseMessage(config: DeviceData.Config){
         if(config.id < Config.values().size){
             stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.values()[config.id].name + " : " + config.status.name
         }
     }
 
-    private
-
     companion object {
+        const val STORE_DATA_CONFIG_ID = 0xFF
+
         const val OFFSET_CORRECTION_MODE_STANDARD = 1
         const val OFFSET_CORRECTION_MODE_PERVCSEL = 3
-        const val POWER_LEVEL_LOW = 35 // Position sensor seems better at this level
+        const val POWER_LEVEL_LOW = 30 // Position sensor seems better at this level
         const val POWER_LEVEL_DEFAULT = 60
-        const val SENSOR_SHORT_TIME_BUDGET = 40000 // Seems like reasonable reaction speed
+        const val SENSOR_SHORT_TIME_BUDGET = 50000 // Gives reasonable response speed
         const val PHS_CAL_PCH_PWR = 2 // Supposedly helps
         const val SENSOR_SHORT_ROI = 101255430 // This sets a 4x4 (minimum allowed) out of 15x15 SPAD array
     }

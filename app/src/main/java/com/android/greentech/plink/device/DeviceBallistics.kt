@@ -1,10 +1,5 @@
 package com.android.greentech.plink.device
 
-
-import android.content.Context
-import androidx.preference.PreferenceManager
-import com.android.greentech.plink.R
-import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.device.model.ModelData
 import com.android.greentech.plink.utils.calculators.CalcBallistics
 import com.android.greentech.plink.utils.calculators.CalcMisc
@@ -12,8 +7,7 @@ import com.android.greentech.plink.utils.calculators.CalcTrig
 import com.android.greentech.plink.utils.converters.ConvertLength
 import kotlin.math.*
 
-class DeviceBallistics(context: Context, model: ModelData) {
-    private val _prefs = PreferenceManager.getDefaultSharedPreferences(context)
+class DeviceBallistics(model: ModelData) {
     private val _model = model
     private var _pos = 0.0
 
@@ -24,10 +18,6 @@ class DeviceBallistics(context: Context, model: ModelData) {
     private var _frictionCoefficient = 0.0 // Currently set to 0.0 since it's almost negligible
     private var _efficiency = 0.0
 
-    private val _forceOffsetKey = context.getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET)
-    private val _frictionCoefficientKey = context.getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT)
-    private val _efficiencyKey = context.getString(R.string.PREFERENCE_FILTER_EFFICIENCY)
-
     inner class ImpactData(var distance: Double = 0.0, var height: Double = 0.0)
 
     var forceOffset: Double
@@ -37,8 +27,6 @@ class DeviceBallistics(context: Context, model: ModelData) {
             } else{
                 0.0
             }
-            // Store the value to preferences
-            _prefs.edit().putFloat(_forceOffsetKey, _forceOffset.toFloat()).apply()
         }
         get() = _forceOffset
 
@@ -49,8 +37,6 @@ class DeviceBallistics(context: Context, model: ModelData) {
             } else{
                 0.0
             }
-            // Store the value to preferences
-            _prefs.edit().putFloat(_frictionCoefficientKey, _frictionCoefficient.toFloat()).apply()
         }
         get() = _frictionCoefficient
 
@@ -61,8 +47,6 @@ class DeviceBallistics(context: Context, model: ModelData) {
             } else{
                 1.0
             }
-            // Store the value to preferences
-            _prefs.edit().putFloat(_efficiencyKey, _efficiency.toFloat()).apply()
         }
         get() = _efficiency
 
@@ -96,8 +80,8 @@ class DeviceBallistics(context: Context, model: ModelData) {
         val deltaPos = _model.getMaxCarriagePosition() - _pos
 
         // Distance times the energy loss due to gravity and friction at an angle
-        val kineticEnergyLoss = deltaPos * (_forceOffset + (0.001 * DataShared.device.model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * sin(Math.toRadians(launchAngle)))
-        + (0.001 * DataShared.device.model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * cos(Math.toRadians(launchAngle))) * _frictionCoefficient)
+        val kineticEnergyLoss = deltaPos * (_forceOffset + (0.001 * _model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * sin(Math.toRadians(launchAngle)))
+        + (0.001 * _model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * cos(Math.toRadians(launchAngle))) * _frictionCoefficient)
 
         // Total potential energy multiplied by an efficiency factor
         val netPotentialEnergy = max(0.0, (_model.getPotentialEnergyAtPosition(_pos) - kineticEnergyLoss) * _efficiency)
@@ -117,7 +101,7 @@ class DeviceBallistics(context: Context, model: ModelData) {
 
         // Get the adjusted target distance which is the calculated target distance plus the distance behind the lens
         // at which the projectile will be launched.
-        val offset = (lensOffset - _model.getProjectileCenterOfMassPosition(DataShared.device.model.getMaxCarriagePosition()))
+        val offset = (lensOffset - _model.getProjectileCenterOfMassPosition(_model.getMaxCarriagePosition()))
         // Only adjust targetDistance if the offset is greater than the offset of the projectiles center of mass location
         _adjustedTargetDistance = if(offset > 0.0){
             // Convert the offset from mm to m
@@ -151,27 +135,36 @@ class DeviceBallistics(context: Context, model: ModelData) {
      * until the height is less or equal to zero (when the projectile hit the ground).
      */
     private fun calculateProjectileWithQuadraticDrag(velocity : Double, height: Double, launchAngle: Double, deltaTimeSeconds : Double) {
+        // Velocity in x/y component (initial)
         val vXinit = velocity * cos(Math.toRadians(launchAngle))
         val vYinit = velocity * sin(Math.toRadians(launchAngle))
 
+        // Velocity
         var v: Double
 
+        // Velocity in x/y component
         var vX = vXinit
         var vY = vYinit
 
+        // Velocity in x/y component (previous)
         var vXprev: Double
         var vYprev: Double
 
+        // Distance in x/y component
         var x = 0.0
         var y = height
 
+        // Distance in x/y component (previous)
         var xPrev: Double
         var yPrev: Double
 
+        // Flag indicating the height at impact was found
         var gotImpactHeight = false
 
-        val dragCoefficient = DataShared.device.model.projectile!!.drag
+        // Drag coefficient
+        val dragCoefficient = _model.projectile!!.drag
 
+        // Run a quadratic drag routine until the height of the projectile reaches zero (hit the ground)
         do{
             v = sqrt(vX.pow(2) + vY.pow(2))
 
@@ -200,7 +193,7 @@ class DeviceBallistics(context: Context, model: ModelData) {
             _impactHeight = 0.0
         }
 
-        // Get distance when y hits zero (ie projectile hit the ground)
+        // Get the distance in the x-direction
         _impactDistance = CalcMisc.interpolate(0.0, y, yPrev, x, xPrev)
     }
 
@@ -219,12 +212,5 @@ class DeviceBallistics(context: Context, model: ModelData) {
     companion object {
         private const val DEFAULT_DELTA_TIME_SECONDS = 0.01
         private const val DEFAULT_EFFICIENCY_FACTOR = 0.65f
-    }
-
-    init {
-        // Load the efficiency value on init
-        _forceOffset = _prefs.getFloat(_forceOffsetKey, 0.0f).toDouble()
-        _frictionCoefficient = _prefs.getFloat(_frictionCoefficientKey, 0.0f).toDouble()
-        _efficiency = _prefs.getFloat(_efficiencyKey, DEFAULT_EFFICIENCY_FACTOR).toDouble()
     }
 }

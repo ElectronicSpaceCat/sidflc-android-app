@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         // Has preferences been previously initialized?
         if (!defaultValueSp.getBoolean(PreferenceManager.KEY_HAS_SET_DEFAULT_VALUES, false)){
             // Init preferences on first time application starts
-            PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+            PreferenceManager.setDefaultValues(this, R.xml.prefs_main, false)
             // Init any additional defaults preferences here
             ProjectilePrefUtils.setDefaultProjectilesPref(this)
         }

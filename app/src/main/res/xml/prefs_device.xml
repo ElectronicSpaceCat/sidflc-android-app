@@ -1,0 +1,48 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:visibility="visible"
+    tools:visibility="visible">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/header_ballistics">
+        <EditTextPreference
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_FORCE_OFFSET"
+            app:persistent="false"
+            app:title="@string/pref_title_force_offset"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="1.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_EFFICIENCY"
+            app:persistent="false"
+            app:title="@string/pref_title_efficiency"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_FRICTION_COEFFICIENT"
+            app:persistent="false"
+            app:title="@string/pref_title_friction_coefficient"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Hardware">
+            <Preference
+                app:defaultValue=""
+                app:iconSpaceReserved="false"
+                app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
+                app:persistent="false"
+                app:summary="spring selected"
+                app:title="@string/pref_title_spring_edit"
+                app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

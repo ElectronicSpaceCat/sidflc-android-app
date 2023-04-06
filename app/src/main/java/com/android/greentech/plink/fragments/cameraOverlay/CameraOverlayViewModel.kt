@@ -48,7 +48,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     private var _totalLengthTarget = 0.0
     private var _totalLengthEst = 0.0
 
-    val carriagePosMerger = MediatorLiveData<Double>()
+    private val carriagePosMerger = MediatorLiveData<Double>()
 
     val gyro = SensorGyro()
 
@@ -188,7 +188,9 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private fun isReadyToFire() : Boolean {
-        return (!isCalculationPaused && dataToGet == DataType.NONE)
+        return (!isCalculationPaused
+                && dataToGet == DataType.NONE
+                && DataShared.device.connectionState.value!!.isReady)
     }
 
     /**

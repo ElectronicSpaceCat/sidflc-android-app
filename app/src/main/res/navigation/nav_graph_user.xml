@@ -17,6 +17,7 @@
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_user"
     app:startDestination="@id/homeFragment">
     <fragment
@@ -55,7 +56,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.android.greentech.plink.fragments.settings.SettingsFragment"
+        android:name="com.android.greentech.plink.fragments.settings.SettingsMainFragment"
         android:label="Settings" >
         <action
             android:id="@+id/action_settingsFragment_to_unitEditorFragment"
@@ -66,6 +67,9 @@
         <action
             android:id="@+id/action_settingsFragment_to_gyroCalFragment"
             app:destination="@id/gyroCalFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_placeholder"
+            app:destination="@id/settingsDeviceFragment" />
     </fragment>
     <fragment
         android:id="@+id/gyroCalFragment"
@@ -105,4 +109,8 @@
         android:id="@+id/deviceInfoFragment"
         android:name="com.android.greentech.plink.fragments.device.deviceInfo.DeviceInfoFragment"
         android:label="Device Info" />
+    <fragment
+        android:id="@+id/settingsDeviceFragment"
+        android:name="com.android.greentech.plink.fragments.settings.SettingsDeviceFragment"
+        android:label="Device Settings" />
 </navigation>

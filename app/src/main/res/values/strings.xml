@@ -26,7 +26,7 @@
     <string name="PREFERENCE_FILTER_UNITS_EDIT">units_edit</string>
     <string name="PREFERENCE_FILTER_SENSOR_CAL_PHONE">gyro_calibration</string>
     <string name="PREFERENCE_FILTER_SENSOR_CAL_DEVICE">device_sensor_calibration</string>
-    <string name="PREFERENCE_FILTER_DEVICE_TUNE">device_configuration</string>
+    <string name="PREFERENCE_FILTER_DEVICE_SETTINGS">device_settings</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_EDIT">projectile_edit</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_NAMES">projectile_names</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_WEIGHTS">projectile_weights</string>
@@ -36,8 +36,8 @@
     <string name="PREFERENCE_FILTER_SPRING_SELECTED">spring_selected</string>
     <string name="PREFERENCE_FILTER_LENS_OFFSET">lens_offset</string>
     <string name="PREFERENCE_FILTER_FORCE_OFFSET">force_offset</string>
-    <string name="PREFERENCE_FILTER_FRICTION_COEFFICIENT">friction_coefficient</string>
     <string name="PREFERENCE_FILTER_EFFICIENCY">efficiency</string>
+    <string name="PREFERENCE_FILTER_FRICTION_COEFFICIENT">friction_coefficient</string>
     <string name="PREFERENCE_FILTER_CARRIAGE_POSITION_MODE">carriage_pos_mode</string>
     <string name="PREFERENCE_FILTER_ENGINEERING_VIEW">engineering_view</string>
 
@@ -119,12 +119,13 @@
     <!-- Preferences -->
     <string name="pref_title_edit_units">Units</string>
     <string name="pref_title_projectile_select">Selected</string>
+    <string name="pref_title_device">Device</string>
     <string name="pref_title_projectile_edit">Projectiles</string>
     <string name="pref_title_spring_edit">Spring</string>
     <string name="pref_title_lens_offset">Lens Offset</string>
     <string name="pref_title_force_offset">Force Offset (N)</string>
-    <string name="pref_title_friction_coefficient">Friction Coefficient</string>
     <string name="pref_title_efficiency">Efficiency Factor</string>
+    <string name="pref_title_friction_coefficient">Friction Coefficient</string>
     <string name="pref_title_calibrate_gyro">Calibrate Gyro</string>
     <string name="pref_title_calibrate_sensors">Calibrate Device</string>
     <string name="pref_title_advanced">Device Configurations</string>
@@ -192,8 +193,8 @@
         \nPress the <b>Calibrate</b> button to zero out the sensors.</string>
 
     <!-- DFU zip file -->
-    <string name="fw_file_version">https://raw.githubusercontent.com/ElectronicSpaceCat/plink-device-firmware/main/extra/dfu/version</string>
-    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/plink-device-firmware/raw/main/extra/dfu/plink.zip</string>
+    <string name="fw_file_version">https://raw.githubusercontent.com/ElectronicSpaceCat/plink-device-firmware/master/extra/dfu/version</string>
+    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/plink-device-firmware/raw/master/extra/dfu/plink.zip</string>
     <string name="fw_file_name">plink.zip</string>
 
     <!-- DFU Screen -->

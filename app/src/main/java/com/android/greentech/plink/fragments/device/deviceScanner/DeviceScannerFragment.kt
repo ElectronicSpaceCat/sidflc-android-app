@@ -326,6 +326,8 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                 fragmentDeviceScannerBinding.bluetoothOff.root.visibility = View.GONE
                 fragmentDeviceScannerBinding.deviceNotSupported.root.visibility = View.GONE
                 fragmentDeviceScannerBinding.noLocationPermission.root.visibility = View.GONE
+
+                // TODO: Add button for clearing bonds
             }
         }
     }

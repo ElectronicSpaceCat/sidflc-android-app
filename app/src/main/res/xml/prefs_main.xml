@@ -26,47 +26,35 @@
             app:defaultValue="0.0"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:key="@string/PREFERENCE_FILTER_FORCE_OFFSET"
-            app:persistent="false"
-            app:title="@string/pref_title_force_offset"
-            app:defaultValue="0.0"
-            app:iconSpaceReserved="false"
-            app:useSimpleSummaryProvider="true" />
-<!--        <EditTextPreference-->
+        <!--        <EditTextPreference-->
 <!--            app:key="@string/PREFERENCE_FILTER_FRICTION_COEFFICIENT"-->
 <!--            app:persistent="false"-->
 <!--            app:title="@string/pref_title_friction_coefficient"-->
 <!--            app:defaultValue="0.0"-->
 <!--            app:iconSpaceReserved="false"-->
 <!--            app:useSimpleSummaryProvider="true" />-->
-        <EditTextPreference
-            app:key="@string/PREFERENCE_FILTER_EFFICIENCY"
-            app:persistent="false"
-            app:title="@string/pref_title_efficiency"
-            app:defaultValue="1.0"
-            app:iconSpaceReserved="false"
-            app:useSimpleSummaryProvider="true" />
         <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_DEVICE_SETTINGS"
+            app:persistent="false"
+            app:title="@string/pref_title_device"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+        <Preference
+            android:id="@+id/preference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_PROJECTILE_EDIT"
             app:persistent="false"
             app:title="@string/pref_title_projectile_edit"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
-        <Preference
-            app:iconSpaceReserved="false"
-            app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
-            app:persistent="false"
-            app:summary="spring selected"
-            app:title="@string/pref_title_spring_edit"
-            app:defaultValue=""
-            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:title="Sensors">
+        app:title="Calibrations">
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"

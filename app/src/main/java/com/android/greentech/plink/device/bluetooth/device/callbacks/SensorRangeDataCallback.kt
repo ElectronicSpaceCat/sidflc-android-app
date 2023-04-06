@@ -19,34 +19,20 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
-import no.nordicsemi.android.ble.callback.DataSentCallback
 import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
 import no.nordicsemi.android.ble.data.Data
 
-abstract class SensorConfigDataCallback : ProfileDataCallback, DataSentCallback, SensorConfigCallback {
+abstract class SensorRangeDataCallback : ProfileDataCallback, SensorRangeCallback {
     override fun onDataReceived(device: BluetoothDevice, data: Data) {
-        parse(device, data)
-    }
-
-    override fun onDataSent(device: BluetoothDevice, data: Data) {
-        parse(device, data)
-    }
-
-    private fun parse(device: BluetoothDevice, data: Data) {
-        if (data.size() != 8) {
+        if (data.size() != 2) {
             onInvalidDataReceived(device, data)
             return
         }
-
-        onSensorConfigChanged(
+        onRangeDataChanged(
             device,
-            data.getIntValue(Data.FORMAT_UINT8, 0)!!,
-            data.getIntValue(Data.FORMAT_UINT8, 1)!!,
-            data.getIntValue(Data.FORMAT_UINT8, 2)!!,
-            data.getIntValue(Data.FORMAT_SINT32_LE, 3)!!,
-            data.getIntValue(Data.FORMAT_UINT8, 7)!!)
+            data.getIntValue(Data.FORMAT_UINT16_LE, 0)!!)
     }
 }

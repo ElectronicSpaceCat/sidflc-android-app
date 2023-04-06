@@ -19,16 +19,16 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
 
-interface SensorResetCallback {
+interface SensorRangeEnableCallback {
     /**
      * Called when the data has been sent to the connected device.
      *
      * @param device the target device.
-     * @param command
+     * @param enable true when LED was enabled, false when disabled.
      */
-    fun onResetChanged(device: BluetoothDevice, command: Int)
+    fun onSampleEnableChanged(device: BluetoothDevice, enable: Boolean)
 }

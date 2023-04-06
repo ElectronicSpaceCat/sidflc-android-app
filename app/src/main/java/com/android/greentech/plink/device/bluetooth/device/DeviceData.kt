@@ -1,19 +1,14 @@
-package com.android.greentech.plink.device.bluetooth.sensor
+package com.android.greentech.plink.device.bluetooth.device
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import java.util.*
 
 /**
  * The data in the class must reference the
  * data from the nRF firmware.
  */
-class SensorData {
+class DeviceData {
     // From device
     private val _sensor = MutableLiveData(Sensor(Sensor.Id.NA, Sensor.Type.NA))
     private val _range = MutableLiveData(0xFFFF)

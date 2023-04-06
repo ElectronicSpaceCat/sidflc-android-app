@@ -19,20 +19,16 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
 
-interface SensorConfigCallback {
+interface SensorRangeCallback {
     /**
-     * Called when the data has been sent to the connected device.
+     * Called when a button was pressed or released on device.
      *
-     * @param device target device
-     * @param trgt configuration target
-     * @param cmd configuration command
-     * @param id configuration id
-     * @param value configuration value
-     * @param status configuration status
+     * @param device the target device.
+     * @param range the range data from the ToF sensor.
      */
-    fun onSensorConfigChanged(device: BluetoothDevice, trgt : Int, cmd : Int, id: Int, value: Int, status: Int)
+    fun onRangeDataChanged(device: BluetoothDevice, range: Int)
 }

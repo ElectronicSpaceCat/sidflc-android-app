@@ -19,16 +19,28 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
+import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
+import no.nordicsemi.android.ble.callback.DataSentCallback
+import no.nordicsemi.android.ble.data.Data
 
-interface SensorSampleEnableCallback {
-    /**
-     * Called when the data has been sent to the connected device.
-     *
-     * @param device the target device.
-     * @param enable true when LED was enabled, false when disabled.
-     */
-    fun onSampleEnableChanged(device: BluetoothDevice, enable: Boolean)
+abstract class ResetDataCmdCallback : ProfileDataCallback, DataSentCallback,
+    ResetCmdCallback {
+    override fun onDataReceived(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    override fun onDataSent(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    private fun parse(device: BluetoothDevice, data: Data) {
+        if (data.size() != 1) {
+            onInvalidDataReceived(device, data)
+            return
+        }
+        onResetChanged(device, data.getIntValue(Data.FORMAT_UINT8, 0)!!)
+    }
 }

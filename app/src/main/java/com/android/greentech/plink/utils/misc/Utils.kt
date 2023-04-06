@@ -221,10 +221,24 @@ object Utils {
      * @param valueStr
      * @return value - Numerical value, if invalid, 0.0 will be returned.
      */
-    fun convertStrToDouble(valueStr: String?) : Double{
+    fun convertStrToDouble(valueStr: String?) : Double {
         var retVal = valueStr?.toDoubleOrNull()
         if(null == retVal){
             retVal = 0.0
+        }
+        return retVal
+    }
+
+    /**
+     * Covert string to float
+     *
+     * @param valueStr
+     * @return value - Numerical value, if invalid, 0.0 will be returned.
+     */
+    fun convertStrToFloat(valueStr: String?) : Float {
+        var retVal = valueStr?.toFloatOrNull()
+        if(null == retVal){
+            retVal = 0.0f
         }
         return retVal
     }

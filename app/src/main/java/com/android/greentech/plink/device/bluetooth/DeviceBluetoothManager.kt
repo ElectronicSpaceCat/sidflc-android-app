@@ -21,13 +21,13 @@
  */
 package com.android.greentech.plink.device.bluetooth
 
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_SERVICE
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_RANGE_CHAR
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_SELECT_CHAR
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_CONFIG_CHAR
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_RESET_CHAR
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_STATUS_CHAR
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData.Companion.LBS_UUID_TOF_SAMPLE_ENABLE_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SERVICE
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RANGE_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SELECT_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_CONFIG_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RESET_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_STATUS_CHAR
+import com.android.greentech.plink.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SAMPLE_ENABLE_CHAR
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SERVICE
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SOURCE_CHAR
 import com.android.greentech.plink.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_DEVICE_INFORMATION_SERVICE
@@ -41,7 +41,7 @@ import no.nordicsemi.android.ble.livedata.ObservableBleManager
 import android.bluetooth.BluetoothGattCharacteristic
 import com.android.greentech.plink.device.bluetooth.deviceinfo.DeviceInfoData
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.LogContract
 import android.bluetooth.BluetoothDevice
@@ -61,7 +61,7 @@ import com.android.greentech.plink.device.bluetooth.dfu.DfuData.Companion.LBS_UU
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_BATT_LEVEL_CHAR
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_BATT_STATUS_CHAR
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.callbacks.PwrBatteryLevelDataCallback
-import com.android.greentech.plink.device.bluetooth.sensor.callbacks.*
+import com.android.greentech.plink.device.bluetooth.device.callbacks.*
 import com.android.greentech.plink.utils.misc.Utils
 import no.nordicsemi.android.ble.Request
 import no.nordicsemi.android.ble.data.Data
@@ -91,7 +91,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
 
     private val _deviceInfo = DeviceInfoData()
     private val _pwrMonitorData = PwrMonitorData()
-    private val _tofSensor = SensorData()
+    private val _tofSensor = DeviceData()
 
     private var _logSession: LogSession? = null
 
@@ -458,10 +458,10 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
                     Log.VERBOSE, "ToF: " + _tofSensor.sensor.toString() + " Status set to: " + status
                 )
 
-                val locStatus = if(status < SensorData.Status.values().size){
-                    SensorData.Status.values()[status]
+                val locStatus = if(status < DeviceData.Status.values().size){
+                    DeviceData.Status.values()[status]
                 } else{
-                    SensorData.Status.BOOTING
+                    DeviceData.Status.BOOTING
                 }
 
                 _tofSensor.setStatus(locStatus)
@@ -493,19 +493,19 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
                     Log.VERBOSE, "ToF: " + _tofSensor.sensor.toString() + " id: " + id + " " + "type: " + type
                 )
 
-                val locId = if(id < SensorData.Sensor.Id.values().size){
-                    SensorData.Sensor.Id.values()[id]
+                val locId = if(id < DeviceData.Sensor.Id.values().size){
+                    DeviceData.Sensor.Id.values()[id]
                 } else{
-                    SensorData.Sensor.Id.NA
+                    DeviceData.Sensor.Id.NA
                 }
 
-                val locType = if(type < SensorData.Sensor.Type.values().size){
-                    SensorData.Sensor.Type.values()[type]
+                val locType = if(type < DeviceData.Sensor.Type.values().size){
+                    DeviceData.Sensor.Type.values()[type]
                 } else{
-                    SensorData.Sensor.Type.NA
+                    DeviceData.Sensor.Type.NA
                 }
 
-                _tofSensor.setSensor(SensorData.Sensor(locId, locType))
+                _tofSensor.setSensor(DeviceData.Sensor(locId, locType))
             }
 
             override fun onInvalidDataReceived(device: BluetoothDevice, data: Data) {
@@ -514,29 +514,29 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             }
         }
 
-    private val sensorConfigCallback: SensorConfigDataCallback =
-        object : SensorConfigDataCallback() {
+    private val sensorConfigCallback: ConfigDataCmdCallback =
+        object : ConfigDataCmdCallback() {
             override fun onSensorConfigChanged(device: BluetoothDevice, trgt : Int, cmd : Int, id: Int, value: Int, status: Int) {
                 log(
                     Log.VERBOSE,"ToF: " + _tofSensor.sensor.toString() + "trgt" + trgt + "cmd" + cmd +" id: " + id + " status: " + status +" value: " + value
                 )
 
-                val configTrgt = if(trgt < SensorData.Config.Target.values().size){
-                    SensorData.Config.Target.values()[trgt]
+                val configTrgt = if(trgt < DeviceData.Config.Target.values().size){
+                    DeviceData.Config.Target.values()[trgt]
                 } else{
-                    SensorData.Config.Target.NA
+                    DeviceData.Config.Target.NA
                 }
 
-                val configCmd = if(cmd < SensorData.Config.Command.values().size){
-                    SensorData.Config.Command.values()[cmd]
+                val configCmd = if(cmd < DeviceData.Config.Command.values().size){
+                    DeviceData.Config.Command.values()[cmd]
                 } else{
-                    SensorData.Config.Command.NA
+                    DeviceData.Config.Command.NA
                 }
 
-                val configStatus = if(status < SensorData.Config.Status.values().size){
-                    SensorData.Config.Status.values()[status]
+                val configStatus = if(status < DeviceData.Config.Status.values().size){
+                    DeviceData.Config.Status.values()[status]
                 } else{
-                    SensorData.Config.Status.INVALID
+                    DeviceData.Config.Status.INVALID
                 }
 
                 _tofSensor.setConfig(configTrgt, configCmd, id, value, configStatus)
@@ -548,8 +548,8 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             }
         }
 
-    private val sensorSampleEnableCallback: SensorSampleEnableDataCallback =
-        object : SensorSampleEnableDataCallback() {
+    private val sensorSampleEnableCallback: SensorRangeEnableDataCallback =
+        object : SensorRangeEnableDataCallback() {
             override fun onSampleEnableChanged(device: BluetoothDevice, enable: Boolean) {
                 log(
                     Log.VERBOSE,"ToF: " + _tofSensor.sensor.toString() + " Enable set to: " + enable
@@ -563,8 +563,8 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             }
         }
 
-    private val sensorResetCallback: SensorResetDataCallback =
-        object : SensorResetDataCallback() {
+    private val sensorResetCallback: ResetDataCmdCallback =
+        object : ResetDataCmdCallback() {
             override fun onResetChanged(device: BluetoothDevice, command: Int) {
                 log(
                     Log.VERBOSE,"ToF: " + _tofSensor.sensor.toString() + " reset: " + command
@@ -717,7 +717,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      *
      * @param id of the sensor
      */
-    fun setSensor(id : SensorData.Sensor.Id) {
+    fun setSensor(id : DeviceData.Sensor.Id) {
         // Does characteristic exist?
         if (tofSelectCharacteristic == null) return
 
@@ -759,7 +759,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      * @param id for the sensor.
      * @param value for the sensor.
      */
-    fun setSensorConfigCommand(target: SensorData.Config.Target, command: SensorData.Config.Command, id: Int, value: Int) {
+    fun setSensorConfigCommand(target: DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
         // Does characteristic exist?
         if (tofConfigCharacteristic == null) return
 
@@ -781,7 +781,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             data,
             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).enqueue()
-        // NOTE: This was causing double calls when notify callback is set too
+        // NOTE: This was causing double calls when notify callback was set too
         //  ').with(sensorResetCallback).enqueue()'
     }
 
@@ -790,7 +790,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      *
      * @param option
      */
-    fun sensorReset(option: SensorData.ResetCommand) {
+    fun sensorReset(option: DeviceData.ResetCommand) {
         // Does characteristic exist?
         if (tofResetCharacteristic == null) return
 
@@ -833,7 +833,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
     /**
      * Get device sensor data
      */
-    val sensorData : SensorData
+    val deviceData : DeviceData
         get() = _tofSensor
 
     /**

@@ -19,16 +19,32 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
+import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
+import no.nordicsemi.android.ble.callback.DataSentCallback
+import no.nordicsemi.android.ble.data.Data
 
-interface SensorRangeCallback {
-    /**
-     * Called when a button was pressed or released on device.
-     *
-     * @param device the target device.
-     * @param range the range data from the ToF sensor.
-     */
-    fun onRangeDataChanged(device: BluetoothDevice, range: Int)
+abstract class SensorSelectDataCallback : ProfileDataCallback, DataSentCallback,
+    SensorSelectCallback {
+    override fun onDataReceived(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    override fun onDataSent(device: BluetoothDevice, data: Data) {
+        parse(device, data)
+    }
+
+    private fun parse(device: BluetoothDevice, data: Data) {
+        if (data.size() != 2) {
+            onInvalidDataReceived(device, data)
+            return
+        }
+
+        onSensorSelectChanged(
+            device,
+            data.getIntValue(Data.FORMAT_UINT8, 0)!!,
+            data.getIntValue(Data.FORMAT_UINT8, 1)!!)
+    }
 }

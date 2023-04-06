@@ -21,25 +21,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.android.greentech.plink.R
-import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceCalibrateBinding
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
+import com.android.greentech.plink.device.sensor.ISensorCalibrate
 import com.android.greentech.plink.device.sensor.ISensorCalibrate.State
+import com.android.greentech.plink.fragments.device.deviceCalibrate.DeviceCalibrateViewModel.CalSelect
 
 class DeviceCalibrateFragment : Fragment() {
     private var _fragmentDeviceCalibrateBinding: FragmentDeviceCalibrateBinding? = null
     private val fragmentDeviceCalibrateBinding get() = _fragmentDeviceCalibrateBinding!!
 
-    private var _prevSelectedSensor = DataShared.device.sensorSelected
-
-    private enum class CalSelect {
-        CAL_ALL,
-        CAL_SENSOR_SHORT,
-        CAL_SENSOR_LONG
-    }
-
-    private var _calSelect = CalSelect.CAL_ALL
+    private lateinit var viewModel: DeviceCalibrateViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _fragmentDeviceCalibrateBinding = FragmentDeviceCalibrateBinding.inflate(inflater, container, false)
@@ -49,75 +44,63 @@ class DeviceCalibrateFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel = ViewModelProvider(this)[DeviceCalibrateViewModel::class.java]
+
         fragmentDeviceCalibrateBinding.calibrationProgressBar.isIndeterminate = true
 
         /**
          * Observe sensorCarrierPosition calibration status
          */
-        DataShared.device.sensorCarriagePosition.calibrationStateOnChange.observe(viewLifecycleOwner) { state ->
+        ISensorCalibrate.calibrationState.observe(viewLifecycleOwner) { state ->
             when(state){
                 State.PREPARE -> {
-                    calPrepare()
+                    fragmentDeviceCalibrateBinding.deviceStartCalibration.visibility = View.GONE
+                    fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.GONE
+                    fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.GONE
+                    fragmentDeviceCalibrateBinding.deviceCalibrating.visibility = View.VISIBLE
+                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrating..."
+                    fragmentDeviceCalibrateBinding.calibrationStatus.visibility = View.VISIBLE
+                    fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.VISIBLE
+                    fragmentDeviceCalibrateBinding.calibrationInfo.visibility = View.VISIBLE
                 }
                 State.START -> {
-                    calStart()
+                    // Do nothing..
                 }
                 State.FINISHED -> {
-                    DataShared.device.sensorCarriagePosition.stopCalibration()
-                    DataShared.device.sensorCarriagePosition.storeConfigData()
-
-                    if(_calSelect == CalSelect.CAL_ALL) {
-                        DataShared.device.sensorDeviceHeight.startCalibration()
+                    viewModel.stopCalibration()
+                    if(CalSelect.CAL_ALL == viewModel.calSelected
+                        && DeviceData.Sensor.Id.LONG != viewModel.activeSensorId) {
+                        viewModel.startCalibration(CalSelect.CAL_SENSOR_LONG)
                     }
                     else{
-                        calFinished()
+                        fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrated"
+                        fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.VISIBLE
+                        fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.VISIBLE
+                        fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.INVISIBLE
+                        fragmentDeviceCalibrateBinding.calibrationInfo.visibility = View.GONE
                     }
                 }
                 State.ERROR -> {
-                    calError()
+                    viewModel.stopCalibration()
+                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibration Failed"
+                    fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.VISIBLE
+                    fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.VISIBLE
+                    fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.INVISIBLE
                 }
                 else -> {}
             }
         }
 
         /**
-         * Observe sensorDeviceHeight calibration status
+         * Observe calibration msg
          */
-        DataShared.device.sensorDeviceHeight.calibrationStateOnChange.observe(viewLifecycleOwner) { state ->
-            when(state){
-                State.PREPARE -> {
-                    calPrepare()
-                }
-                State.START -> {
-                    calStart()
-                }
-                State.FINISHED -> {
-                    DataShared.device.sensorDeviceHeight.stopCalibration()
-                    DataShared.device.sensorDeviceHeight.storeConfigData()
-
-                    calFinished()
-                }
-                State.ERROR -> {
-                    calError()
-                }
-                else -> {}
-            }
-        }
-
-        /**
-         * Observe sensorDeviceHeight calibration msg
-         */
-        DataShared.device.sensorDeviceHeight.calibrationStateMsgOnChange.observe(viewLifecycleOwner) { msg ->
+        ISensorCalibrate.calibrationStateMsg.observe(viewLifecycleOwner) { msg ->
             fragmentDeviceCalibrateBinding.calibrationInfo.text = msg
         }
 
         /**
-         * Observe sensorCarrierPosition calibration msg
+         * Setup a long-click listener to open the option for individual sensor calibrations (engineer mode)
          */
-        DataShared.device.sensorCarriagePosition.calibrationStateMsgOnChange.observe(viewLifecycleOwner) { msg ->
-            fragmentDeviceCalibrateBinding.calibrationInfo.text = msg
-        }
-
         fragmentDeviceCalibrateBinding.imageView.setOnLongClickListener {
             if(fragmentDeviceCalibrateBinding.calBtnAll.visibility == View.GONE){
                 fragmentDeviceCalibrateBinding.calBtnAll.visibility = View.VISIBLE
@@ -133,77 +116,39 @@ class DeviceCalibrateFragment : Fragment() {
             true
         }
 
-        // Set up button onClickListeners
+        /**
+         * Set up button onClickListeners
+         */
         fragmentDeviceCalibrateBinding.calBtnAll.setOnClickListener { onCalAllClicked() }
         fragmentDeviceCalibrateBinding.calBtnSensor1.setOnClickListener { onCalSensor1Clicked() }
         fragmentDeviceCalibrateBinding.calBtnSensor2.setOnClickListener { onCalSensor2Clicked() }
         fragmentDeviceCalibrateBinding.calBtnRestart.setOnClickListener { onRestartClicked() }
         fragmentDeviceCalibrateBinding.calBtnOk.setOnClickListener { onOkClicked() }
 
+
+        /**
+         * Set view visibilities
+         */
         fragmentDeviceCalibrateBinding.deviceStartCalibration.visibility = View.VISIBLE
         fragmentDeviceCalibrateBinding.deviceCalibrating.visibility = View.GONE
     }
 
-    private fun calPrepare() {
-        fragmentDeviceCalibrateBinding.deviceStartCalibration.visibility = View.GONE
-        fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.GONE
-        fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.GONE
-
-        fragmentDeviceCalibrateBinding.deviceCalibrating.visibility = View.VISIBLE
-
-        fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrating..."
-        fragmentDeviceCalibrateBinding.calibrationStatus.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calibrationInfo.visibility = View.VISIBLE
-    }
-
-    private fun calStart() {
-        // Not implemented
-    }
-
-    private fun calFinished() {
-        fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrated"
-        fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.INVISIBLE
-        fragmentDeviceCalibrateBinding.calibrationInfo.visibility = View.GONE
-    }
-
-    private fun calError() {
-        DataShared.device.sensorCarriagePosition.stopCalibration()
-        DataShared.device.sensorDeviceHeight.stopCalibration()
-
-        fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibration Failed"
-        fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.VISIBLE
-        fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.INVISIBLE
-    }
-
     private fun onCalAllClicked() {
-        _calSelect = CalSelect.CAL_ALL
-        DataShared.device.sensorCarriagePosition.startCalibration()
+        viewModel.startCalibration(CalSelect.CAL_ALL)
     }
 
+    // Currently hidden
     private fun onCalSensor1Clicked() {
-        _calSelect = CalSelect.CAL_SENSOR_SHORT
-        DataShared.device.sensorCarriagePosition.startCalibration()
+        viewModel.startCalibration(CalSelect.CAL_SENSOR_SHORT)
     }
 
+    // Currently hidden
     private fun onCalSensor2Clicked() {
-        _calSelect = CalSelect.CAL_SENSOR_LONG
-        DataShared.device.sensorDeviceHeight.startCalibration()
+        viewModel.startCalibration(CalSelect.CAL_SENSOR_LONG)
     }
 
     private fun onRestartClicked() {
-        when(_calSelect){
-            CalSelect.CAL_SENSOR_SHORT,
-            CalSelect.CAL_ALL -> {
-                DataShared.device.sensorCarriagePosition.startCalibration()
-            }
-            CalSelect.CAL_SENSOR_LONG -> {
-                DataShared.device.sensorDeviceHeight.startCalibration()
-            }
-        }
+        viewModel.startCalibration()
     }
 
     private fun onOkClicked() {
@@ -211,19 +156,12 @@ class DeviceCalibrateFragment : Fragment() {
     }
 
     override fun onResume() {
-        DataShared.device.setSensorEnable(false)
+        viewModel.onResume()
         super.onResume()
     }
 
     override fun onDestroyView() {
-        // Selected the sensor that was active before entering the Calibration screen
-        DataShared.device.setSensor(_prevSelectedSensor.value!!.id)
-
-        // Ensure we stop any running cals on destroy
-        DataShared.device.sensorCarriagePosition.stopCalibration()
-        DataShared.device.sensorDeviceHeight.stopCalibration()
-
-        DataShared.device.setSensorEnable(false)
+        viewModel.onDestroy()
 
         // Null the viewBinding
         _fragmentDeviceCalibrateBinding = null

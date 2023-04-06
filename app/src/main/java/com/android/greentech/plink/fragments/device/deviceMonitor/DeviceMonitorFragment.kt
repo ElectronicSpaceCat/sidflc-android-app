@@ -19,7 +19,10 @@ import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceMonitorBinding
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.greentech.plink.utils.misc.Utils
+import kotlinx.coroutines.*
+import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
+import no.nordicsemi.android.ble.observer.ConnectionObserver
 
 class DeviceMonitorFragment : Fragment() {
     private var _fragmentDeviceMonitorBinding: FragmentDeviceMonitorBinding? = null
@@ -86,14 +89,14 @@ class DeviceMonitorFragment : Fragment() {
         /** Attempt to connect device if bluetooth is enabled and device is advertising */
         autoConnectDeviceIfMatch(requireContext())
 
-//        /**
-//         * Observe the device bond status
-//         */
-//        DataShared.device.bondingState.observe(viewLifecycleOwner) { bond ->
-//            if(bond.state != BondState.State.NOT_BONDED) {
-//                Toast.makeText(context, "Device: ".plus(bond.state.name), Toast.LENGTH_LONG).show()
-//            }
-//        }
+        /**
+         * Observe the device bond status
+         */
+        DataShared.device.bondingState.observe(viewLifecycleOwner) { bond ->
+            if(bond.state != BondState.State.NOT_BONDED) {
+                Toast.makeText(context, "Device: ".plus(bond.state.name), Toast.LENGTH_LONG).show()
+            }
+        }
 
         /**
          * Observe the device connections state
@@ -105,6 +108,22 @@ class DeviceMonitorFragment : Fragment() {
 //                ConnectionState.State.READY -> {
 //                    if(navController.currentDestination?.id != R.id.homeFragment && navController.currentDestination?.id != R.id.deviceScannerFragment) {
 //                        Toast.makeText(context, "Device: Connected", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//                ConnectionState.State.CONNECTING -> {
+//                    CoroutineScope(Dispatchers.IO).launch {
+//                        withTimeout(7000){
+//                            repeat(5){
+//                                if(DataShared.device.connectionState.value!!.state == ConnectionState.State.CONNECTING){
+//                                    delay(1000)
+//                                }
+//                                else{
+//                                    return@withTimeout
+//                                }
+//                            }
+//
+//                            DataShared.device.disconnect()
+//                        }
 //                    }
 //                }
                 ConnectionState.State.DISCONNECTED -> {

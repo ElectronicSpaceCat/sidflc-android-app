@@ -34,7 +34,7 @@ import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentCameraOverlayBinding
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.device.projectile.utils.ProjectilePrefUtils
 import com.android.greentech.plink.fragments.dialogs.InputDialogFragment
 import com.android.greentech.plink.fragments.dialogs.ProjectileSelectDialogFragment
@@ -483,7 +483,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     if (DataShared.device.connectionState.value?.isReady!!
                         && btnDeviceHeight.acquisitionMode == BallisticsButton.Mode.AUTO
                     ) {
-                        DataShared.device.setSensor(SensorData.Sensor.Id.LONG)
+                        DataShared.device.setSensor(DeviceData.Sensor.Id.LONG)
                         DataShared.device.setSensorEnable(true)
                     }
                 }
@@ -497,7 +497,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 DataType.NONE -> {
                     fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
                     if (DataShared.device.connectionState.value?.isReady!!) {
-                        DataShared.device.setSensor(SensorData.Sensor.Id.SHORT)
+                        DataShared.device.setSensor(DeviceData.Sensor.Id.SHORT)
                         DataShared.device.setSensorEnable(true)
                     }
                 }
@@ -579,7 +579,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          */
         DataShared.device.sensorCarriagePosition.rangeFiltered.observe(viewLifecycleOwner) {
             if (viewModel.dataToGet == DataType.NONE
-                // This prevents updating the value when navigating off screen and back and no sensor connected
+                // Only update the value when sensor is ready
                 && DataShared.device.connectionState.value!!.isReady
             ) {
                 DataShared.carriagePosition.setValue(Unit.MM, it.roundToInt().toDouble())

@@ -25,7 +25,7 @@ import android.annotation.SuppressLint
 import android.os.ParcelUuid
 import androidx.lifecycle.LiveData
 import com.android.greentech.plink.device.bluetooth.dfu.DfuData
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 import java.util.*
 
@@ -138,7 +138,7 @@ class DevicesLiveData(
     }
 
     companion object {
-        private val FILTER_UUID = ParcelUuid(SensorData.LBS_UUID_TOF_SERVICE)
+        private val FILTER_UUID = ParcelUuid(DeviceData.LBS_UUID_TOF_SERVICE)
         private val FILTER_UUID_DFU = ParcelUuid(DfuData.LBS_UUID_DFU_SERVICE)
 
         private const val FILTER_RSSI = -50 // [dBm]

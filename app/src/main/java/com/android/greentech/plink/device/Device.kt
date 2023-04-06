@@ -10,16 +10,26 @@ import androidx.preference.PreferenceManager
 import com.android.greentech.plink.R
 import com.android.greentech.plink.device.bluetooth.DeviceBluetoothManager
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.device.model.Model
 import com.android.greentech.plink.device.model.ModelData
 import com.android.greentech.plink.device.sensor.Sensor
 import com.android.greentech.plink.device.springs.Spring
+import kotlinx.coroutines.*
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.log.Logger
+import java.lang.Float.intBitsToFloat
 
 class Device(context: Context) {
+    // External data configurations
+    enum class EXTDATA{
+        FORCE_OFFSET,
+        EFFICIENCY,
+        FRICTION_COEFFICIENT,
+        SPRING_ID
+    }
+
     /**
      * TODO: - Need a clean way of updating spring, projectile, and model when they change.
      *       - I would like the spring, projectile, and model to be stored in a local database
@@ -41,15 +51,18 @@ class Device(context: Context) {
 
     private val _prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    /** Device Sensor array */
-    val sensors = arrayOf(
-        Sensor(context, _bleDeviceManager, SensorData.Sensor.Id.SHORT),
-        Sensor(context, _bleDeviceManager, SensorData.Sensor.Id.LONG)
-    )
+    private var _configIdx = 0
+    private var _isInitialized = false
 
-    /** Provide sensor accessors by name */
-    val sensorCarriagePosition = sensors[SensorData.Sensor.Id.SHORT.ordinal]
-    val sensorDeviceHeight = sensors[SensorData.Sensor.Id.LONG.ordinal]
+    /** Device sensors */
+    val sensorCarriagePosition = Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.SHORT)
+    val sensorDeviceHeight = Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.LONG)
+
+    /** Active sensor (default to carriage position sensor) */
+    var activeSensor : Sensor = sensorCarriagePosition
+
+    val isInitialized : Boolean
+        get() = _isInitialized
 
     /**
      * Get model as liveData
@@ -67,7 +80,7 @@ class Device(context: Context) {
             _model.value = value
 
             // Set the calibration offset reference for the carrier position sensor
-            sensors[SensorData.Sensor.Id.SHORT.ordinal].offsetRef = model.getMaxCarriagePosition().toInt()
+            activeSensor.offsetRef = model.getMaxCarriagePosition().toInt()
 
             // Store the model to prefs if new
             val idModel = _prefs.getString(model_pref_tag, Model.Name.V23.name)!!
@@ -129,17 +142,17 @@ class Device(context: Context) {
     val batteryLevel: LiveData<Int>
         get() = _bleDeviceManager.powerMonitor.batteryLevel
 
-    /** Device sensor information */
-    val sensorSelected: LiveData<SensorData.Sensor>
-        get() = _bleDeviceManager.sensorData.sensor
-    val sensorStatus: LiveData<SensorData.Status>
-        get() = _bleDeviceManager.sensorData.status
+    /** Device data information */
+    val sensorSelected: LiveData<DeviceData.Sensor>
+        get() = _bleDeviceManager.deviceData.sensor
+    val sensorStatus: LiveData<DeviceData.Status>
+        get() = _bleDeviceManager.deviceData.status
     val sensorRangeRaw: LiveData<Int>
-        get() = _bleDeviceManager.sensorData.range
-    val sensorConfig: LiveData<SensorData.Config>
-        get() = _bleDeviceManager.sensorData.config
+        get() = _bleDeviceManager.deviceData.range
+    val sensorConfig: LiveData<DeviceData.Config>
+        get() = _bleDeviceManager.deviceData.config
     val sensorEnabled: LiveData<Boolean>
-        get() = _bleDeviceManager.sensorData.enable
+        get() = _bleDeviceManager.deviceData.enable
 
     /**
      * Enable battery level notifications
@@ -149,24 +162,11 @@ class Device(context: Context) {
     }
 
     /**
-     * Get the active sensor
-     *
-     * @return SensorData.Sensor.Id or null
-     */
-    fun getActiveSensor() : Sensor? {
-        return if(sensorSelected.value!!.id.ordinal < SensorData.Sensor.Id.NUM_IDS.ordinal){
-            sensors[sensorSelected.value!!.id.ordinal]
-        } else{
-            null
-        }
-    }
-
-    /**
      * Request selected sensor
      *
      * @param id
      */
-    fun setSensor(id: SensorData.Sensor.Id) {
+    fun setSensor(id: DeviceData.Sensor.Id) {
         _bleDeviceManager.setSensor(id)
     }
 
@@ -187,7 +187,7 @@ class Device(context: Context) {
      * @param id
      * @param value
      */
-    fun sendConfigCommand(target : SensorData.Config.Target, command: SensorData.Config.Command, id: Int, value: Int) {
+    fun sendConfigCommand(target : DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
         _bleDeviceManager.setSensorConfigCommand(target, command, id, value)
     }
 
@@ -196,7 +196,7 @@ class Device(context: Context) {
      * WARNING! this will disconnect the bluetooth connection!
      */
     fun resetDevice() {
-        _bleDeviceManager.sensorReset(SensorData.ResetCommand.RESET_DEVICE)
+        _bleDeviceManager.sensorReset(DeviceData.ResetCommand.RESET_DEVICE)
     }
 
     /**
@@ -222,6 +222,7 @@ class Device(context: Context) {
 
     /**
      * Connect to the given peripheral
+     * (Primarily used for the backup bond-less bootloader)
      *
      * @param target the target device
      */
@@ -232,12 +233,16 @@ class Device(context: Context) {
             val logSession = Logger.newSession(context, null, target.address, target.name)
             _bleDeviceManager.setLogger(logSession)
         }
-        reconnect()
+
+        _bleDeviceManager.connect(_bleDevice!!)
+            .retry(3, 100)
+            .useAutoConnect(false)
+            .enqueue()
     }
 
     /**
      * Connect to the given peripheral
-     * (Primarily for use by the auto-bonding)
+     * (Primarily used for auto-bonding)
      *
      * @param target the target device
      */
@@ -248,34 +253,10 @@ class Device(context: Context) {
             val logSession = Logger.newSession(context, null, target.address, target.name)
             _bleDeviceManager.setLogger(logSession)
         }
-        autoConnect()
-    }
 
-    /**
-     * Reconnects to previously connected device
-     * If this device was not supported, its services were cleared on disconnection, so
-     * reconnection may help
-     */
-    private fun autoConnect() {
-        if (_bleDevice != null) {
-            _bleDeviceManager.connect(_bleDevice!!)
-                .useAutoConnect(true)
-                .enqueue()
-        }
-    }
-
-    /**
-     * Reconnects to previously connected device
-     * If this device was not supported, its services were cleared on disconnection, so
-     * reconnection may help
-     */
-    private fun reconnect() {
-        if (_bleDevice != null) {
-            _bleDeviceManager.connect(_bleDevice!!)
-                .retry(3, 100)
-                .useAutoConnect(false)
-                .enqueue()
-        }
+        _bleDeviceManager.connect(_bleDevice!!)
+            .useAutoConnect(true)
+            .enqueue()
     }
 
     /**
@@ -285,6 +266,24 @@ class Device(context: Context) {
         _bleDevice = null
         if (_bleDeviceManager.isConnected || _bleDeviceManager.isReady) {
             _bleDeviceManager.disconnect().enqueue()
+        }
+    }
+
+    private fun getConfigs(config : Int){
+        // Is sensor configs initialized?
+        if(!_isInitialized){
+            // Yes - Is config index within range?
+            if(_configIdx < EXTDATA.values().lastIndex){
+                // Yes - Is the config the same as the one we requested?
+                if(_configIdx == config){
+                    // Yes - Send for the next one
+                    sendConfigCommand(DeviceData.Config.Target.EXT_STORE, DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
+                }
+            }
+            // No - Finished..
+            else{
+                _isInitialized = true
+            }
         }
     }
 
@@ -306,7 +305,7 @@ class Device(context: Context) {
         this.model = _model.value!!
 
         // Set the ballistics manager
-        _ballistics = DeviceBallistics(context, this.model)
+        _ballistics = DeviceBallistics(this.model)
 
         /**
          * Observe the device model data and set the model if not the same
@@ -326,6 +325,81 @@ class Device(context: Context) {
             if (modelData != null) {
                 this.model = modelData
             }
+        }
+
+        /**
+         * Observe the device connection state
+         */
+        connectionState.observe(context as LifecycleOwner) {
+            when(it.state){
+                ConnectionState.State.DISCONNECTED -> {
+                    _isInitialized = false
+                    _configIdx = 0
+                }
+                else -> {}
+            }
+        }
+
+        /**
+         * Observe the selected sensor to update the activeSensor
+         */
+        sensorSelected.observe(context as LifecycleOwner) {
+            when(it.id){
+                DeviceData.Sensor.Id.SHORT,
+                DeviceData.Sensor.Id.LONG-> {
+                    // Switch sensor to selected
+                    activeSensor = if(it.id == DeviceData.Sensor.Id.SHORT) {
+                        sensorCarriagePosition
+                    } else{
+                        sensorDeviceHeight
+                    }
+                }
+                else -> {
+                    // Do nothing..
+                }
+            }
+        }
+
+        /**
+         * Observe the sensor status. When ready,
+         * get all device specific stored data.
+         */
+        sensorStatus.observe(context as LifecycleOwner) {
+            when (it) {
+                DeviceData.Status.READY -> {
+                    if(_isInitialized) return@observe
+                    // Send command to get a stored configuration which will trigger getting the rest
+                    sendConfigCommand(DeviceData.Config.Target.EXT_STORE, DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+                }
+                else -> {}
+            }
+        }
+
+        /** Observe the configuration data for external storage data */
+        sensorConfig.observe(context as LifecycleOwner) {
+            if(it.trgt != DeviceData.Config.Target.EXT_STORE) return@observe
+
+            when (it.status) {
+                DeviceData.Config.Status.OK,
+                DeviceData.Config.Status.UPDATED,
+                DeviceData.Config.Status.MISMATCH -> {
+                    when(it.id){
+                        EXTDATA.FORCE_OFFSET.ordinal -> {
+                            _ballistics.forceOffset = intBitsToFloat(it.value).toDouble()
+                        }
+                        EXTDATA.EFFICIENCY.ordinal -> {
+                            _ballistics.efficiency = intBitsToFloat(it.value).toDouble()
+                        }
+                        EXTDATA.FRICTION_COEFFICIENT.ordinal -> {
+                            _ballistics.frictionCoefficient = intBitsToFloat(it.value).toDouble()
+                        }
+                    }
+                }
+                else -> {}
+            }
+
+            // Run config init
+            getConfigs(it.id)
         }
     }
 

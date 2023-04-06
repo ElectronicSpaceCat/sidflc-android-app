@@ -86,16 +86,21 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
             if(versionDataNew.size == versionDataCurrent.size) {
                 // Do a simple check if major, minor, or revision parts are greater than the current
                 for (idx in 0..versionDataNew.lastIndex) {
-                    val newInt = versionDataNew[idx].toInt()
+                    val newInt = versionDataNew[idx].toIntOrNull()
                     val currentInt = versionDataCurrent[idx].toInt()
-                    // Set flag if any part of current version is less than the latest
+
+                    if (newInt == null) {
+                        updateStatus = UpdateStatus.ERROR
+                        return@launch
+                    }
+
                     if(newInt > currentInt){
                         updateStatus = UpdateStatus.UPDATE_AVAILABLE
                         return@launch
                     }
                 }
 
-                updateStatus = UpdateStatus.UPDATE_ON_LATEST
+                updateStatus = UpdateStatus.ON_LATEST_FIRMWARE
             }
             else{
                 return@launch
@@ -104,13 +109,20 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun downloadFirmware(context: Context) {
-        updateStatus = UpdateStatus.UPDATE_DOWNLOADING
+        updateStatus = UpdateStatus.DOWNLOADING
         // Download the latest firmware
-        Utils.download(
-            context.getString(R.string.fw_file_download), mFilePath) { progress, length ->
-            // Update the progress bar when downloading
-            _downloadProgress.postValue(((progress / length) * 100).toInt())
+        try {
+            Utils.download(
+                context.getString(R.string.fw_file_download), mFilePath) { progress, length ->
+                // Update the progress bar when downloading
+                _downloadProgress.postValue(((progress / length) * 100).toInt())
+            }
         }
+        catch (e : Exception) {
+            updateStatus = UpdateStatus.ERROR
+            return
+        }
+
     }
 
     private fun updateFirmware(context: Context) {
@@ -147,12 +159,13 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
 
     companion object{
         enum class UpdateStatus {
-            UPDATE_NO_NETWORK,
-            UPDATED_CHECKING_FIRMWARE,
-            UPDATE_ON_LATEST,
+            NO_NETWORK,
+            CHECKING_FIRMWARE,
+            ON_LATEST_FIRMWARE,
             UPDATE_AVAILABLE,
-            UPDATE_DOWNLOADING,
+            DOWNLOADING,
             UPDATING,
+            ERROR,
             NA
         }
     }

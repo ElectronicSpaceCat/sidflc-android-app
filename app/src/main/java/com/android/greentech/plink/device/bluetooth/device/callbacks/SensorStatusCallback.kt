@@ -19,24 +19,16 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
-import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
-import no.nordicsemi.android.ble.data.Data
 
-abstract class SensorStatusDataCallback : ProfileDataCallback, SensorStatusCallback {
-    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-        parse(device, data)
-    }
-
-    private fun parse(device: BluetoothDevice, data: Data) {
-        if (data.size() != 1) {
-            onInvalidDataReceived(device, data)
-            return
-        }
-        onSensorStatusChanged(
-            device,
-            data.getIntValue(Data.FORMAT_UINT8, 0)!!)
-    }
+interface SensorStatusCallback {
+    /**
+     * Called when the data has been sent to the connected device.
+     *
+     * @param device the target device.
+     * @param status of the range sensor.
+     */
+    fun onSensorStatusChanged(device: BluetoothDevice, status: Int)
 }

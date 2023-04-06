@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.greentech.plink.R
 import com.android.greentech.plink.databinding.ItemConfigBinding
 import com.android.greentech.plink.device.Device
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.fragments.device.deviceTuner.DeviceTunerFragment
 import com.android.greentech.plink.fragments.dialogs.InputDialogFragment
 
@@ -24,24 +24,20 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
 
         // Invalidate last config data to prevent the sensor config observer
         // from acting on the last value.
-        _device.sensors.forEach {
-            it.invalidateLastConfigData()
-        }
+        _device.activeSensor.invalidateLastConfigData()
 
         /**
          * Observer selected sensor to update the sensor configurations in the list
          */
-        _device.sensorSelected.observe(activity.viewLifecycleOwner) { sensor ->
-            if(sensor.id.ordinal < _device.sensors.size){
-                // Clear out existing configurations
-                clearConfigs()
-                // Notify the adapter of change to the list to update it
-                notifyConfigChange()
-                // Add the configurations to adapter list and set status as Requested,
-                // even though it is not an actual request call to the device
-                _device.sensors[sensor.id.ordinal].configs.forEach {
-                    addConfig(it.name, it.value, SensorData.Config.Status.NA.name)
-                }
+        _device.sensorSelected.observe(activity.viewLifecycleOwner) {
+            // Clear out existing configurations
+            clearConfigs()
+            // Notify the adapter of change to the list to update it
+            notifyConfigChange()
+            // Add the configurations to adapter list and set status as Requested,
+            // even though it is not an actual request call to the device
+            _device.activeSensor.configs.forEach {
+                addConfig(it.name, it.value, DeviceData.Config.Status.NA.name)
             }
         }
 
@@ -120,14 +116,11 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
      * Get the configuration
      */
     private fun getConfig(position: Int) {
-        val sensor = _device.getActiveSensor()
-        if(sensor != null){
-            _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.GET, position, Int.MAX_VALUE)
+        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.GET, position, Int.MAX_VALUE)
 
-            // Set the sensor status to NA
-            if(position < _configs.size) {
-                configModify(position, _configs[position].value, SensorData.Config.Status.NA.name)
-            }
+        // Set the sensor status to NA
+        if(position < _configs.size) {
+            configModify(position, _configs[position].value, DeviceData.Config.Status.NA.name)
         }
     }
 
@@ -137,14 +130,11 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
      * value from the sensor.
      */
     private fun resetConfig(position: Int) {
-        val sensor = _device.getActiveSensor()
-        if(sensor != null){
-            _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.RESET, position, Int.MAX_VALUE)
+        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.RESET, position, Int.MAX_VALUE)
 
-            // Set the sensor status to NA
-            if(position < _configs.size) {
-                configModify(position, _configs[position].value, SensorData.Config.Status.NA.name)
-            }
+        // Set the sensor status to NA
+        if(position < _configs.size) {
+            configModify(position, _configs[position].value, DeviceData.Config.Status.NA.name)
         }
     }
 
@@ -152,10 +142,10 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
         val listener : InputDialogFragment.InputDialogListener = object : InputDialogFragment.InputDialogListener{
                 override fun onDialogPositiveClick(value: Number) {
                     // Send configuration command
-                    _device.sendConfigCommand(SensorData.Config.Target.SENSOR, SensorData.Config.Command.SET, position, value.toInt())
+                    _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.SET, position, value.toInt())
                     // Set the sensor status to NA
                     if(position < _configs.size) {
-                        configModify(position, _configs[position].value, SensorData.Config.Status.NA.name)
+                        configModify(position, _configs[position].value, DeviceData.Config.Status.NA.name)
                     }
                 }
                 override fun onDialogNegativeClick(value: Number) {

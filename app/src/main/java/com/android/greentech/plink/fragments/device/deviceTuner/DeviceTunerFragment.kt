@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceTunerBinding
-import com.android.greentech.plink.device.bluetooth.sensor.SensorData
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.fragments.device.deviceTuner.configAdapter.ConfigAdapter
 import com.android.greentech.plink.fragments.dialogs.InputDialogFragment
 import com.android.greentech.plink.utils.plotter.DataPoint
@@ -42,16 +42,14 @@ class DeviceTunerFragment : Fragment() {
         var yIncrement : Int = 0
     }
 
-    private val _plotDataShortRange = PlotData()
-    private val _plotDataLongRange = PlotData()
+    private val _plotterData = arrayOf(PlotData(), PlotData())
+    private var _activePlotterData : PlotData = _plotterData[0]
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        setDefaultPlotValues(SensorData.Sensor.Id.SHORT)
-        setDefaultPlotValues(SensorData.Sensor.Id.LONG)
 
         _fragmentDeviceTunerBinding = FragmentDeviceTunerBinding.inflate(inflater, container, false)
         return fragmentDeviceTunerBinding.root
@@ -92,39 +90,34 @@ class DeviceTunerFragment : Fragment() {
          */
         DataShared.device.sensorSelected.observe(viewLifecycleOwner) {
             when(DataShared.device.sensorSelected.value!!.id) {
-                SensorData.Sensor.Id.SHORT -> {
-                    fragmentDeviceTunerBinding.refData.text = _plotDataShortRange.ref.toString()
-                    fragmentDeviceTunerBinding.incrementsValue.text = _plotDataShortRange.yIncrement.toString()
-                    fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.sensorCarriagePosition.sampleSize.toString()
-                    _cumStdDeviation.reset()
-
+                DeviceData.Sensor.Id.SHORT -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = true
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = false
-
-                    fragmentDeviceTunerBinding.sensorType.text = DataShared.device.sensorCarriagePosition.type.name
-
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.VISIBLE
                 }
-                SensorData.Sensor.Id.LONG -> {
-                    fragmentDeviceTunerBinding.refData.text = _plotDataLongRange.ref.toString()
-                    fragmentDeviceTunerBinding.incrementsValue.text = _plotDataLongRange.yIncrement.toString()
-                    fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.sensorDeviceHeight.sampleSize.toString()
-                    _cumStdDeviation.reset()
-
+                DeviceData.Sensor.Id.LONG -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = false
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = true
-
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.GONE
-
-                    fragmentDeviceTunerBinding.sensorType.text = DataShared.device.sensorDeviceHeight.type.name
                 }
                 else -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = false
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = false
-
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.GONE
                 }
             }
+
+            fragmentDeviceTunerBinding.refData.text = _activePlotterData.ref.toString()
+            fragmentDeviceTunerBinding.incrementsValue.text = _activePlotterData.yIncrement.toString()
+            fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.activeSensor.sampleSize.toString()
+            fragmentDeviceTunerBinding.sensorType.text = DataShared.device.activeSensor.type.name
+            // Reset standard deviation
+            _cumStdDeviation.reset()
+            // Trigger a sensor load config
+            DataShared.device.activeSensor.loadConfigs()
+            // Set the active plotter data to match active sensor
+            _activePlotterData = _plotterData[it.id.ordinal]
+
             updatePlot()
         }
 
@@ -132,9 +125,11 @@ class DeviceTunerFragment : Fragment() {
          * Handler for the short range sensor selector
          */
         fragmentDeviceTunerBinding.btnSensor1.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked && !DataShared.device.sensorCarriagePosition.isActive){
+            if(isChecked &&
+                DataShared.device.sensorSelected.value!!.id != DeviceData.Sensor.Id.SHORT){
+
                 fragmentDeviceTunerBinding.btnSensor2.isChecked = false
-                DataShared.device.sensorCarriagePosition.select()
+                DataShared.device.setSensor(DeviceData.Sensor.Id.SHORT)
             }
         }
 
@@ -142,9 +137,11 @@ class DeviceTunerFragment : Fragment() {
          * Handler for the long range sensor selector
          */
         fragmentDeviceTunerBinding.btnSensor2.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked && !DataShared.device.sensorDeviceHeight.isActive){
+            if(isChecked &&
+                DataShared.device.sensorSelected.value!!.id != DeviceData.Sensor.Id.LONG){
+
                 fragmentDeviceTunerBinding.btnSensor1.isChecked = false
-                DataShared.device.sensorDeviceHeight.select()
+                DataShared.device.setSensor(DeviceData.Sensor.Id.LONG)
             }
         }
 
@@ -189,30 +186,16 @@ class DeviceTunerFragment : Fragment() {
         DataShared.device.sensorRangeRaw.observe(viewLifecycleOwner) { value ->
             // Update the raw value
             fragmentDeviceTunerBinding.rawData.text = value.toString()
-
-            fragmentDeviceTunerBinding.sdData.text =
-                String.format(Locale.getDefault(), "%.1f", _cumStdDeviation.sd(value.toDouble()))
+            // Update the standard deviation
+            fragmentDeviceTunerBinding.sdData.text = String.format(Locale.getDefault(), "%.1f", _cumStdDeviation.sd(value.toDouble()))
 
             // Update the filtered value
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _arrayDequeue.add(DataShared.device.sensorCarriagePosition.rangeFiltered.value!!)
-                    fragmentDeviceTunerBinding.filteredData.text = String.format(
-                        Locale.getDefault(),
-                        "%.1f",
-                        DataShared.device.sensorCarriagePosition.rangeFiltered.value!!)
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _arrayDequeue.add(DataShared.device.sensorDeviceHeight.rangeFiltered.value!!)
-                    fragmentDeviceTunerBinding.filteredData.text = String.format(
-                        Locale.getDefault(),
-                        "%.1f",
-                        DataShared.device.sensorDeviceHeight.rangeFiltered.value!!)
-                }
-                else -> {
+            _arrayDequeue.add(DataShared.device.activeSensor.rangeFiltered.value!!)
+            fragmentDeviceTunerBinding.filteredData.text = String.format(
+                Locale.getDefault(),
+                "%.1f",
+                DataShared.device.activeSensor.rangeFiltered.value!!)
 
-                }
-            }
             // Update the plotter
             if(_arrayDequeue.count() >= _queueSize){
                 val data = (0 until _queueSize).map {
@@ -229,28 +212,16 @@ class DeviceTunerFragment : Fragment() {
          * Handler for the plotter auto-scale enable button
          */
         fragmentDeviceTunerBinding.btnAutoScale.setOnClickListener {
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _plotDataShortRange.yMax = (DataShared.device.sensorCarriagePosition.rangeFiltered.value!! + _plotDataShortRange.yIncrement * 2).roundToInt()
-                    _plotDataShortRange.yMin = (DataShared.device.sensorCarriagePosition.rangeFiltered.value!! - _plotDataShortRange.yIncrement * 2).roundToInt()
-                    updatePlot()
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _plotDataLongRange.yMax = (DataShared.device.sensorDeviceHeight.rangeFiltered.value!! + _plotDataLongRange.yIncrement * 2).roundToInt()
-                    _plotDataLongRange.yMin = (DataShared.device.sensorDeviceHeight.rangeFiltered.value!! - _plotDataLongRange.yIncrement * 2).roundToInt()
-                    updatePlot()
-                }
-                else -> {
-
-                }
-            }
+            _activePlotterData.yMax = (DataShared.device.activeSensor.rangeFiltered.value!! + _activePlotterData.yIncrement * 2).roundToInt()
+            _activePlotterData.yMin = (DataShared.device.activeSensor.rangeFiltered.value!! - _activePlotterData.yIncrement * 2).roundToInt()
+            updatePlot()
         }
 
         /**
          * Handler for the plotter reset button
          */
         fragmentDeviceTunerBinding.btnPlotReset.setOnClickListener {
-            setDefaultPlotValues(DataShared.device.sensorSelected.value!!.id)
+            setDefaultPlotterData(DataShared.device.sensorSelected.value!!.id)
             updatePlot()
         }
 
@@ -265,30 +236,24 @@ class DeviceTunerFragment : Fragment() {
          * Handler for the reset sensor default button
          */
         fragmentDeviceTunerBinding.btnResetSensorDefault.setOnClickListener {
-            if(DataShared.device.sensorSelected.value!!.id.ordinal < DataShared.device.sensors.size){
-                DataShared.device.sensors[DataShared.device.sensorSelected.value!!.id.ordinal].reset()
-                clearPlot()
-            }
+            DataShared.device.activeSensor.reset()
+            clearPlot()
         }
 
         /**
          * Handler for the reset sensor factory button
          */
         fragmentDeviceTunerBinding.btnResetSensorFactory.setOnClickListener {
-            if(DataShared.device.sensorSelected.value!!.id.ordinal < DataShared.device.sensors.size){
-                DataShared.device.sensors[DataShared.device.sensorSelected.value!!.id.ordinal].resetFactory()
-                clearPlot()
-            }
+            DataShared.device.activeSensor.resetFactory()
+            clearPlot()
         }
 
         /**
          * Handler for the store configs button
          */
         fragmentDeviceTunerBinding.btnStoreConfigs.setOnClickListener {
-            if(DataShared.device.sensorSelected.value!!.id.ordinal < DataShared.device.sensors.size){
-                DataShared.device.sensors[DataShared.device.sensorSelected.value!!.id.ordinal].storeConfigData()
-                Toast.makeText(context, "Data stored", Toast.LENGTH_SHORT).show()
-            }
+            DataShared.device.activeSensor.storeConfigData()
+            Toast.makeText(context, "Data stored", Toast.LENGTH_SHORT).show()
         }
 
         /**
@@ -301,17 +266,7 @@ class DeviceTunerFragment : Fragment() {
         fragmentDeviceTunerBinding.btnEditIncrements.setOnClickListener {
             val listener : InputDialogFragment.InputDialogListener = object : InputDialogFragment.InputDialogListener{
                 override fun onDialogPositiveClick(value: Number) {
-                    when(DataShared.device.sensorSelected.value!!.id) {
-                        DataShared.device.sensorCarriagePosition.id -> {
-                            _plotDataShortRange.yIncrement = value.toInt()
-                        }
-                        DataShared.device.sensorDeviceHeight.id -> {
-                            _plotDataLongRange.yIncrement = value.toInt()
-                        }
-                        else -> {
-
-                        }
-                    }
+                    _activePlotterData.yIncrement = value.toInt()
                     fragmentDeviceTunerBinding.graphViewBox.yIncrement = value.toInt()
                     fragmentDeviceTunerBinding.incrementsValue.text = value.toInt().toString()
                     updatePlot()
@@ -332,17 +287,7 @@ class DeviceTunerFragment : Fragment() {
         fragmentDeviceTunerBinding.btnEditRef.setOnClickListener {
             val listener : InputDialogFragment.InputDialogListener = object : InputDialogFragment.InputDialogListener{
                 override fun onDialogPositiveClick(value: Number) {
-                    when(DataShared.device.sensorSelected.value!!.id) {
-                        DataShared.device.sensorCarriagePosition.id -> {
-                            _plotDataShortRange.ref = value.toInt()
-                        }
-                        DataShared.device.sensorDeviceHeight.id -> {
-                            _plotDataLongRange.ref = value.toInt()
-                        }
-                        else -> {
-
-                        }
-                    }
+                    _activePlotterData.ref = value.toInt()
                     fragmentDeviceTunerBinding.graphViewBox.ref = value.toInt()
                     fragmentDeviceTunerBinding.refData.text = value.toInt().toString()
                     updatePlot()
@@ -365,37 +310,18 @@ class DeviceTunerFragment : Fragment() {
                 override fun onDialogPositiveClick(value: Number) {
                     // Prevent zero as a sample size
                     val size = Integer.max(1, value.toInt())
-                    when(DataShared.device.sensorSelected.value!!.id) {
-                        DataShared.device.sensorCarriagePosition.id -> {
-                            DataShared.device.sensorCarriagePosition.setFilterSampleSize(size)
-                            fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.sensorCarriagePosition.sampleSize.toString()
-                        }
-                        DataShared.device.sensorDeviceHeight.id -> {
-                            DataShared.device.sensorDeviceHeight.setFilterSampleSize(size)
-                            fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.sensorDeviceHeight.sampleSize.toString()
-                        }
-                        else -> {
-
-                        }
-                    }
+                    // Update sample size
+                    DataShared.device.activeSensor.setFilterSampleSize(size)
+                    fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.activeSensor.sampleSize.toString()
                 }
                 override fun onDialogNegativeClick(value: Number) {
                     // Do nothing..
                 }
             }
 
-            val currentSampleSize = when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    DataShared.device.sensorCarriagePosition.sampleSize
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    DataShared.device.sensorDeviceHeight.sampleSize
-                }
-                else -> {
-                    0
-                }
-            }
+            val currentSampleSize = DataShared.device.activeSensor.sampleSize
 
+            // Prompt user input dialog to enter the sample size value
             InputDialogFragment(
                 "Set Sample Size",
                 InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL,
@@ -411,21 +337,9 @@ class DeviceTunerFragment : Fragment() {
                     // Cap the value to MAX_BUFF_SIZE if higher
                     _queueSize = Integer.min(value.toInt(), MAX_BUFF_SIZE)
                     _arrayDequeue.clear()
-                    _plotDataShortRange.xMax = _queueSize
-                    _plotDataLongRange.xMax = _queueSize
+                    _activePlotterData.xMax = _queueSize
                     fragmentDeviceTunerBinding.queueSizeValue.text = _queueSize.toString()
-
-                    when(DataShared.device.sensorSelected.value!!.id) {
-                        DataShared.device.sensorCarriagePosition.id -> {
-                            setPlotterBounds(_plotDataShortRange)
-                        }
-                        DataShared.device.sensorDeviceHeight.id -> {
-                            setPlotterBounds(_plotDataLongRange)
-                        }
-                        else -> {
-
-                        }
-                    }
+                    setPlotterBounds(_activePlotterData)
                 }
                 override fun onDialogNegativeClick(value: Number) {
                     // Do nothing..
@@ -444,117 +358,67 @@ class DeviceTunerFragment : Fragment() {
          * Increases the y upper bound of the graph by 1 increment
          */
         fragmentDeviceTunerBinding.ymaxInc.setOnClickListener {
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _plotDataShortRange.yMax += _plotDataShortRange.yIncrement
-                    setPlotterBounds(_plotDataShortRange)
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _plotDataLongRange.yMax += _plotDataLongRange.yIncrement
-                    setPlotterBounds(_plotDataLongRange)
-                }
-                else -> {
-
-                }
-            }
+            _activePlotterData.yMax += _activePlotterData.yIncrement
+            setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Decreases the y upper bound of the graph by 1 increment
          */
         fragmentDeviceTunerBinding.ymaxDec.setOnClickListener {
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _plotDataShortRange.yMax -= _plotDataShortRange.yIncrement
-                    setPlotterBounds(_plotDataShortRange)
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _plotDataLongRange.yMax -= _plotDataLongRange.yIncrement
-                    setPlotterBounds(_plotDataLongRange)
-                }
-                else -> {
-
-                }
-            }
+            _activePlotterData.yMax -= _activePlotterData.yIncrement
+            setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Increases the y lower bound of the graph by 1 increment
          */
         fragmentDeviceTunerBinding.yminInc.setOnClickListener {
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _plotDataShortRange.yMin += _plotDataShortRange.yIncrement
-                    setPlotterBounds(_plotDataShortRange)
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _plotDataLongRange.yMin += _plotDataLongRange.yIncrement
-                    setPlotterBounds(_plotDataLongRange)
-                }
-                else -> {
-
-                }
-            }
+            _activePlotterData.yMin += _activePlotterData.yIncrement
+            setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Decreases the y lower bound of the graph by 1 increment
          */
         fragmentDeviceTunerBinding.yminDec.setOnClickListener {
-            when(DataShared.device.sensorSelected.value!!.id) {
-                DataShared.device.sensorCarriagePosition.id -> {
-                    _plotDataShortRange.yMin -= _plotDataShortRange.yIncrement
-                    setPlotterBounds(_plotDataShortRange)
-                }
-                DataShared.device.sensorDeviceHeight.id -> {
-                    _plotDataLongRange.yMin -= _plotDataLongRange.yIncrement
-                    setPlotterBounds(_plotDataLongRange)
-                }
-                else -> {
-
-                }
-            }
+            _activePlotterData.yMin -= _activePlotterData.yIncrement
+            setPlotterBounds(_activePlotterData)
         }
     }
 
-    private fun setDefaultPlotValues(id : SensorData.Sensor.Id) {
-        when(id) {
-            SensorData.Sensor.Id.SHORT -> {
-                _plotDataShortRange.ref = DataShared.device.model.getMaxCarriagePosition().toInt()
-                _plotDataShortRange.xMin = 0
-                _plotDataShortRange.xMax = _queueSize
-                _plotDataShortRange.yMin = 0
-                _plotDataShortRange.yMax = _plotDataShortRange.ref + 10
-                _plotDataShortRange.xOffset = 70f
-                _plotDataShortRange.xIncrement = 10
-                _plotDataShortRange.yIncrement = 10
+    private fun setDefaultPlotterData(id : DeviceData.Sensor.Id) {
+        when(val idIdx = id.ordinal) {
+            DeviceData.Sensor.Id.SHORT.ordinal -> {
+                _plotterData[idIdx].ref = DataShared.device.model.getMaxCarriagePosition().toInt()
+                _plotterData[idIdx].xMin = 0
+                _plotterData[idIdx].xMax = _queueSize
+                _plotterData[idIdx].yMin = 0
+                _plotterData[idIdx].yMax = _activePlotterData.ref + 10
+                _plotterData[idIdx].xOffset = 70f
+                _plotterData[idIdx].xIncrement = 10
+                _plotterData[idIdx].yIncrement = 10
+
+                _activePlotterData = _plotterData[idIdx]
             }
-            SensorData.Sensor.Id.LONG -> {
-                _plotDataLongRange.ref = 0
-                _plotDataLongRange.xMin = 0
-                _plotDataLongRange.xMax = _queueSize
-                _plotDataLongRange.yMin = 0
-                _plotDataLongRange.yMax = 4000
-                _plotDataLongRange.xOffset = 70f
-                _plotDataLongRange.xIncrement = 10
-                _plotDataLongRange.yIncrement = 500
+            DeviceData.Sensor.Id.LONG.ordinal -> {
+                _plotterData[idIdx].ref = 0
+                _plotterData[idIdx].xMin = 0
+                _plotterData[idIdx].xMax = _queueSize
+                _plotterData[idIdx].yMin = 0
+                _plotterData[idIdx].yMax = 4000
+                _plotterData[idIdx].xOffset = 70f
+                _plotterData[idIdx].xIncrement = 10
+                _plotterData[idIdx].yIncrement = 500
+
+                _activePlotterData = _plotterData[idIdx]
             }
             else -> {}
         }
     }
 
     private fun updatePlot(){
-        when(DataShared.device.sensorSelected.value!!.id) {
-            DataShared.device.sensorCarriagePosition.id -> {
-                setPlotterBounds(_plotDataShortRange)
-            }
-            DataShared.device.sensorDeviceHeight.id -> {
-                setPlotterBounds(_plotDataLongRange)
-            }
-            else -> {
-
-            }
-        }
+        setPlotterBounds(_activePlotterData)
     }
 
     private fun setPlotterBounds(data : PlotData) {
@@ -571,6 +435,7 @@ class DeviceTunerFragment : Fragment() {
         fragmentDeviceTunerBinding.graphViewBox.yOffset = data.yOffset
         fragmentDeviceTunerBinding.graphViewBox.ref = data.ref
         fragmentDeviceTunerBinding.graphViewBox.draw()
+
         // Plotter
         fragmentDeviceTunerBinding.graphViewPlotter.setDataBounds(
             data.xMin,
@@ -612,5 +477,12 @@ class DeviceTunerFragment : Fragment() {
 
     companion object{
         const val MAX_BUFF_SIZE = 100
+    }
+
+    init {
+        // Initialize the plotter data
+        DeviceData.Sensor.Id.values().forEach {
+            setDefaultPlotterData(it)
+        }
     }
 }

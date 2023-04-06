@@ -19,28 +19,16 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.android.greentech.plink.device.bluetooth.sensor.callbacks
+package com.android.greentech.plink.device.bluetooth.device.callbacks
 
 import android.bluetooth.BluetoothDevice
-import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback
-import no.nordicsemi.android.ble.callback.DataSentCallback
-import no.nordicsemi.android.ble.data.Data
 
-abstract class SensorResetDataCallback : ProfileDataCallback, DataSentCallback,
-    SensorResetCallback {
-    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-        parse(device, data)
-    }
-
-    override fun onDataSent(device: BluetoothDevice, data: Data) {
-        parse(device, data)
-    }
-
-    private fun parse(device: BluetoothDevice, data: Data) {
-        if (data.size() != 1) {
-            onInvalidDataReceived(device, data)
-            return
-        }
-        onResetChanged(device, data.getIntValue(Data.FORMAT_UINT8, 0)!!)
-    }
+interface ResetCmdCallback {
+    /**
+     * Called when the data has been sent to the connected device.
+     *
+     * @param device the target device.
+     * @param command
+     */
+    fun onResetChanged(device: BluetoothDevice, command: Int)
 }

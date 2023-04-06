@@ -84,7 +84,7 @@ class DeviceDfuFragment : Fragment() {
                     if (viewModel.networkStatus.value!!) {
                         viewModel.checkFirmwareVersion(requireContext())
                     } else {
-                        viewModel.updateStatus = UpdateStatus.UPDATE_NO_NETWORK
+                        viewModel.updateStatus = UpdateStatus.NO_NETWORK
                     }
                 }
                 catch (e : Exception){
@@ -127,17 +127,17 @@ class DeviceDfuFragment : Fragment() {
          */
         viewModel.updateStatusLive.observe(viewLifecycleOwner) { status ->
             when(status!!){
-                UpdateStatus.UPDATE_NO_NETWORK -> {
+                UpdateStatus.NO_NETWORK -> {
                     fragmentDfuBinding.dfuProgress.text = "Internet connection required\nto check for updates."
                     fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
                     fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }
-                UpdateStatus.UPDATED_CHECKING_FIRMWARE -> {
+                UpdateStatus.CHECKING_FIRMWARE -> {
                     fragmentDfuBinding.dfuProgress.text = "Checking firmware version"
                     fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
                     fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }
-                UpdateStatus.UPDATE_ON_LATEST -> {
+                UpdateStatus.ON_LATEST_FIRMWARE -> {
                     fragmentDfuBinding.dfuProgress.text = "Firmware is on latest"
                     fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
                     fragmentDfuBinding.dfuButton.text = "Check"
@@ -152,7 +152,7 @@ class DeviceDfuFragment : Fragment() {
                     // Check if location permissions granted if update available
                     //checkLocationPermissionStatus()
                 }
-                UpdateStatus.UPDATE_DOWNLOADING -> {
+                UpdateStatus.DOWNLOADING -> {
                     fragmentDfuBinding.dfuProgress.text = "Downloading firmware…"
                     fragmentDfuBinding.dfuProgressBar.progress = 0
                     fragmentDfuBinding.dfuProgressBar.isIndeterminate = false
@@ -161,6 +161,11 @@ class DeviceDfuFragment : Fragment() {
                 }
                 UpdateStatus.UPDATING -> {
                     fragmentDfuBinding.dfuProgressBar.visibility = View.VISIBLE
+                }
+                UpdateStatus.ERROR -> {
+                    fragmentDfuBinding.dfuProgress.text = "Version error"
+                    fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
+                    fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }
                 UpdateStatus.NA -> {
                     // Do nothing..
@@ -194,7 +199,7 @@ class DeviceDfuFragment : Fragment() {
             UpdateStatus.UPDATE_AVAILABLE -> {
                 viewModel.startFirmwareUpdate(requireContext())
             }
-            UpdateStatus.UPDATE_ON_LATEST,
+            UpdateStatus.ON_LATEST_FIRMWARE,
             UpdateStatus.NA, -> {
                 viewModel.checkFirmwareVersion(requireContext())
             }
