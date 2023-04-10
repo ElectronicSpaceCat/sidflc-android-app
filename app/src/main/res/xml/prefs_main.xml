@@ -18,21 +18,14 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:title="Ballistics">
+        app:title="@string/header_ballistics">
         <EditTextPreference
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_LENS_OFFSET"
             app:persistent="false"
             app:title="@string/pref_title_lens_offset"
-            app:defaultValue="0.0"
-            app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
-        <!--        <EditTextPreference-->
-<!--            app:key="@string/PREFERENCE_FILTER_FRICTION_COEFFICIENT"-->
-<!--            app:persistent="false"-->
-<!--            app:title="@string/pref_title_friction_coefficient"-->
-<!--            app:defaultValue="0.0"-->
-<!--            app:iconSpaceReserved="false"-->
-<!--            app:useSimpleSummaryProvider="true" />-->
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_DEVICE_SETTINGS"
@@ -54,7 +47,7 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:title="Calibrations">
+        app:title="@string/header_calibrations">
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"
@@ -70,17 +63,5 @@
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
     </PreferenceCategory>
-
-<!--    <PreferenceCategory-->
-<!--        app:iconSpaceReserved="false"-->
-<!--        app:title="Advanced">-->
-<!--        <Preference-->
-<!--            app:iconSpaceReserved="false"-->
-<!--            app:key="@string/PREFERENCE_FILTER_DEVICE_CONFIGURATION"-->
-<!--            app:persistent="true"-->
-<!--            app:title="@string/pref_title_advanced"-->
-<!--            app:useSimpleSummaryProvider="true"-->
-<!--            app:widgetLayout="@layout/widget_open_window" />-->
-<!--    </PreferenceCategory>-->
 
 </PreferenceScreen>

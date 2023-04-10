@@ -115,6 +115,7 @@
     <string name="header_height">Height</string>
     <string name="header_device">Device</string>
     <string name="header_ballistics">Ballistics</string>
+    <string name="header_calibrations">Calibrations</string>
 
     <!-- Preferences -->
     <string name="pref_title_edit_units">Units</string>

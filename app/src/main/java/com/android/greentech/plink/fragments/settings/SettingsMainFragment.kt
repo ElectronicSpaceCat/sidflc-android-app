@@ -19,20 +19,19 @@ package com.android.greentech.plink.fragments.settings
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.navigation.Navigation
 import androidx.preference.*
-import com.android.greentech.plink.dataShared.DataShared
-import com.android.greentech.plink.device.springs.Spring
-import com.android.greentech.plink.fragments.dialogs.SpringSelectDialogFragment
-import com.android.greentech.plink.utils.textFilters.TextInputFilter
-import com.android.greentech.plink.utils.misc.Utils
 import com.android.greentech.plink.R
-import java.util.*
+import com.android.greentech.plink.dataShared.DataShared
+import com.android.greentech.plink.utils.misc.Utils
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsMainFragment : PreferenceFragmentCompat() {
+
     // These preferences require special handling
     private lateinit var editUnits: Preference
     private lateinit var lensOffset: EditTextPreference
