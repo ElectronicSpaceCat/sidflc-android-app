@@ -223,33 +223,33 @@ class DeviceDfuFragment : Fragment() {
             }
 
             override fun onDfuAborted(deviceAddress: String) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_aborted)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_aborted)
             }
 
             override fun onDeviceDisconnecting(deviceAddress: String?) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_disconnecting)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_disconnecting)
             }
 
             override fun onDeviceConnected(deviceAddress: String) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_connecting)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_connecting)
             }
 
             override fun onEnablingDfuMode(deviceAddress: String) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_switching_to_dfu)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_switching_to_dfu)
             }
 
             override fun onDfuProcessStarting(deviceAddress: String) {
                 fragmentDfuBinding.dfuProgressBar.progress = 0
                 fragmentDfuBinding.dfuProgressBar.isIndeterminate = false
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_starting)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_starting)
             }
 
             override fun onFirmwareValidating(deviceAddress: String) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_validating)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_validating)
             }
 
             override fun onProgressChanged(deviceAddress: String, percent: Int, speed: Float, avgSpeed: Float, currentPart: Int, partsTotal: Int) {
-                fragmentDfuBinding.dfuProgress.setText(R.string.dfu_status_uploading)
+                fragmentDfuBinding.dfuProgress.setText(no.nordicsemi.android.dfu.R.string.dfu_status_uploading)
                 fragmentDfuBinding.dfuProgressBar.progress = percent
             }
 

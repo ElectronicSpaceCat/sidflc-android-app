@@ -12,6 +12,7 @@ object Model {
         getName(Name.V23) to ModelData(
             getName(Name.V23),
             Spring.Name.MC9287K33,
+            95.0,
             46.0,
             37.65,
             48.0,
@@ -27,6 +28,7 @@ object Model {
         getName(Name.V24) to ModelData(
             getName(Name.V24),
             Spring.Name.MC9287K33,
+            95.0,
             46.0,
             34.5,
             45.0,

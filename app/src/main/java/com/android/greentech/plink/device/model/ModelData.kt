@@ -5,27 +5,28 @@ import com.android.greentech.plink.device.springs.Spring
 import com.android.greentech.plink.device.springs.SpringData
 import com.android.greentech.plink.utils.calculators.CalcMisc
 import com.android.greentech.plink.utils.calculators.CalcTrig
-import no.nordicsemi.android.ble.common.profile.csc.CyclingSpeedAndCadenceCallback
 import kotlin.math.*
 
 /**
  * @param name Model name
  * @param defaultSpringName Default spring that comes with the model
- * @param studCenterToStudCenter Distance from left spring stud center to right spring stud center
- * @param sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud
- * @param sensorToCarriageBackFace Distance from face of sensor to carriage back face
- * @param carriageSpringGripAngle Angle of the spring grip
- * @param carriageBackFaceToSpringPoint Distance from the back face of the carriage to the point where the springs meet
- * @param carriageBackFaceToCarriageSlotPoint Distance from the back face of the carriage to back point of the carriage pocket
- * @param carriageWeight Weight of the carriage in grams
- * @param springStudRadius
- * @param springSupportRadius
- * @param springSupportAngleFromHorizontal
- * @param studCenterToSpringSupportCenter
+ * @param caseBodyLength Length of the case (mm)
+ * @param studCenterToStudCenter Distance from left spring stud center to right spring stud center (mm)
+ * @param sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud (mm)
+ * @param sensorToCarriageBackFace Distance from face of sensor to carriage back face (mm)
+ * @param carriageSpringGripAngle Angle of the spring grip (deg)
+ * @param carriageBackFaceToSpringPoint Distance from the back face of the carriage to the point where the springs meet (mm)
+ * @param carriageBackFaceToCarriageSlotPoint Distance from the back face of the carriage to back point of the carriage pocket (mm)
+ * @param carriageWeight Weight of the carriage (g)
+ * @param springStudRadius Radius of the stud that the spring sits on (mm)
+ * @param springSupportRadius Radius of the spring support that holds against the lower spring leg (mm)
+ * @param springSupportAngleFromHorizontal Angle of the imaginary line between the spring stud center to the spring support center (deg)
+ * @param studCenterToSpringSupportCenter Distance of the imaginary line between the spring stud center to the spring support center(mm)
  */
  class ModelData(
     name: String,
     defaultSpringName: Spring.Name,
+    caseBodyLength: Double,
     studCenterToStudCenter: Double,
     sensorToStudCenter: Double,
     sensorToCarriageBackFace: Double,
@@ -43,13 +44,14 @@ import kotlin.math.*
      */
     private val _name = name
     private val _defaultSpringName = defaultSpringName
-    private val _studCenterToStudCenter = studCenterToStudCenter // mm
-    private val _sensorToStudCenter = sensorToStudCenter // mm
-    private val _sensorToCarriageBackFace = sensorToCarriageBackFace // mm
-    private val _carriageSpringGripAngle = carriageSpringGripAngle // deg
-    private val _carriageBackFaceToSpringPoint = carriageBackFaceToSpringPoint // mm
-    private val _carriageBackFaceToCarriageSlotPoint = carriageBackFaceToCarriageSlotPoint // mm
-    private val _carriageWeight = carriageWeight // g
+    private val _caseBodyLength = caseBodyLength
+    private val _studCenterToStudCenter = studCenterToStudCenter
+    private val _sensorToStudCenter = sensorToStudCenter
+    private val _sensorToCarriageBackFace = sensorToCarriageBackFace
+    private val _carriageSpringGripAngle = carriageSpringGripAngle
+    private val _carriageBackFaceToSpringPoint = carriageBackFaceToSpringPoint
+    private val _carriageBackFaceToCarriageSlotPoint = carriageBackFaceToCarriageSlotPoint
+    private val _carriageWeight = carriageWeight
     private val _springStudRadius = springStudRadius
     private val _springSupportRadius = springSupportRadius
     private val _springSupportAngleFromHorizontal = springSupportAngleFromHorizontal
@@ -94,6 +96,9 @@ import kotlin.math.*
      */
     private class TableData(var position: Double = 0.0, var potentialEnergy: Double = 0.0)
     private var _lookUpTable: ArrayList<TableData> = arrayListOf()
+
+    val caseBodyLength : Double
+        get() = _caseBodyLength
 
     val unloadedSpringAngle : Double
         get() = _unloadedSpringAngle

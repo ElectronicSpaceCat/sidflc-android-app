@@ -69,7 +69,7 @@ class DeviceBallistics(model: ModelData) {
      * @param launchAngle (deg) Pitch of the device
      * @param launchHeight (m) Launch height of the device
      * @param targetDistance (m) Distance of the target to hit
-     * @param lensOffset (mm) Distance of the lens to the face of the long range sensor
+     * @param lensOffset (mm) Distance from the front of case to the center of the mobile's main camera lens
      *
      * @return impactDistance (m)
      */
@@ -90,7 +90,7 @@ class DeviceBallistics(model: ModelData) {
         // and then adjusted by the launch angle where the vertex starts at the device height.
         /*
                                /|
-             Projectile --> ()/-|--- <---- Height offset
+             Projectile -->  ()-|--- <---- Height offset
                              /  |
                         ____/)__|__-____________________
                              ^.__ Device Angle      ^.__ Device height
@@ -101,7 +101,7 @@ class DeviceBallistics(model: ModelData) {
 
         // Get the adjusted target distance which is the calculated target distance plus the distance behind the lens
         // at which the projectile will be launched.
-        val offset = (lensOffset - _model.getProjectileCenterOfMassPosition(_model.getMaxCarriagePosition()))
+        val offset = ((_model.caseBodyLength + lensOffset) - _model.getProjectileCenterOfMassPosition(_model.getMaxCarriagePosition()))
         // Only adjust targetDistance if the offset is greater than the offset of the projectiles center of mass location
         _adjustedTargetDistance = if(offset > 0.0){
             // Convert the offset from mm to m
