@@ -52,21 +52,21 @@ class DeviceModelFragment : Fragment() {
          * Get the scale factor to get a close representation of
          * the the carriage position in relation to the physical model.
          */
-        // Width of the actual drawable (height could also be used)
-        val drawableWidthStr = parseXmlForWidthValue(MODEL_DRAWABLE, MODEL_DRAWABLE_WIDTH_XML_ATTR)
-        val drawableWidthMm = Utils.convertStrToDouble(drawableWidthStr).toFloat()
+        // Width of the actual drawable
+        val drawableWidthMmStr = parseXmlForWidthValue(MODEL_DRAWABLE, MODEL_DRAWABLE_WIDTH_XML_ATTR)
+        val drawableWidthMm = Utils.convertStrToDouble(drawableWidthMmStr).toFloat()
 
         // Width in Dp of container that holds the model drawable
-        //val widthDp = requireContext().resources.getDimension(R.dimen.device_model_width)
-        val widthStr = parseXmlForWidthValue(MODEL_LAYOUT, MODEL_LAYOUT_WIDTH_XML_ATTR)
-        val widthDp = Utils.convertStrToDouble(widthStr).toFloat()
+        val widthDpStr = parseXmlForWidthValue(MODEL_LAYOUT, MODEL_LAYOUT_WIDTH_XML_ATTR)
+        val widthDp = Utils.convertStrToDouble(widthDpStr).toFloat()
+
         // Convert to px
         val widthPx = ConvertDispUnits.dpToPx(requireContext(), widthDp)
 
         // Width in mm of container that holds the model drawable
-        val widthMM = ConvertDispUnits.pxToMm(requireContext(), widthPx)
-        // Scaling factor
-        val scale = (widthMM / drawableWidthMm)
+        val widthMm = ConvertDispUnits.pxToMm(requireContext(), widthPx)
+        // Scaling factor obtained by getting the ratio of the drawable container size to the drawable size
+        val scale = (widthMm / drawableWidthMm)
 
         /**
          * Observe the carriage position for updating graphics
@@ -128,11 +128,10 @@ class DeviceModelFragment : Fragment() {
             when (event) {
                 XmlPullParser.START_TAG -> {
                     // Get the value from the attribute
-                    // Note: "http://schemas.android.com/apk/res/android" needs to be used in place of "android" in the xml
                     str = parser.getAttributeValue("http://schemas.android.com/apk/res/android", attr)
                     if (str != null && str.length > 1 && str[0] == '@') {
                         val id: Int = str.substring(1).toInt()
-                        str = getString(id).removeSuffix("dip")
+                        str = getString(id).removeSuffix("dp")
                     }
                     break
                 }

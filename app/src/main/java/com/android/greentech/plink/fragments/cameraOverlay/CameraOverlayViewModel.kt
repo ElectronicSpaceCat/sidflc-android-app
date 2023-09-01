@@ -136,7 +136,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
             // Convert to common unit
             val deviceHeight = DataShared.deviceHeight.getConverted(Unit.M)
             val lensOffset = DataShared.lensOffset.getConverted(Unit.M)
-            val caseBodyLength = ConvertLength.convert(Unit.M, Unit.MM, DataShared.device.model.caseBodyLength)
+            val caseBodyLength = ConvertLength.convert(Unit.MM, Unit.M, DataShared.device.model.caseBodyLength)
             // Get total lens height which is offset by the phone's pitch
             val lensHeight = (deviceHeight + CalcTrig.getSideAGivenSideCAngleA(caseBodyLength + lensOffset, pitch))
             // Calculate target distance
@@ -148,7 +148,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         // Convert to common unit
         val deviceHeight = DataShared.deviceHeight.getConverted(Unit.M)
         val lensOffset = DataShared.lensOffset.getConverted(Unit.M)
-        val caseBodyLength = ConvertLength.convert(Unit.M, Unit.MM, DataShared.device.model.caseBodyLength)
+        val caseBodyLength = ConvertLength.convert(Unit.MM, Unit.M, DataShared.device.model.caseBodyLength)
         // Get total lens height
         val lensHeight = (deviceHeight + CalcTrig.getSideAGivenSideCAngleA(caseBodyLength + lensOffset, pitch))
         // Calculate target angle
