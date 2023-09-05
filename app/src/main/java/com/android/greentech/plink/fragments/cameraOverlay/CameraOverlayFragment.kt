@@ -413,15 +413,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         viewModel.isEngViewActiveOnChange.observe(viewLifecycleOwner) {
             if (it) {
                 fragmentCameraOverlayBinding.engineerView.visibility = View.VISIBLE
-                fragmentCameraOverlayBinding.efficiency.visibility = View.VISIBLE
-                fragmentCameraOverlayBinding.efficiencyValue.text = String.format(
-                    Locale.getDefault(),
-                    "%.3f",
-                    DataShared.device.ballistics.efficiency
-                )
             } else {
                 fragmentCameraOverlayBinding.engineerView.visibility = View.INVISIBLE
-                fragmentCameraOverlayBinding.efficiency.visibility = View.INVISIBLE
             }
         }
 
@@ -440,35 +433,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          */
         fragmentCameraOverlayBinding.sensorsAvailablePrompt.btnSensorsOk.setOnClickListener {
             fragmentCameraOverlayBinding.sensorsAvailablePrompt.root.visibility = View.GONE
-        }
-
-        /**
-         * Set onClick for editing the efficiency value
-         */
-        fragmentCameraOverlayBinding.efficiency.setOnClickListener {
-            val listener: InputDialogFragment.InputDialogListener =
-                object : InputDialogFragment.InputDialogListener {
-                    override fun onDialogPositiveClick(value: Number) {
-                        DataShared.device.ballistics.efficiency = value.toDouble()
-                        fragmentCameraOverlayBinding.efficiencyValue.text = String.format(
-                            Locale.getDefault(),
-                            "%.3f",
-                            DataShared.device.ballistics.efficiency
-                        )
-                    }
-
-                    override fun onDialogNegativeClick(value: Number) {
-                        // Do nothing..
-                    }
-                }
-
-            InputDialogFragment(
-                "Set Efficiency",
-                InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL,
-                DataShared.device.ballistics.efficiency,
-                7,
-                3,
-                listener).show(parentFragmentManager, null)
         }
 
         /**

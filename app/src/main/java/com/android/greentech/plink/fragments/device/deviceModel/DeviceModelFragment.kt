@@ -131,7 +131,7 @@ class DeviceModelFragment : Fragment() {
                     str = parser.getAttributeValue("http://schemas.android.com/apk/res/android", attr)
                     if (str != null && str.length > 1 && str[0] == '@') {
                         val id: Int = str.substring(1).toInt()
-                        str = getString(id).removeSuffix("dp")
+                        str = getString(id).removeSuffix("dip") // 'dip' is correct, not 'dp'
                     }
                     break
                 }

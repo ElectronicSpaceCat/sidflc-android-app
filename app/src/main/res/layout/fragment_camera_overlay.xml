@@ -125,39 +125,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/efficiency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:theme="@style/TextShadow"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/projectile_selected"
-        app:layout_constraintStart_toStartOf="@+id/projectile_selected">
-
-        <TextView
-            android:id="@+id/textView34"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EFFICIENCY"
-            android:textColor="?android:attr/textColorPrimary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/efficiency_value"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:text="@string/value_unknown"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textColor="@color/textprimary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView34" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/projectile_selected"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
