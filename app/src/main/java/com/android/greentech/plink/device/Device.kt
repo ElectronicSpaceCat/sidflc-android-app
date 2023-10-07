@@ -23,7 +23,7 @@ import java.lang.Float.intBitsToFloat
 
 class Device(context: Context) {
     // External data configurations
-    enum class EXTDATA{
+    enum class USERDATA{
         FORCE_OFFSET,
         EFFICIENCY,
         FRICTION_COEFFICIENT,
@@ -78,10 +78,11 @@ class Device(context: Context) {
         set(value) {
             // Set the new model
             _model.value = value
-
             // Set the calibration offset reference for the carrier position sensor
-            activeSensor.offsetRef = model.getMaxCarriagePosition().toInt()
-
+            if(activeSensor.id == DeviceData.Sensor.Id.SHORT){
+                activeSensor.targetReference = model.getMaxCarriagePosition().toInt()
+                activeSensor.driftCompensationEnable = true
+            }
             // Store the model to prefs if new
             val idModel = _prefs.getString(model_pref_tag, Model.Name.V23.name)!!
             if(idModel != _model.value!!.name) {
@@ -188,7 +189,7 @@ class Device(context: Context) {
      * @param value
      */
     fun sendConfigCommand(target : DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
-        _bleDeviceManager.setSensorConfigCommand(target, command, id, value)
+        _bleDeviceManager.sendSensorConfigCommand(target, command, id, value)
     }
 
     /**
@@ -278,11 +279,11 @@ class Device(context: Context) {
         // Is sensor configs initialized?
         if(!_isInitialized){
             // Yes - Is config index within range?
-            if(_configIdx < EXTDATA.values().lastIndex){
+            if(_configIdx < USERDATA.values().lastIndex){
                 // Yes - Is the config the same as the one we requested?
                 if(_configIdx == config){
                     // Yes - Send for the next one
-                    sendConfigCommand(DeviceData.Config.Target.EXT_STORE, DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
+                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
                 }
             }
             // No - Finished..
@@ -374,7 +375,7 @@ class Device(context: Context) {
                 DeviceData.Status.READY -> {
                     if(_isInitialized) return@observe
                     // Send command to get a stored configuration which will trigger getting the rest
-                    sendConfigCommand(DeviceData.Config.Target.EXT_STORE, DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
                 }
                 else -> {}
             }
@@ -382,20 +383,20 @@ class Device(context: Context) {
 
         /** Observe the configuration data for external storage data */
         sensorConfig.observe(context as LifecycleOwner) {
-            if(it.trgt != DeviceData.Config.Target.EXT_STORE) return@observe
+            if(it.trgt != DeviceData.Config.Target.USER) return@observe
 
             when (it.status) {
                 DeviceData.Config.Status.OK,
                 DeviceData.Config.Status.UPDATED,
                 DeviceData.Config.Status.MISMATCH -> {
                     when(it.id){
-                        EXTDATA.FORCE_OFFSET.ordinal -> {
+                        USERDATA.FORCE_OFFSET.ordinal -> {
                             _ballistics.forceOffset = intBitsToFloat(it.value).toDouble()
                         }
-                        EXTDATA.EFFICIENCY.ordinal -> {
+                        USERDATA.EFFICIENCY.ordinal -> {
                             _ballistics.efficiency = intBitsToFloat(it.value).toDouble()
                         }
-                        EXTDATA.FRICTION_COEFFICIENT.ordinal -> {
+                        USERDATA.FRICTION_COEFFICIENT.ordinal -> {
                             _ballistics.frictionCoefficient = intBitsToFloat(it.value).toDouble()
                         }
                     }

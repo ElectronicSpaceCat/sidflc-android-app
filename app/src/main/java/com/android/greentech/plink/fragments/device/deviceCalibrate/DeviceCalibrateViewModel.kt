@@ -40,8 +40,8 @@ class DeviceCalibrateViewModel (application: Application) : AndroidViewModel(app
 
     fun startCalibration() {
         when(_calSelected){
-            CalSelect.CAL_SENSOR_SHORT,
-            CalSelect.CAL_ALL -> {
+            CalSelect.CAL_ALL,
+            CalSelect.CAL_SENSOR_SHORT -> {
                 setSensor(DeviceData.Sensor.Id.SHORT)
             }
             CalSelect.CAL_SENSOR_LONG -> {
@@ -51,9 +51,10 @@ class DeviceCalibrateViewModel (application: Application) : AndroidViewModel(app
     }
 
     fun startCalibration(calSelect: CalSelect) {
+        _calSelected = calSelect
         when(calSelect){
-            CalSelect.CAL_SENSOR_SHORT,
-            CalSelect.CAL_ALL -> {
+            CalSelect.CAL_ALL,
+            CalSelect.CAL_SENSOR_SHORT -> {
                 setSensor(DeviceData.Sensor.Id.SHORT)
             }
             CalSelect.CAL_SENSOR_LONG -> {
@@ -73,7 +74,7 @@ class DeviceCalibrateViewModel (application: Application) : AndroidViewModel(app
                 DataShared.device.setSensor(sensorId)
                 CoroutineScope(Dispatchers.IO).launch {
                     withTimeout(2500){
-                        // Wait until sensor to calibrate is active
+                        // Wait until requested sensor is active
                         while(DataShared.device.sensorSelected.value!!.id != sensorId){
                             delay(250)
                         }

@@ -6,6 +6,7 @@ import com.android.greentech.plink.device.bluetooth.device.DeviceData
 
 interface ISensorCalibrate {
     enum class State {
+        INIT,
         PREPARE,
         START,
         CALIBRATING,

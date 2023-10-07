@@ -53,18 +53,21 @@ class DeviceCalibrateFragment : Fragment() {
          */
         ISensorCalibrate.calibrationState.observe(viewLifecycleOwner) { state ->
             when(state){
-                State.PREPARE -> {
+                State.INIT -> {
                     fragmentDeviceCalibrateBinding.deviceStartCalibration.visibility = View.GONE
                     fragmentDeviceCalibrateBinding.calBtnOk.visibility = View.GONE
                     fragmentDeviceCalibrateBinding.calBtnRestart.visibility = View.GONE
                     fragmentDeviceCalibrateBinding.deviceCalibrating.visibility = View.VISIBLE
-                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrating..."
+                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Initializing..."
                     fragmentDeviceCalibrateBinding.calibrationStatus.visibility = View.VISIBLE
                     fragmentDeviceCalibrateBinding.calibrationProgressBar.visibility = View.VISIBLE
                     fragmentDeviceCalibrateBinding.calibrationInfo.visibility = View.VISIBLE
                 }
+                State.PREPARE -> {
+                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Preparing..."
+                }
                 State.START -> {
-                    // Do nothing..
+                    fragmentDeviceCalibrateBinding.calibrationStatus.text = "Calibrating..."
                 }
                 State.FINISHED -> {
                     viewModel.stopCalibration()

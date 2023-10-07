@@ -9,6 +9,7 @@ import com.android.greentech.plink.device.bluetooth.DeviceBluetoothManager
 import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.utils.calculators.CalcFilters
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
+import kotlin.math.abs
 
 class Sensor(
     context: Context,
@@ -29,11 +30,18 @@ class Sensor(
     private var _isActive = false
 
     private var _sampleSize = DEFAULT_SAMPLE_SIZE
-    private var _filter = CalcFilters.MovingAverage(_sampleSize)
-//    private var _filter = CalcFilters.KalmanFilter(0.1, 15.0)
-    private var _rangeFiltered = MutableLiveData(0.0)
+    private var _rangeAvg = CalcFilters.MovingAverage(_sampleSize)
+    private var _rangeAvgErr = CalcFilters.MovingAverage(_sampleSize) // Moving average of the (previous - current) range average
+//    private var _rangeKalman = CalcFilters.KalmanFilter(1.0, 5.0)
+//    private var _uncertainty = 0.0
 
-    var offsetRef : Int = 0
+    private var _rangeFiltered = MutableLiveData(0.0) // Range value after filtering and drift compensation (if enabled)
+
+    private var _driftOffset : Double = 0.0 // Used for drift compensation
+    private var _driftCompensationEnable = false // Enable sensor drift compensation
+    private var _driftCompReset = false
+
+    var targetReference : Int = 0 // Target reference distance in mm
 
     val sampleSize: Int
         get() = _sampleSize
@@ -52,6 +60,16 @@ class Sensor(
 
     val configs: Array<ISensor.Config>
         get() = _sensor.configs
+
+    val driftOffset : Double
+        get() = _driftOffset
+
+    var driftCompensationEnable : Boolean
+        get() = _driftCompensationEnable
+        set(value) {
+            _driftCompensationEnable = value
+            _driftOffset = 0.0
+        }
 
     /**
      * Select the sensor enable
@@ -80,10 +98,9 @@ class Sensor(
      */
     private fun setSensorType(type: DeviceData.Sensor.Type) {
         _sensor = when (type) {
-            DeviceData.Sensor.Type.VL53L4CD ->
+            DeviceData.Sensor.Type.VL53L4CD -> {
                 VL53L4CD(this)
-            DeviceData.Sensor.Type.VL53L4CX ->
-                VL53L4CX(this)
+            }
             else -> {
                 VL53L4CX(this)
             }
@@ -92,8 +109,10 @@ class Sensor(
 
     fun setFilterSampleSize(size: Int) {
         _sampleSize = Integer.max(1, size)
-        _filter = CalcFilters.MovingAverage(_sampleSize)
-        _filter.reset(_rangeFiltered.value!!)
+        _rangeAvg = CalcFilters.MovingAverage(_sampleSize)
+        _rangeAvgErr = CalcFilters.MovingAverage(_sampleSize)
+        _rangeAvg.reset(_rangeFiltered.value!!)
+        _rangeAvgErr.reset()
         _prefs.edit().putInt(_filterTag, _sampleSize).apply()
     }
 
@@ -102,7 +121,7 @@ class Sensor(
      */
     fun loadConfigs(){
         if(_isInitialized) return
-        setConfigCommand(DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+        sendConfigCommand(DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
     }
 
     /**
@@ -119,7 +138,7 @@ class Sensor(
             // Yes - Is the config the same as the one we requested?
             if(_configIdx == config){
                 // Yes - Send for the next one
-                setConfigCommand(DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
+                sendConfigCommand(DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
             }
         }
         // No - Finished..
@@ -193,8 +212,8 @@ class Sensor(
      * @param id
      * @param value
      */
-    fun setConfigCommand(command: DeviceData.Config.Command, id: Int, value: Int) {
-        device.setSensorConfigCommand(DeviceData.Config.Target.SENSOR, command, id, value)
+    fun sendConfigCommand(command: DeviceData.Config.Command, id: Int, value: Int) {
+        device.sendSensorConfigCommand(DeviceData.Config.Target.SENSOR, command, id, value)
     }
 
     /**
@@ -202,7 +221,7 @@ class Sensor(
      * into permanent storage internal to the device
      */
     fun storeConfigData() {
-        device.setSensorConfigCommand(DeviceData.Config.Target.SENSOR,  DeviceData.Config.Command.STORE, Int.MAX_VALUE, Int.MAX_VALUE)
+        device.sendSensorConfigCommand(DeviceData.Config.Target.SENSOR,  DeviceData.Config.Command.STORE, Int.MAX_VALUE, Int.MAX_VALUE)
     }
 
     /**
@@ -221,9 +240,6 @@ class Sensor(
 
     /**
      * Called when the active sensor changes
-     *
-     * Super - Sets the sensor type in persistent storage
-     *
      * @param sensor DeviceData.Sensor
      */
     private fun onSensorUpdate(sensor: DeviceData.Sensor) {
@@ -234,33 +250,55 @@ class Sensor(
 
     /**
      * Called when sensor ranging enable state changes.
-     *
-     * Super - None
-     *
      * @param enable
      */
     private fun onSensorEnableUpdate(enable : Boolean) {
         _isEnabled = enable
+        _driftCompReset = true
     }
 
     /**
-     * Called when new range data is received.
-     *
-     * Super - Sets the filter window size
-     *
+     * Called when new range data is received
+     * If the autoRangeDriftAdjustEnable is True then
+     * the offsetRef will be used to determine the drift offset
+     * and remove it from the filtered range value.
      * @param range
      */
     private fun onRangeUpdate(range: Int) {
-        _rangeFiltered.value = _filter.getAverage(range.toDouble())
+        // Apply the moving average to reduce jitter
+        _rangeAvg.getAverage(range.toDouble())
+        _rangeAvgErr.getAverage(abs(_rangeAvg.averagePrev - _rangeAvg.average))
+        // Only calculate drift offset if target reference not zero
+        if(targetReference != 0) {
+            // Set the drift compensation reset flag if average range below target reference
+            if (_rangeAvg.average < targetReference) {
+                _driftCompReset = true
+            }
+            // Calculate applied drift offset if error withing threshold
+            if(_rangeAvgErr.average < RANGE_ERR_AVG_THRESHOLD) {
+                // Reset the drift offset if range above target reference and flag was set
+                if (_driftCompReset && _rangeAvg.average > targetReference) {
+                    _driftCompReset = false
+                    _driftOffset = 0.0
+                }
+                // Calculate the drift offset
+                if (_rangeAvg.average > (targetReference + _driftOffset)) {
+                    _driftOffset = (_rangeAvg.average - targetReference)
+                }
+            }
+            // Apply drift compensation if enabled
+            if(driftCompensationEnable){
+                _rangeFiltered.value = (_rangeAvg.average - _driftOffset)
+                return
+            }
+        }
+        // Update the filtered range value
+        _rangeFiltered.value = _rangeAvg.average
     }
 
     /**
      * Called when there is a configuration response
      * to a configuration command.
-     *
-     * Super - Stores the configuration response data
-     * depending on the status and boot configuration status.
-     *
      * @param config
      */
     private fun onConfigUpdate(config : DeviceData.Config) {
@@ -284,9 +322,6 @@ class Sensor(
 
     /**
      * Called when there is a status update from the active sensor.
-     *
-     * Super - Resets the configuration init data when the sensor is booting
-     *
      * @param status
      */
     private fun onStatusUpdate(status : DeviceData.Status) {
@@ -301,9 +336,6 @@ class Sensor(
 
     /**
      * Called when there is a connection state change from the device
-     *
-     * Super - Resets the configured flag when disconnected.
-     *
      * @param connection
      */
     private fun onConnectionStateUpdate(connection: ConnectionState) {
@@ -314,10 +346,6 @@ class Sensor(
             }
             else -> {}
         }
-    }
-
-    companion object{
-        private const val DEFAULT_SAMPLE_SIZE = 5
     }
 
     init {
@@ -375,5 +403,10 @@ class Sensor(
             if(!_isActive) return@observe
             onConnectionStateUpdate(it)
         }
+    }
+
+    companion object{
+        private const val DEFAULT_SAMPLE_SIZE = 7
+        private const val RANGE_ERR_AVG_THRESHOLD = 1 // Error needs to be within threshold before calculating drift offset, ie the signal is stabilized
     }
 }

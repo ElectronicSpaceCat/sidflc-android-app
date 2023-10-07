@@ -20,7 +20,6 @@ import com.android.greentech.plink.databinding.FragmentDeviceMonitorBinding
 import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.greentech.plink.utils.misc.Utils
-import kotlinx.coroutines.*
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
@@ -106,63 +105,44 @@ class DeviceMonitorFragment : Fragment() {
             val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
 
             when (state.state) {
-//                ConnectionState.State.READY -> {
-//                    if(navController.currentDestination?.id != R.id.homeFragment && navController.currentDestination?.id != R.id.deviceScannerFragment) {
-//                        Toast.makeText(context, "Device: Connected", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//                ConnectionState.State.CONNECTING -> {
-//                    CoroutineScope(Dispatchers.IO).launch {
-//                        withTimeout(7000){
-//                            repeat(5){
-//                                if(DataShared.device.connectionState.value!!.state == ConnectionState.State.CONNECTING){
-//                                    delay(1000)
-//                                }
-//                                else{
-//                                    return@withTimeout
-//                                }
-//                            }
-//
-//                            DataShared.device.disconnect()
-//                        }
-//                    }
-//                }
+                ConnectionState.State.READY -> {}
+                ConnectionState.State.CONNECTING -> {}
                 ConnectionState.State.DISCONNECTED -> {
 //                    if(navController.currentDestination?.id != R.id.homeFragment && navController.currentDestination?.id != R.id.deviceScannerFragment) {
 //                        Toast.makeText(context, "Device: Disconnected", Toast.LENGTH_SHORT).show()
 //                    }
-//                    val connState = DataShared.device.connectionState.value!!
+                    val connState = DataShared.device.connectionState.value!!
 //                    // Get disconnect reason if any
 //                    val disconnectReason = if (connState is ConnectionState.Disconnected) {
 //                        connState.reason
 //                    } else {
 //                        ConnectionObserver.REASON_SUCCESS
 //                    }
-//
-//                    if (connState is ConnectionState.Disconnected) {
-//                        val stateWithReason: ConnectionState.Disconnected = connState
-//                        // Determine disconnection reason
-//                        when (stateWithReason.reason) {
-//                            ConnectionObserver.REASON_NOT_SUPPORTED -> { }
-//                            ConnectionObserver.REASON_CANCELLED -> { }
-//                            ConnectionObserver.REASON_SUCCESS -> { }
-//                            ConnectionObserver.REASON_TERMINATE_PEER_USER -> { }
-//                            ConnectionObserver.REASON_TIMEOUT -> { }
-//                            ConnectionObserver.REASON_UNKNOWN -> { }
-//                            ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> { }
-//                            ConnectionObserver.REASON_LINK_LOSS -> {}
-//                            else -> { }
-//                        }
-//                    }
-//
-//                    Toast.makeText(context, "Disconnect reason id: ".plus(disconnectReason.toString()), Toast.LENGTH_LONG).show()
 
+                    if (connState is ConnectionState.Disconnected) {
+                        val stateWithReason: ConnectionState.Disconnected = connState
+                        // Determine disconnection reason
+                        when (stateWithReason.reason) {
+                            ConnectionObserver.REASON_NOT_SUPPORTED -> { }
+                            ConnectionObserver.REASON_CANCELLED -> { }
+                            ConnectionObserver.REASON_SUCCESS -> { }
+                            ConnectionObserver.REASON_TERMINATE_PEER_USER -> { }
+                            ConnectionObserver.REASON_TIMEOUT -> { }
+                            ConnectionObserver.REASON_UNKNOWN -> { }
+                            ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> { }
+                            ConnectionObserver.REASON_LINK_LOSS -> {}
+                            else -> { }
+                        }
+                    }
+
+//                    Toast.makeText(context, "Disconnect reason id: ".plus(disconnectReason.toString()), Toast.LENGTH_LONG).show()
 
                     // Navigate back to scanner page
                     // Note: deviceDfuFragment handles disconnects differently
                     if(navController.currentDestination?.id == R.id.deviceConnectedFragment
                             || navController.currentDestination?.id == R.id.deviceCalibrateFragment
-                            || navController.currentDestination?.id == R.id.deviceTunerFragment) {
+                            || navController.currentDestination?.id == R.id.deviceTunerFragment
+                            || navController.currentDestination?.id == R.id.settingsDeviceFragment) {
 
                         val options = NavOptions.Builder()
                             .setPopUpTo(R.id.homeFragment, false)

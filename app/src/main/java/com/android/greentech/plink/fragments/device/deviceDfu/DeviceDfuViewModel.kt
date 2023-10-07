@@ -13,6 +13,7 @@ import com.android.greentech.plink.utils.network.ConnectionLiveData
 import com.android.greentech.plink.utils.network.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.dfu.DfuServiceInitiator
@@ -54,8 +55,12 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
     fun startFirmwareUpdate(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             downloadFirmware(context)
+            delay(1000)
             if(_updateStatus.value == UpdateStatus.DOWNLOADED){
                 updateFirmware(context)
+            }
+            else {
+                updateStatus = UpdateStatus.ERROR
             }
         }
     }

@@ -6,16 +6,20 @@ import kotlin.math.sqrt
  * Cumulative Standard Deviation
  */
 class CumStdDev {
-        private var n = 0
-        private var sum = 0.0
-        private var sum2 = 0.0
+    private var n = 0
+    private var sum = 0.0
+    private var sum2 = 0.0
+    private var _sd = 0.0
 
-        fun sd(x: Double): Double {
-            n++
-            sum += x
-            sum2 += x * x
-            return sqrt(sum2 / n - sum * sum / n / n)
-        }
+    val sd : Double
+        get() = _sd
+    fun sd(x: Double): Double {
+        n++
+        sum += x
+        sum2 += x * x
+        _sd = sqrt(sum2 / n - sum * sum / n / n)
+        return sd
+    }
 
     fun reset() {
         n = 0

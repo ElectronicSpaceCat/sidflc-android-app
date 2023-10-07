@@ -765,7 +765,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      * @param id for the sensor.
      * @param value for the sensor.
      */
-    fun setSensorConfigCommand(target: DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
+    fun sendSensorConfigCommand(target: DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
         // Does characteristic exist?
         if (tofConfigCharacteristic == null) return
 

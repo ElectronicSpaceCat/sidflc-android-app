@@ -313,9 +313,9 @@
                 tools:layout_editor_absoluteX="46dp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/section_power_info"
+                android:id="@+id/section_device_info"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/pwr_source_info"
@@ -347,9 +347,9 @@
                     android:id="@+id/batt_status_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
+                    app:layout_constraintEnd_toStartOf="@+id/batt_level_info"
                     app:layout_constraintStart_toEndOf="@+id/pwr_source_info"
-                    app:layout_constraintTop_toTopOf="@+id/pwr_source_info">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/batt_status_title"
@@ -374,8 +374,7 @@
                     android:id="@+id/batt_level_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
-                    app:layout_constraintStart_toEndOf="@+id/batt_status_info"
+                    app:layout_constraintStart_toStartOf="@+id/range_info_adj"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
@@ -394,30 +393,23 @@
                         android:text="@string/value_unknown"
                         app:layout_constraintStart_toStartOf="@+id/batt_level_title"
                         app:layout_constraintTop_toBottomOf="@+id/batt_level_title" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:id="@+id/view3"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="5dp"
-                android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout2"
-                tools:layout_editor_absoluteX="46dp" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/section_sensor_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                <View
+                    android:id="@+id/view3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="5dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@+id/pwr_source_info" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/sensor_type_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/view3">
 
                     <TextView
                         android:id="@+id/textView28"
@@ -435,15 +427,15 @@
                         android:text="@string/value_unknown"
                         app:layout_constraintStart_toStartOf="@+id/textView28"
                         app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/sensor_status_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="54dp"
-                    app:layout_constraintStart_toEndOf="@+id/sensor_type_info"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintStart_toStartOf="@+id/batt_status_info"
+                    app:layout_constraintTop_toBottomOf="@+id/view3">
 
                     <TextView
                         android:id="@+id/textView24"
@@ -461,30 +453,24 @@
                         android:text="@string/value_unknown"
                         app:layout_constraintStart_toStartOf="@+id/textView24"
                         app:layout_constraintTop_toBottomOf="@+id/textView24" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:id="@+id/view7"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="5dp"
-                android:background="@android:color/darker_gray"
-                tools:layout_editor_absoluteX="46dp" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/section_sensor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp">
+                <View
+                    android:id="@+id/view7"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="5dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@+id/sensor_status_info"
+                    tools:layout_editor_absoluteX="22dp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/sensor_selector"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/view7">
 
                     <TextView
                         android:id="@+id/textView5"
@@ -506,7 +492,7 @@
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="@+id/textView5"
                         app:layout_constraintTop_toBottomOf="@+id/textView5"
-                        tools:ignore="TouchTargetSizeCheck"/>
+                        tools:ignore="TouchTargetSizeCheck" />
 
                     <RadioButton
                         android:id="@+id/btnSensor2"
@@ -518,18 +504,30 @@
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="@+id/btnSensor1"
                         app:layout_constraintTop_toBottomOf="@+id/btnSensor1"
-                        tools:ignore="TouchTargetSizeCheck"/>
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_sensor_enable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enable "
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/text_primary_color_selector"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/btnSensor2" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_drift_comp_enable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Drift\nComp  "
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/text_primary_color_selector"
+                        app:layout_constraintEnd_toEndOf="@+id/switch_sensor_enable"
+                        app:layout_constraintTop_toBottomOf="@+id/switch_sensor_enable" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_sensor_enable"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Enable "
-                    android:textColor="@color/text_primary_color_selector"
-                    app:layout_constraintStart_toStartOf="@+id/sensor_selector"
-                    app:layout_constraintTop_toBottomOf="@+id/sensor_selector" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/range_info"
@@ -537,7 +535,7 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toStartOf="@+id/range_info_adj"
                     app:layout_constraintStart_toEndOf="@+id/sensor_selector"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/view7">
 
                     <TextView
                         android:id="@+id/textView9"
@@ -556,6 +554,52 @@
                         app:layout_constraintStart_toEndOf="@+id/textView9"
                         app:layout_constraintStart_toStartOf="@+id/textView9"
                         app:layout_constraintTop_toBottomOf="@+id/textView9">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/drift_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Drift"
+                                android:textColor="@color/text_primary_color_selector"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/drift_data"
+                                android:layout_width="65dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/value_unknown"
+                                android:textAlignment="viewStart"
+                                android:textColor="@color/lightgray"
+                                android:textSize="14sp" />
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/sd_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="S.D."
+                                android:textColor="@color/text_primary_color_selector"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/sd_data"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/value_unknown"
+                                android:textAlignment="viewStart"
+                                android:textColor="@color/lightgray"
+                                android:textSize="14sp" />
+
+                        </TableRow>
 
                         <TableRow
                             android:layout_width="match_parent"
@@ -603,30 +647,8 @@
 
                         </TableRow>
 
-                        <TableRow
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:id="@+id/sd_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="S.D."
-                                android:textColor="@color/text_primary_color_selector"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:id="@+id/sd_data"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/value_unknown"
-                                android:textAlignment="viewStart"
-                                android:textColor="@color/lightgray"
-                                android:textSize="14sp" />
-
-                        </TableRow>
-
                     </TableLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -634,7 +656,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/view7">
 
                     <TextView
                         android:id="@+id/textView25"
@@ -654,14 +676,13 @@
 
                         <TableRow
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:paddingTop="5dp">
+                            android:layout_height="match_parent">
 
                             <TextView
                                 android:id="@+id/ref_title"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Ref "
+                                android:text="Trgt. Ref "
                                 android:textColor="@color/text_primary_color_selector"
                                 android:textSize="14sp" />
 
@@ -706,10 +727,10 @@
 
                             <ImageView
                                 android:id="@+id/btn_edit_sample_size"
-                                tools:ignore="ContentDescription"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                app:srcCompat="@drawable/ic_edit" />
+                                app:srcCompat="@drawable/ic_edit"
+                                tools:ignore="ContentDescription" />
 
                         </TableRow>
 
@@ -718,12 +739,15 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/reset_sd"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/range_info">
+                    android:layout_marginTop="5dp"
+                    app:layout_constraintStart_toStartOf="@+id/range_info"
+                    app:layout_constraintTop_toBottomOf="@+id/range_info">
 
                     <TextView
                         android:id="@+id/textView2"
@@ -733,7 +757,7 @@
                         android:textColor="@color/textprimary"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="SpeakableTextPresentCheck"/>
+                        tools:ignore="SpeakableTextPresentCheck" />
 
                     <ImageButton
                         android:id="@+id/btn_reset_sd"
@@ -752,8 +776,8 @@
                     android:id="@+id/reset_sensor_options"
                     android:layout_width="175dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/reset_sd">
 
                     <TextView
                         android:id="@+id/textView17"
@@ -764,7 +788,7 @@
                         app:layout_constraintBottom_toTopOf="@+id/btn_store_configs"
                         app:layout_constraintStart_toStartOf="@+id/btn_store_configs"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="SpeakableTextPresentCheck"/>
+                        tools:ignore="SpeakableTextPresentCheck" />
 
                     <ImageButton
                         android:id="@+id/btn_store_configs"

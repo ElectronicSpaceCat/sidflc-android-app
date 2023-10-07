@@ -25,13 +25,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.ParcelUuid
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -41,7 +38,6 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,24 +45,15 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceScannerBinding
-import com.android.greentech.plink.fragments.cameraOverlay.CameraOverlayFragment
 import com.android.greentech.plink.fragments.device.deviceScanner.deviceAdapter.DevicesAdapter
 import com.android.greentech.plink.fragments.device.deviceScanner.deviceAdapter.DiscoveredBluetoothDevice
-import com.android.greentech.plink.utils.converters.ConvertLength
 import com.android.greentech.plink.utils.misc.Utils.isLocationPermissionDeniedForever
 import com.android.greentech.plink.utils.misc.Utils.isLocationPermissionsGranted
 import com.android.greentech.plink.utils.misc.Utils.markLocationPermissionRequested
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import java.util.Timer
 import java.util.TimerTask
-
 
 internal enum class ScanState {
     SCAN_NO_BLUETOOTH,
@@ -86,7 +73,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
     private var scanState: ScanState = ScanState.SCAN_NO_BLUETOOTH
 
-    private var deviceSelected : DiscoveredBluetoothDevice ?= null
+    private var deviceSelected : DiscoveredBluetoothDevice?= null
 
     private var kickTimer = false
 
@@ -157,7 +144,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                     kickTimer = false
                 }
                 else{
-                    viewModel.clearRecords()
+                    clear()
                     viewModel.refresh()
                 }
             }

@@ -11,6 +11,13 @@ object CalcFilters {
         private var _index = 0
         private var _sum = 0.0
         private var _average = 0.0
+        private var _averagePrev = 0.0
+
+        val average : Double
+            get() = _average
+
+        val averagePrev : Double
+            get() = _averagePrev
 
         /**
          * Returns averaged input
@@ -22,7 +29,10 @@ object CalcFilters {
             _samples[_index] = value
             _sum += value
             _index = (_index + 1) % windowSize
+
+            _averagePrev = _average
             _average = _sum / windowSize.toFloat()
+
             return _average
         }
 
@@ -46,7 +56,7 @@ object CalcFilters {
      *
      * @param R Models the process noise and describes how noisy a system internally is.
      *          How much noise can be expected from the system itself?
-     *          When a system is constant R can be set to a (very) low value.
+     *          When a system is constant, R can be set to a (very) low value.
      *
      * @param Q Resembles the measurement noise.
      *          How much noise is caused by the measurements?
@@ -59,8 +69,8 @@ object CalcFilters {
      * @param B Control vector
      * @param C Measurement vector
      */
-    class KalmanFilter(private val R: Double,
-                       private val Q: Double,
+    class KalmanFilter(private var R: Double,
+                       private var Q: Double,
                        private val A: Double = 1.0,
                        private val B: Double = 0.0,
                        private val C: Double = 1.0) {

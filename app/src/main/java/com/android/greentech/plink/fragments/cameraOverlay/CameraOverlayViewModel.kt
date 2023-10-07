@@ -272,7 +272,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         }
 
         // Launch background coroutine to process the ballistics data
-        // which will update the hitConfidence liveData when finished.
+        // which will update the hitConfidence liveData.
         CoroutineScope(Dispatchers.IO).launch {
             carriagePosMerger.asFlow().collect {
                 if(isReadyToFire()) {

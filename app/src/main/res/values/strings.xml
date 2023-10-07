@@ -15,6 +15,7 @@
   ~ limitations under the License.
   -->
 <resources>
+    <string name="app_name_full">(Smartphone Interfaced Device For Launching Coins)</string>
     <string name="app_name">SIDFLC</string>
     <string name="dfu_name">SIDFLC_DFU</string>
 
@@ -159,6 +160,7 @@
 
     <!-- Device Calibration Info -->
     <string name="calibration_procedure">Leave the carriage in the default position and place a flat object against the rear sensor.\n\nPress the Calibrate button when ready.</string>
+    <string name="calibration_options">Long press the image to toggle options.</string>
 
     <!-- Updatable Length Param Keys -->
     <string name="key_lens_offset">lens_offset</string>
@@ -182,7 +184,7 @@
     <string name="item_carriage_position">Carriage Position</string>
 
     <!-- About -->
-    <string name="about_app">This app provides an interface to the Plink device (available <b>here</b>) and assists in calculating a probability of hitting a target with a projectile.
+    <string name="about_app">This app assists in calculating a probability of hitting a target with a projectile.
     </string>
 
     <!-- Privacy -->
@@ -216,4 +218,9 @@
     <string name="batt_very_low">Battery very low, shutting down</string>
     <string name="batt_charging">Battery charging</string>
     <string name="batt_charging_complete">Battery charging complete</string>
+
+    <string name="position">Position</string>
+    <string name="angle">Angle</string>
+    <string name="spring">Spring</string>
+    <string name="model">Model</string>
 </resources>

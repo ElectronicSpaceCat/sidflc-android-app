@@ -86,7 +86,7 @@ open class CanvasPlotterBox(context: Context, attributeSet: AttributeSet) : View
             canvas.drawLine(0f, incrementInPixels * i, width.toFloat(), incrementInPixels * i, linePaint)
         }
 
-        // If data ref is not zero, draw a ref line
+        // Draw a ref line if not zero
         if(ref > 0) {
             val yVal = (yMax - ref).toRealY()
             canvas.drawLine(xOffset, yVal, width.toFloat(), yVal, refLinePaint)

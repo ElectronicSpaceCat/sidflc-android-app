@@ -85,7 +85,7 @@ class DeviceData {
     class Config(var trgt : Target, var cmd : Command, var id: Int, var value: Int, var status: Status){
         enum class Target{
             SENSOR,
-            EXT_STORE,
+            USER,
             NUM_TARGETS,
             NA
         }

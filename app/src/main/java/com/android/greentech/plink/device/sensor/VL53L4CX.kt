@@ -20,7 +20,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
         CAL_OFFSET_SIMPLE,
         CAL_OFFSET_ZERO,
         CAL_OFFSET_VCSEL,
-        CAL_XTALK
+        CAL_XTALK // Note: This seems to goof up the sensor, datasheet recommends running it with target at 600mm
     }
 
     override val configs: Array<ISensor.Config> = Array(Config.values().size) {
@@ -31,30 +31,37 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
         state = State.NA
     }
     override fun startCalibration() {
-        state = State.PREPARE
-        // Calling this will trigger a response which is used to drive the state machine
-        sensor.setConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
+        sensor.resetFactory()
+        state = State.INIT
+        sensor.sendConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
     }
 
     override fun runCalibration(config : DeviceData.Config) {
         when (state) {
-            State.PREPARE -> {
+            State.INIT -> {
                 if(sensor.isEnabled) {
                     sensor.enable(false)
+                    // Calling this will trigger a response which is used to drive the state machine
+                    sensor.sendConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
                 }
                 else{
-                    state = State.START
+                    state = State.PREPARE
+                    sensor.loadConfigs()
                 }
-                // Calling this will trigger a response which is used to drive the state machine
-                sensor.setConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
+            }
+            State.PREPARE -> {
+                if(sensor.isInitialized) {
+                    state = State.START
+                    sensor.sendConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
+                }
             }
             State.START -> {
                 when(sensor.id){
                     DeviceData.Sensor.Id.SHORT -> {
-                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_LOW)
+                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_LOW)
                     }
                     DeviceData.Sensor.Id.LONG -> {
-                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_DEFAULT)
+                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.POWER_LEVEL.ordinal, POWER_LEVEL_DEFAULT)
                     }
                     else -> {}
                 }
@@ -70,29 +77,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
-                                when(sensor.id){
-                                    DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
-                                    }
-                                    DeviceData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
-                                    }
-                                    else -> {}
-                                }
-                                setCalMessage(Config.OFFSET_MODE.ordinal)
-                                state = State.WAIT_FOR_RESPONSE
-                            }
-                            else -> {
-                                state = State.ERROR
-                            }
-                        }
-
-                    }
-                    Config.OFFSET_MODE.ordinal-> {
-                        setCalResponseMessage(config)
-                        when(config.status) {
-                            DeviceData.Config.Status.OK -> {
-                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.PHS_CAL_PCH_PWR.ordinal, PHS_CAL_PCH_PWR)
+                                sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.PHS_CAL_PCH_PWR.ordinal, PHS_CAL_PCH_PWR)
                                 setCalMessage(Config.PHS_CAL_PCH_PWR.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
@@ -105,8 +90,16 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
-                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.SMUDGE_CORR_MODE.ordinal, 0)
-                                setCalMessage(Config.SMUDGE_CORR_MODE.ordinal)
+                                when(sensor.id){
+                                    DeviceData.Sensor.Id.SHORT -> {
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
+                                    }
+                                    DeviceData.Sensor.Id.LONG -> {
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
+                                    }
+                                    else -> {}
+                                }
+                                setCalMessage(Config.OFFSET_MODE.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
                             else -> {
@@ -114,30 +107,16 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                             }
                         }
                     }
-                    Config.SMUDGE_CORR_MODE.ordinal-> {
-                        setCalResponseMessage(config)
-                        when(config.status) {
-                            DeviceData.Config.Status.OK -> {
-                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.XTALK_COMP_EN.ordinal, 0)
-                                setCalMessage(Config.XTALK_COMP_EN.ordinal)
-                                state = State.WAIT_FOR_RESPONSE
-                            }
-                            else -> {
-                                state = State.ERROR
-                            }
-                        }
-                        setCalResponseMessage(config)
-                    }
-                    Config.XTALK_COMP_EN.ordinal-> {
+                    Config.OFFSET_MODE.ordinal-> {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
                                     DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.RECT_OF_INTEREST.ordinal, SENSOR_SHORT_ROI)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.RECT_OF_INTEREST.ordinal, SENSOR_SHORT_ROI)
                                     }
                                     DeviceData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.RESET, Config.RECT_OF_INTEREST.ordinal, Int.MAX_VALUE)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.RESET, Config.RECT_OF_INTEREST.ordinal, Int.MAX_VALUE)
                                     }
                                     else -> {}
                                 }
@@ -153,7 +132,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
-                                sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_REFSPAD.ordinal, 0)
+                                sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_REFSPAD.ordinal, 0)
                                 setCalMessage(Config.CAL_REFSPAD.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
@@ -168,11 +147,11 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                             DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
                                     DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.offsetRef - 2)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.targetReference)
                                         setCalMessage(Config.CAL_OFFSET_VCSEL.ordinal)
                                     }
                                     DeviceData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
                                         setCalMessage(Config.CAL_OFFSET_ZERO.ordinal)
                                     }
                                     else -> {}
@@ -191,10 +170,10 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                             DeviceData.Config.Status.OK -> {
                                 when(sensor.id){
                                     DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_SHORT_TIME_BUDGET)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_SHORT_TIME_BUDGET)
                                     }
                                     DeviceData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.GET, Config.TIME_BUDGET.ordinal, Int.MAX_VALUE)
+                                        sensor.sendConfigCommand(DeviceData.Config.Command.GET, Config.TIME_BUDGET.ordinal, Int.MAX_VALUE)
                                     }
                                     else -> {}
                                 }
@@ -223,7 +202,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                             }
                         }
                     }
-                    STORE_DATA_CONFIG_ID-> { // ID used for storing data (any value would work)
+                    STORE_DATA_CONFIG_ID-> { // Int.MAX_VALUE is the ID used for storing data
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
                                 stateMsg = "Sensor: " + sensor.id.toString() + "\nData stored"
@@ -263,13 +242,13 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
 
     companion object {
         const val STORE_DATA_CONFIG_ID = 0xFF
-
         const val OFFSET_CORRECTION_MODE_STANDARD = 1
         const val OFFSET_CORRECTION_MODE_PERVCSEL = 3
-        const val POWER_LEVEL_LOW = 30 // Position sensor seems better at this level
+        const val POWER_LEVEL_LOW = 30 // Carriage sensor seems better at this level
         const val POWER_LEVEL_DEFAULT = 60
-        const val SENSOR_SHORT_TIME_BUDGET = 50000 // Gives reasonable response speed
         const val PHS_CAL_PCH_PWR = 2 // Supposedly helps
+
+        const val SENSOR_SHORT_TIME_BUDGET = 55000 // Gives reasonable response speed
         const val SENSOR_SHORT_ROI = 101255430 // This sets a 4x4 (minimum allowed) out of 15x15 SPAD array
     }
 }

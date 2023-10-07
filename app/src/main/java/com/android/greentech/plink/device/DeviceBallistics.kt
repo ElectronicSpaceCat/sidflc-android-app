@@ -90,10 +90,13 @@ class DeviceBallistics(model: ModelData) {
         // and then adjusted by the launch angle where the vertex starts at the device height.
         /*
                                /|
-             Projectile -->  ()-|--- <---- Height offset
+              Projectile --> () |--- <-- Height offset
                              /  |
-                        ____/)__|__-____________________
-                             ^.__ Device Angle      ^.__ Device height
+                      ______/)__|_______________________
+                            ^.__ Device Angle      ^ <-- Device height
+                                                   |
+                                                   v
+                      __________________________________ <-- Ground
          */
         val heightOffsetMM = getProjectileHeightOffsetAtAngle(_model.getMaxCarriagePosition(), launchAngle)
         val heightOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, heightOffsetMM)

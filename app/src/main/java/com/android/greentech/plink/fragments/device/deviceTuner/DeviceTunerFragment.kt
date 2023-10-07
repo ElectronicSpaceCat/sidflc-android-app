@@ -85,34 +85,38 @@ class DeviceTunerFragment : Fragment() {
          * Observe the selected sensor
          */
         DataShared.device.sensorSelected.observe(viewLifecycleOwner) {
-            when(DataShared.device.sensorSelected.value!!.id) {
+            when(it.id) {
                 DeviceData.Sensor.Id.SHORT -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = true
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = false
+                    fragmentDeviceTunerBinding.switchDriftCompEnable.isEnabled = true
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.VISIBLE
                 }
                 DeviceData.Sensor.Id.LONG -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = false
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = true
+                    fragmentDeviceTunerBinding.switchDriftCompEnable.isEnabled = false
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.GONE
                 }
                 else -> {
                     fragmentDeviceTunerBinding.btnSensor1.isChecked = false
                     fragmentDeviceTunerBinding.btnSensor2.isChecked = false
+                    fragmentDeviceTunerBinding.switchDriftCompEnable.isEnabled = false
                     fragmentDeviceTunerBinding.containerDeviceModel.visibility = View.GONE
                 }
             }
+            // Set the active plotter data to match active sensor
+            _activePlotterData = _plotterData[it.id.ordinal]
 
             fragmentDeviceTunerBinding.refData.text = _activePlotterData.ref.toString()
             fragmentDeviceTunerBinding.incrementsValue.text = _activePlotterData.yIncrement.toString()
             fragmentDeviceTunerBinding.sampleSizeData.text = DataShared.device.activeSensor.sampleSize.toString()
             fragmentDeviceTunerBinding.sensorType.text = DataShared.device.activeSensor.type.name
+            fragmentDeviceTunerBinding.switchDriftCompEnable.isChecked = DataShared.device.activeSensor.driftCompensationEnable
             // Reset standard deviation
             _cumStdDeviation.reset()
             // Trigger a sensor load config
             DataShared.device.activeSensor.loadConfigs()
-            // Set the active plotter data to match active sensor
-            _activePlotterData = _plotterData[it.id.ordinal]
 
             updatePlot()
         }
@@ -177,13 +181,18 @@ class DeviceTunerFragment : Fragment() {
         }
 
         /**
-         * Observe the raw sensor range data and show it and the filtered version
+         * Observe the raw sensor range data
          */
         DataShared.device.sensorRangeRaw.observe(viewLifecycleOwner) { value ->
             // Update the raw value
             fragmentDeviceTunerBinding.rawData.text = value.toString()
             // Update the standard deviation
-            fragmentDeviceTunerBinding.sdData.text = String.format(Locale.getDefault(), "%.1f", _cumStdDeviation.sd(value.toDouble()))
+            _cumStdDeviation.sd(value.toDouble())
+            // Reset SD is out of normal range
+            if(_cumStdDeviation.sd > SD_RESET_THRESHOLD){
+                _cumStdDeviation.reset()
+            }
+            fragmentDeviceTunerBinding.sdData.text = String.format(Locale.getDefault(), "%.1f", _cumStdDeviation.sd)
 
             // Update the filtered value
             _arrayDequeue.add(DataShared.device.activeSensor.rangeFiltered.value!!)
@@ -191,6 +200,12 @@ class DeviceTunerFragment : Fragment() {
                 Locale.getDefault(),
                 "%.1f",
                 DataShared.device.activeSensor.rangeFiltered.value!!)
+
+            // Update the drift offset value
+            fragmentDeviceTunerBinding.driftData.text = String.format(
+                Locale.getDefault(),
+                "%.1f",
+                DataShared.device.activeSensor.driftOffset)
 
             // Update the plotter
             if(_arrayDequeue.count() >= _queueSize){
@@ -226,6 +241,13 @@ class DeviceTunerFragment : Fragment() {
          */
         fragmentDeviceTunerBinding.switchSensorEnable.setOnCheckedChangeListener { _, isChecked ->
             DataShared.device.setSensorEnable(isChecked)
+        }
+
+        /**
+         * Handler for the drift compensation enable switch
+         */
+        fragmentDeviceTunerBinding.switchDriftCompEnable.setOnCheckedChangeListener { _, isChecked ->
+            DataShared.device.activeSensor.driftCompensationEnable = isChecked
         }
 
         /**
@@ -402,7 +424,7 @@ class DeviceTunerFragment : Fragment() {
                 _plotterData[idIdx].xMin = 0
                 _plotterData[idIdx].xMax = _queueSize
                 _plotterData[idIdx].yMin = 0
-                _plotterData[idIdx].yMax = 4000
+                _plotterData[idIdx].yMax = 2500
                 _plotterData[idIdx].xOffset = 70f
                 _plotterData[idIdx].xIncrement = 10
                 _plotterData[idIdx].yIncrement = 500
@@ -471,14 +493,15 @@ class DeviceTunerFragment : Fragment() {
         super.onDestroyView()
     }
 
-    companion object{
-        const val MAX_BUFF_SIZE = 100
-    }
-
     init {
         // Initialize the plotter data
         DeviceData.Sensor.Id.values().forEach {
             setDefaultPlotterData(it)
         }
+    }
+
+    companion object{
+        const val MAX_BUFF_SIZE = 100
+        const val SD_RESET_THRESHOLD = 10.0
     }
 }

@@ -25,6 +25,7 @@
 
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
+                android:visibility="visible"
                 tools:visibility="visible">
 
 
@@ -45,7 +46,7 @@
                     android:id="@+id/textView17"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="10dp"
                     android:paddingStart="@dimen/activity_horizontal_margin"
                     android:paddingTop="@dimen/item_padding_top"
                     android:paddingEnd="@dimen/activity_horizontal_margin"
@@ -121,20 +122,26 @@
                     app:layout_constraintEnd_toStartOf="@+id/imageView8"
                     app:layout_constraintTop_toTopOf="@+id/imageView8" />
 
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/calibration_options"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_primary_color_selector"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
                 <LinearLayout
+                    android:id="@+id/linearLayout2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView">
-
-                    <Button
-                        android:id="@+id/cal_btn_all"
-                        android:layout_width="150dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/button_calibrate"
-                        android:textColor="@color/text_primary_color_selector" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView8">
 
                     <Button
                         android:id="@+id/cal_btn_sensor_1"
@@ -151,6 +158,13 @@
                         android:text="@string/button_calibrate_sensor_2"
                         android:textColor="@color/text_primary_color_selector"
                         android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/cal_btn_all"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/button_calibrate"
+                        android:textColor="@color/text_primary_color_selector" />
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>

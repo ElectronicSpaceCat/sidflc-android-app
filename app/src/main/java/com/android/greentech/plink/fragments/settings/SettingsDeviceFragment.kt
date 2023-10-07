@@ -131,9 +131,9 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
                     if(TextInputFilter.isStrInRange(0.0, 2.0, newValue)) {
                         _dataWasModified = true
                         DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Target.USER,
                             DeviceData.Config.Command.SET,
-                            Device.EXTDATA.FORCE_OFFSET.ordinal,
+                            Device.USERDATA.FORCE_OFFSET.ordinal,
                             Utils.convertStrToFloat(newValue).toBits()
                         )
                         retVal = true
@@ -157,9 +157,9 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
                     if(TextInputFilter.isStrInRange(0.5, 1.0, newValue)) {
                         _dataWasModified = true
                         DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Target.USER,
                             DeviceData.Config.Command.SET,
-                            Device.EXTDATA.EFFICIENCY.ordinal,
+                            Device.USERDATA.EFFICIENCY.ordinal,
                             Utils.convertStrToFloat(newValue).toBits()
                         )
                         retVal = true
@@ -183,9 +183,9 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
                     if(TextInputFilter.isStrInRange(0.0, 1.0, newValue)) {
                         _dataWasModified = true
                         DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Target.USER,
                             DeviceData.Config.Command.SET,
-                            Device.EXTDATA.FRICTION_COEFFICIENT.ordinal,
+                            Device.USERDATA.FRICTION_COEFFICIENT.ordinal,
                             Utils.convertStrToFloat(newValue).toBits()
                         )
                         retVal = true
@@ -195,7 +195,7 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
             }
 
         /**
-         * Selected Spring - set the summary
+         * Selected Spring - set the summary TODO - Should store spring ID to device
          */
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val prefsKey = requireContext().getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED)
@@ -215,7 +215,7 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
 
         // Send command to store the configurations if any changed
         DataShared.device.sendConfigCommand(
-            DeviceData.Config.Target.EXT_STORE,
+            DeviceData.Config.Target.USER,
             DeviceData.Config.Command.STORE,
             Int.MAX_VALUE, // Ignored
             Int.MAX_VALUE) // Ignored
