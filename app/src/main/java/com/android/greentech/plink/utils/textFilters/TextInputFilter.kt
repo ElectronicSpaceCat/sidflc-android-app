@@ -17,23 +17,39 @@ object TextInputFilter {
             if(source == "-"){
                 return source
             }
-            else{
-                try {
-                    val input = (dest.toString() + source.toString()).toFloat()
-                    if (isInRange(intMin.toFloat(), intMax.toFloat(), input)) {
-                        return null
-                    }
-                } catch (e: NumberFormatException) {
-                    e.printStackTrace()
-                }
-                return ""
-            }
-        }
 
-        // Check if input c is in between min a and max b and
-        // returns corresponding boolean
-        private fun isInRange(a: Float, b: Float, c: Float): Boolean {
-            return if (b > a) c in a..b else c in b..a
+            if(this.intMin.toFloat() < 1.0){
+                if((dStart == 0 && source == "0") || (dStart == 1 && source == ".")) {
+                    return null
+                }
+            }
+
+            try {
+                val input = (dest.toString() + source.toString()).toFloat()
+                if (isInRange(intMin.toFloat(), intMax.toFloat(), input)) {
+                    return null
+                }
+            } catch (e: NumberFormatException) {
+                e.printStackTrace()
+            }
+
+            return ""
         }
+    }
+
+    fun isStrInRange(intMin: Number, intMax: Number, strVal : String) : Boolean{
+        try {
+            val input = strVal.toFloat()
+            return isInRange(intMin.toFloat(), intMax.toFloat(), input)
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    // Check if input c is in between min a and max b and
+    // returns corresponding boolean
+    private fun isInRange(a: Float, b: Float, c: Float): Boolean {
+        return if (b > a) c in a..b else c in b..a
     }
 }

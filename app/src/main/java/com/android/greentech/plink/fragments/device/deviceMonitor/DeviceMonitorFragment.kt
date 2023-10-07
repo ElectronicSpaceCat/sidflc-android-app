@@ -17,6 +17,7 @@ import androidx.navigation.Navigation
 import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceMonitorBinding
+import com.android.greentech.plink.device.bluetooth.device.DeviceData
 import com.android.greentech.plink.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.greentech.plink.utils.misc.Utils
 import kotlinx.coroutines.*
@@ -47,7 +48,7 @@ class DeviceMonitorFragment : Fragment() {
                     BluetoothAdapter.STATE_TURNING_ON, -> {}
                     BluetoothAdapter.STATE_ON -> {
                         // Attempt to connect device
-                        autoConnectDeviceIfMatch(requireContext())
+                        connectDeviceIfMatch(requireContext())
                     }
                 }
             }
@@ -56,14 +57,14 @@ class DeviceMonitorFragment : Fragment() {
 
     /**
      * Connects to the ble device if it is bonded and the
-     * name matches our device name
+     * name matches a given UUID
      *
      * @param context
      */
-    fun autoConnectDeviceIfMatch(context: Context) {
-        val device = Utils.getBondedDevice(context, context.getString(R.string.app_name))
+    fun connectDeviceIfMatch(context: Context) {
+        val device = Utils.getBondedDeviceByUUID(context, context.getString(R.string.app_name))
         if(device != null){
-            DataShared.device.autoConnect(context, device)
+            DataShared.device.connect(context, device)
         }
     }
 
@@ -87,7 +88,7 @@ class DeviceMonitorFragment : Fragment() {
         requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
 
         /** Attempt to connect device if bluetooth is enabled and device is advertising */
-        autoConnectDeviceIfMatch(requireContext())
+        connectDeviceIfMatch(requireContext())
 
         /**
          * Observe the device bond status

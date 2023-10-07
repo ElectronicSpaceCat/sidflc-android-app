@@ -101,12 +101,12 @@ class DevicesLiveData(
         val tmp: MutableList<DiscoveredBluetoothDevice> = ArrayList()
         for (device in devices) {
             val result = device.scanResult
-            if (matchesUuidFilter(result)
-                && matchesNearbyFilter(device.highestRssi)) {
+            if (matchesUuidFilter(result) && matchesNearbyFilter(device.highestRssi)) {
                 // Add filtered device
                 tmp.add(device)
             }
         }
+
         filteredDevices = tmp
         postValue(filteredDevices)
         return filteredDevices.isNotEmpty()

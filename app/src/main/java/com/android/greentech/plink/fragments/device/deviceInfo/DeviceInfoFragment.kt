@@ -21,7 +21,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceInfoBinding
 
@@ -52,7 +51,7 @@ class DeviceInfoFragment : Fragment() {
         fragmentDeviceInfoBinding.deviceConnectedInfo.itemDeviceVersionFw.visibility = View.GONE
 
         // Set up observers for additional ble device information
-        if(DataShared.device.name == requireContext().getString(R.string.app_name)) {
+        if(!DataShared.device.isBootloaderActive()) {
             DataShared.device.manufacturer.observe(viewLifecycleOwner) { str: String? ->
                 fragmentDeviceInfoBinding.deviceConnectedInfo.itemDeviceManufacturer.visibility = View.VISIBLE
                 fragmentDeviceInfoBinding.deviceConnectedInfo.bleDeviceManufacturer.text = str

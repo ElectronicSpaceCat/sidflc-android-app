@@ -42,7 +42,7 @@ class DeviceBallistics(model: ModelData) {
 
     var efficiency: Double
         set(value) {
-            _efficiency = if(value in 0.0..1.0){
+            _efficiency = if(value in 0.5..1.0){
                 value
             } else{
                 1.0

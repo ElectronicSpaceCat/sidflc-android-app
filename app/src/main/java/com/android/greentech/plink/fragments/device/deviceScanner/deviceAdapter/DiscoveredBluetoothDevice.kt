@@ -22,6 +22,8 @@
 package com.android.greentech.plink.fragments.device.deviceScanner.deviceAdapter
 
 import android.bluetooth.BluetoothDevice
+import android.os.ParcelUuid
+import com.android.greentech.plink.device.bluetooth.dfu.DfuData
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 
 //public class DiscoveredBluetoothDevice implements Parcelable {
@@ -45,6 +47,9 @@ class DiscoveredBluetoothDevice(scanResult: ScanResult) {
         get() = device.address
     val scanResult: ScanResult
         get() = lastScanResult!!
+
+    val isDFU : Boolean
+        get() = scanResult.scanRecord?.serviceUuids?.contains(ParcelUuid(DfuData.LBS_UUID_DFU_SERVICE))!!
 
     /**
      * This method returns true if the RSSI range has changed.

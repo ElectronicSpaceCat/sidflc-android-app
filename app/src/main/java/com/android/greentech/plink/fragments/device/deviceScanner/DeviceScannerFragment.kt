@@ -25,10 +25,13 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.ParcelUuid
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -38,6 +41,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,13 +49,24 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.android.greentech.plink.R
 import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.databinding.FragmentDeviceScannerBinding
+import com.android.greentech.plink.fragments.cameraOverlay.CameraOverlayFragment
 import com.android.greentech.plink.fragments.device.deviceScanner.deviceAdapter.DevicesAdapter
 import com.android.greentech.plink.fragments.device.deviceScanner.deviceAdapter.DiscoveredBluetoothDevice
+import com.android.greentech.plink.utils.converters.ConvertLength
 import com.android.greentech.plink.utils.misc.Utils.isLocationPermissionDeniedForever
 import com.android.greentech.plink.utils.misc.Utils.isLocationPermissionsGranted
 import com.android.greentech.plink.utils.misc.Utils.markLocationPermissionRequested
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
+import java.util.Timer
+import java.util.TimerTask
+
 
 internal enum class ScanState {
     SCAN_NO_BLUETOOTH,
@@ -71,7 +86,9 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
     private var scanState: ScanState = ScanState.SCAN_NO_BLUETOOTH
 
-    private var deviceSelected : BluetoothDevice ?= null
+    private var deviceSelected : DiscoveredBluetoothDevice ?= null
+
+    private var kickTimer = false
 
     private val requestPermissionLauncher =
         registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
@@ -129,6 +146,22 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         DataShared.device.connectionState.observe(viewLifecycleOwner) {
             viewModel.refresh()
         }
+
+        // Setup a timer for rescanning periodically
+        Timer("RescanTimeoutTask", false).schedule(object : TimerTask() {
+            override fun run() {
+                if(_fragmentDeviceScannerBinding == null) {
+                    this.cancel()
+                }
+                if(kickTimer){
+                    kickTimer = false
+                }
+                else{
+                    viewModel.clearRecords()
+                    viewModel.refresh()
+                }
+            }
+        },0, 2500)
     }
 
     override fun onItemClick(device: DiscoveredBluetoothDevice) {
@@ -137,21 +170,14 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
     @SuppressLint("MissingPermission")
     private fun connectDevice(target: DiscoveredBluetoothDevice){
-        // Force a disconnect. If a previous is in AutoConnect
-        // it needs to be disconnect in the event we're connecting
-        // to the backup bootloader ..named PlinkDFU
+        deviceSelected = target
         DataShared.device.disconnect()
-
-        // Now connect to DFU or Device service
-        if(target.name == requireContext().getString(R.string.app_name)){
-            deviceSelected = target.device
-            DataShared.device.autoConnect(requireActivity(), target.device)
-        }
-        else{
-            deviceSelected = null
+        if(target.isDFU){
             DataShared.device.connect(requireActivity(), target.device)
         }
-
+        else{
+            DataShared.device.autoConnect(requireActivity(), target.device)
+        }
         Toast.makeText(requireActivity(),
             "Device selected: " + target.name,
             Toast.LENGTH_SHORT
@@ -202,6 +228,13 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
     }
 
     /**
+     * Call refresh to trigger a rescan of devices
+     */
+    private fun onScanClicked() {
+        viewModel.deviceScannerState.clearRecords()
+    }
+
+    /**
      * Start scanning for Bluetooth devices or displays a message based on the scanner state.
      */
     @SuppressLint("MissingPermission")
@@ -221,6 +254,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         }
         else if (state.hasRecords()) {
             scanState = ScanState.SCAN_DEVICES_FOUND
+            kickTimer = true
         }
         else {
             // NOTE: Disconnect reason REASON_SUCCESS is set if user disconnected the device
@@ -276,11 +310,10 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
             ScanState.SCAN_DEVICE_CONNECTED -> {
                 // If not the DFU service and not bonded then ensure a bond
                 if(deviceSelected != null){
-                    if(deviceSelected!!.bondState == BluetoothDevice.BOND_NONE){
+                    if(!deviceSelected?.isDFU!! && deviceSelected?.device?.bondState == BluetoothDevice.BOND_NONE){
                         DataShared.device.ensureBond()
                     }
                 }
-
                 // Go to deviceConnected fragment
                 Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
                     R.id.action_deviceScannerFragment_to_deviceConnectedFragment
@@ -327,7 +360,8 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                 fragmentDeviceScannerBinding.deviceNotSupported.root.visibility = View.GONE
                 fragmentDeviceScannerBinding.noLocationPermission.root.visibility = View.GONE
 
-                // TODO: Add button for clearing bonds
+                // TODO: Add button for clearing bonds on phone side
+
             }
         }
     }

@@ -64,6 +64,10 @@ class DeviceScannerViewModel(application: Application) : AndroidViewModel(applic
         deviceScannerState.refresh()
     }
 
+    fun clearRecords() {
+        deviceScannerState.clearRecords()
+    }
+
     /**
      * Updates the device filter. Devices that once passed the filter will still be shown
      * even if they move away from the phone, or change the advertising packet. This is to

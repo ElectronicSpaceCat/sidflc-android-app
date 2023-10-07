@@ -220,6 +220,11 @@ class Device(context: Context) {
         }
     }
 
+    @SuppressLint("MissingPermission")
+    fun isBootloaderActive(): Boolean {
+        return _bleDeviceManager.isBootloader()
+    }
+
     /**
      * Connect to the given peripheral
      * (Primarily used for the backup bond-less bootloader)

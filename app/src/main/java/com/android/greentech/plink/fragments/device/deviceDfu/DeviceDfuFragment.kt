@@ -159,11 +159,17 @@ class DeviceDfuFragment : Fragment() {
                     fragmentDfuBinding.dfuProgressBar.visibility = View.VISIBLE
                     fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }
+                UpdateStatus.DOWNLOADED-> {
+                    fragmentDfuBinding.dfuProgress.text = "Downloaded firmware…"
+                    fragmentDfuBinding.dfuProgressBar.isIndeterminate = false
+                    fragmentDfuBinding.dfuProgressBar.visibility = View.VISIBLE
+                    fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
+                }
                 UpdateStatus.UPDATING -> {
                     fragmentDfuBinding.dfuProgressBar.visibility = View.VISIBLE
                 }
                 UpdateStatus.ERROR -> {
-                    fragmentDfuBinding.dfuProgress.text = "Version error"
+                    fragmentDfuBinding.dfuProgress.text = "Update error"
                     fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
                     fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }

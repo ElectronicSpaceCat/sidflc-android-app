@@ -43,7 +43,7 @@ class DeviceConnectedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // If the DFU service then hide unrelated buttons
-        if(DataShared.device.name != requireContext().getString(R.string.app_name)){
+        if(DataShared.device.isBootloaderActive()){
             fragmentDeviceConnectedBinding.btnCalibrate.visibility = View.GONE
             fragmentDeviceConnectedBinding.btnTune.visibility = View.GONE
         }
@@ -63,6 +63,7 @@ class DeviceConnectedFragment : Fragment() {
     }
 
     private fun onDisconnectClicked() {
+        DataShared.device.removeBond()
         DataShared.device.disconnect()
     }
 

@@ -475,8 +475,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
                 if (viewModel.isPositionAutoMode) {
                     fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
-                    fragmentCameraOverlayBinding.carriagePositionValue.text =
-                        getString(R.string.value_unknown)
+                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
                 }
             }
 
@@ -707,9 +706,10 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private fun runCarriageOverrideTask() {
         Timer(LOOPER_TASK, false).schedule(object : TimerTask() {
             override fun run() {
-                if(_fragmentCameraOverlayBinding == null) return
-
-                if(!viewModel.isPositionAutoMode){
+                if(_fragmentCameraOverlayBinding == null){
+                    this.cancel()
+                }
+                else if(!viewModel.isPositionAutoMode){
                     DataShared.carriagePositionOverride.postValue(Unit.MM, fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress.toDouble())
                 }
                 else{

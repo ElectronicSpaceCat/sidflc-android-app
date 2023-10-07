@@ -54,8 +54,9 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
     fun startFirmwareUpdate(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             downloadFirmware(context)
-
-            updateFirmware(context)
+            if(_updateStatus.value == UpdateStatus.DOWNLOADED){
+                updateFirmware(context)
+            }
         }
     }
 
@@ -65,6 +66,17 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun checkFirmwareVersion(context: Context) {
+
+        updateStatus = UpdateStatus.CHECKING_FIRMWARE
+
+        if(networkStatus.value == null){
+            return
+        }
+
+        if(!networkStatus.value!!) {
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             // Get latest version
             try {
@@ -74,8 +86,8 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
                 return@launch
             }
 
-            // If device is in forced-DFU mode then allow any firmware
-            if(DataShared.device.name == context.getString(R.string.dfu_name)){
+            // If device is in DFU mode then allow any firmware
+            if(DataShared.device.isBootloaderActive() || DataShared.device.versionFirmware.value!! == ""){
                 updateStatus = UpdateStatus.UPDATE_AVAILABLE
                 return@launch
             }
@@ -117,6 +129,7 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
                 // Update the progress bar when downloading
                 _downloadProgress.postValue(((progress / length) * 100).toInt())
             }
+            updateStatus = UpdateStatus.DOWNLOADED
         }
         catch (e : Exception) {
             updateStatus = UpdateStatus.ERROR
@@ -164,6 +177,7 @@ class DeviceDfuViewModel(application: Application) : AndroidViewModel(applicatio
             ON_LATEST_FIRMWARE,
             UPDATE_AVAILABLE,
             DOWNLOADING,
+            DOWNLOADED,
             UPDATING,
             ERROR,
             NA

@@ -75,7 +75,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                                         sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
                                     }
                                     DeviceData.Sensor.Id.LONG -> {
-                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_STANDARD)
+                                        sensor.setConfigCommand(DeviceData.Config.Command.SET, Config.OFFSET_MODE.ordinal, OFFSET_CORRECTION_MODE_PERVCSEL)
                                     }
                                     else -> {}
                                 }

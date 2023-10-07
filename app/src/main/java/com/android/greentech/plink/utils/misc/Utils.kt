@@ -188,18 +188,20 @@ object Utils {
      * Get bluetooth device if the name matches one in the list of bonded devices
      *
      * @param context
-     * @param deviceName
+     * @param name
      * @return BluetoothDevice if match found, null if not
      */
     @SuppressLint("MissingPermission")
-    fun getBondedDevice(context: Context, deviceName : String) : BluetoothDevice? {
+    fun getBondedDeviceByUUID(context: Context, name : String) : BluetoothDevice? {
         val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        if(manager.adapter.isEnabled){
-            val devices = manager.adapter.bondedDevices
-            devices.forEach { device ->
-                if (device.bondState == BluetoothDevice.BOND_BONDED && device.name == deviceName) {
-                    return device
-                }
+        if(!manager.adapter.isEnabled) {
+            return null
+        }
+        val devices = manager.adapter.bondedDevices
+        devices.forEach { device ->
+            if (device.bondState == BluetoothDevice.BOND_BONDED
+                && device.name == name){
+                return device
             }
         }
         return null

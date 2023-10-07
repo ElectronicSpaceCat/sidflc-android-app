@@ -22,15 +22,16 @@ import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import androidx.preference.*
-import com.android.greentech.plink.dataShared.DataShared
-import com.android.greentech.plink.device.springs.Spring
-import com.android.greentech.plink.fragments.dialogs.SpringSelectDialogFragment
-import com.android.greentech.plink.utils.textFilters.TextInputFilter
-import com.android.greentech.plink.utils.misc.Utils
 import com.android.greentech.plink.R
+import com.android.greentech.plink.dataShared.DataShared
 import com.android.greentech.plink.device.Device
 import com.android.greentech.plink.device.bluetooth.device.DeviceData
+import com.android.greentech.plink.device.springs.Spring
+import com.android.greentech.plink.fragments.dialogs.SpringSelectDialogFragment
+import com.android.greentech.plink.utils.misc.Utils
+import com.android.greentech.plink.utils.textFilters.TextInputFilter
 import java.util.*
+
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsDeviceFragment : PreferenceFragmentCompat() {
@@ -58,8 +59,7 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
         val forceOffsetFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
-                InputFilter.LengthFilter(7),
-                TextInputFilter.MinMax(0, 2)
+                InputFilter.LengthFilter(7)
             )
             editText.filters = filters
             editText.setSelection(editText.text.length)
@@ -72,8 +72,7 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
         val efficiencyFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
-                InputFilter.LengthFilter(7),
-                TextInputFilter.MinMax(0, 1)
+                InputFilter.LengthFilter(7)
             )
             editText.filters = filters
             editText.setSelection(editText.text.length)
@@ -86,8 +85,7 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
         val frictionCoefficientFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
-                InputFilter.LengthFilter(7),
-                TextInputFilter.MinMax(0, 1)
+                InputFilter.LengthFilter(7)
             )
             editText.filters = filters
             editText.setSelection(editText.text.length)
@@ -130,13 +128,16 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 if (forceOffset.text != newValue as String) {
-                    _dataWasModified = true
-                    val value = Utils.convertStrToFloat(newValue)
-                    DataShared.device.sendConfigCommand(DeviceData.Config.Target.EXT_STORE,
-                        DeviceData.Config.Command.SET,
-                        Device.EXTDATA.FORCE_OFFSET.ordinal,
-                        value.toBits())
-                    retVal = true
+                    if(TextInputFilter.isStrInRange(0.0, 2.0, newValue)) {
+                        _dataWasModified = true
+                        DataShared.device.sendConfigCommand(
+                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Command.SET,
+                            Device.EXTDATA.FORCE_OFFSET.ordinal,
+                            Utils.convertStrToFloat(newValue).toBits()
+                        )
+                        retVal = true
+                    }
                 }
                 retVal
             }
@@ -153,13 +154,16 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 if (efficiency.text != newValue as String) {
-                    _dataWasModified = true
-                    val value = Utils.convertStrToFloat(newValue)
-                    DataShared.device.sendConfigCommand(DeviceData.Config.Target.EXT_STORE,
-                        DeviceData.Config.Command.SET,
-                        Device.EXTDATA.EFFICIENCY.ordinal,
-                        value.toBits())
-                    retVal = true
+                    if(TextInputFilter.isStrInRange(0.5, 1.0, newValue)) {
+                        _dataWasModified = true
+                        DataShared.device.sendConfigCommand(
+                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Command.SET,
+                            Device.EXTDATA.EFFICIENCY.ordinal,
+                            Utils.convertStrToFloat(newValue).toBits()
+                        )
+                        retVal = true
+                    }
                 }
                 retVal
             }
@@ -176,13 +180,16 @@ class SettingsDeviceFragment : PreferenceFragmentCompat() {
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 if (frictionCoefficient.text != newValue as String) {
-                    _dataWasModified = true
-                    val value = Utils.convertStrToFloat(newValue)
-                    DataShared.device.sendConfigCommand(DeviceData.Config.Target.EXT_STORE,
-                        DeviceData.Config.Command.SET,
-                        Device.EXTDATA.FRICTION_COEFFICIENT.ordinal,
-                        value.toBits())
-                    retVal = true
+                    if(TextInputFilter.isStrInRange(0.0, 1.0, newValue)) {
+                        _dataWasModified = true
+                        DataShared.device.sendConfigCommand(
+                            DeviceData.Config.Target.EXT_STORE,
+                            DeviceData.Config.Command.SET,
+                            Device.EXTDATA.FRICTION_COEFFICIENT.ordinal,
+                            Utils.convertStrToFloat(newValue).toBits()
+                        )
+                        retVal = true
+                    }
                 }
                 retVal
             }

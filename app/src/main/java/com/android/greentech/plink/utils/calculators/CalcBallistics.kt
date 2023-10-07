@@ -86,7 +86,7 @@ object CalcBallistics {
     }
 
     /**
-     * Get impact distance
+     * Get impact distance for ideal parabolic trajectory
      *
      * x = v₀ * cos(α) * (v₀ * sin(α) + √((v₀ * sin(α))² + 2 * g * h)) / g
      *
@@ -103,7 +103,7 @@ object CalcBallistics {
     }
 
     /**
-     * Get impact height
+     * Get impact height for ideal parabolic trajectory
      *
      * y = y₀ + v₀ᵧt - 0.5 * g * t²
      *

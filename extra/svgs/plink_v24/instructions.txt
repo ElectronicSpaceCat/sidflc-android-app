@@ -1,0 +1,5 @@
+1) Create a cad drawing of the top, bottom, carriage in FreeCad of the device
+2) Export them as an svg
+3) Use something like Inkscape to import the svg
+4) Separate into three separate files
+5) The carriage needs to be overlayed over the bottom layer (for reference) and align the bottom of the carriage to the back wall of the bottom. This defaults it's position to 0mm in front of the Time of Flight sensor. The smartphone app can then translate the position of the carriage svg image based on the actual ToF range value with some math.

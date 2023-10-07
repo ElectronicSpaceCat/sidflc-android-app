@@ -15,11 +15,10 @@
   ~ limitations under the License.
   -->
 <resources>
-    <string name="app_name">Plink</string>
-    <string name="dfu_name">PlinkDFU</string>
+    <string name="app_name">SIDFLC</string>
+    <string name="dfu_name">SIDFLC_DFU</string>
 
     <!-- Common -->
-    <string name="ok">ok</string>
     <string name="notice">notice</string>
 
     <!-- Preferences Common -->
@@ -194,8 +193,8 @@
         \nPress the <b>Calibrate</b> button to zero out the sensors.</string>
 
     <!-- DFU zip file -->
-    <string name="fw_file_version">https://raw.githubusercontent.com/ElectronicSpaceCat/plink-device-firmware/master/extra/dfu/version</string>
-    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/plink-device-firmware/raw/master/extra/dfu/plink.zip</string>
+    <string name="fw_file_version">https://raw.githubusercontent.com/ElectronicSpaceCat/sidflc-fw-app/main/extra/dfu/version</string>
+    <string name="fw_file_download">https://github.com/ElectronicSpaceCat/sidflc-fw-app/raw/main/extra/dfu/sidflc.zip</string>
     <string name="fw_file_name">plink.zip</string>
 
     <!-- DFU Screen -->

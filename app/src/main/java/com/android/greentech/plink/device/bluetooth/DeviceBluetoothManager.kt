@@ -98,6 +98,8 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
     // Flags used to determine when device cache should be cleared on disconnect
     private var _supported = false
 
+    private var _isBootloader = false
+
     /**
      * Make the ensureBond method public
      */
@@ -118,6 +120,10 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      */
     fun setLogger(session: LogSession?) {
         _logSession = session
+    }
+
+    fun isBootloader() : Boolean {
+        return _isBootloader
     }
 
     override fun log(priority: Int, message: String) {
@@ -400,12 +406,12 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             // 1) Generic Access    (standard)
             // 2) Generic Attribute (standard)
             // 3) DFU
-            val isBootloader = (gatt.services.size == 3 && null != gatt.getService(LBS_UUID_DFU_SERVICE))
+            _isBootloader = (gatt.services.size == 3 && null != gatt.getService(LBS_UUID_DFU_SERVICE))
 
             // Return True if device has supported services for the app OR is in the bootloader
             // The _supported flag is use to determine if the cached services should be cleared on disconnect
             // which it should if connected to the bootloader or app services are not supported.
-            return ((_supported && writeRequest) || isBootloader)
+            return ((_supported && writeRequest) || _isBootloader)
         }
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
