@@ -47,7 +47,7 @@ class UnitEditorFragment : Fragment() {
 
         // Unit selections - Lengths
         val unitLengthsDefault : MutableList<String> = mutableListOf()
-        ConvertLength.Unit.values().forEach {
+        ConvertLength.Unit.entries.forEach {
             unitLengthsDefault.add(it.name.lowercase())
         }
 

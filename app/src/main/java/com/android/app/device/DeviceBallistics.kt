@@ -14,9 +14,9 @@ class DeviceBallistics(model: ModelData) {
     private var _impactDistance = 0.0
     private var _impactHeight = 0.0
 
-    private var _forceOffset = 0.0
-    private var _frictionCoefficient = 0.0 // Currently set to 0.0 since it's almost negligible
-    private var _efficiency = 0.0
+    private var _forceOffset = DEFAULT_FORCE_OFFSET
+    private var _efficiency = DEFAULT_EFFICIENCY_FACTOR
+    private var _frictionCoefficient = DEFAULT_FRICTION_COEFFICIENT
 
     inner class ImpactData(var distance: Double = 0.0, var height: Double = 0.0)
 
@@ -25,7 +25,7 @@ class DeviceBallistics(model: ModelData) {
             _forceOffset = if(value in 0.0..2.0){
                 value
             } else{
-                0.0
+                DEFAULT_FORCE_OFFSET
             }
         }
         get() = _forceOffset
@@ -45,7 +45,7 @@ class DeviceBallistics(model: ModelData) {
             _efficiency = if(value in 0.5..1.0){
                 value
             } else{
-                0.7
+                DEFAULT_EFFICIENCY_FACTOR
             }
         }
         get() = _efficiency
@@ -89,14 +89,14 @@ class DeviceBallistics(model: ModelData) {
         // Get the approximate launch height which is the value of the (device height + max carriage pos + projectile center of gravity offset)
         // and then adjusted by the launch angle where the vertex starts at the device height.
         /*
-                               /|
-              Projectile --> () |--- <-- Height offset
-                             /  |
-                      ______/)__|_______________________
-                            ^.__ Device Angle      ^ <-- Device height
+                               /
+              Projectile -- > @ .--- <-- Height offset
+                             /  .
+                      ______/)__._______________________
+                             ^.__ Device Angle     ^ <-- Device height
                                                    |
                                                    v
-                      __________________________________ <-- Ground
+                      ---------------------------------- <-- Ground
          */
         val heightOffsetMM = getProjectileHeightOffsetAtAngle(_model.getMaxCarriagePosition(), launchAngle)
         val heightOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, heightOffsetMM)
@@ -213,7 +213,10 @@ class DeviceBallistics(model: ModelData) {
     }
 
     companion object {
+        private const val DEFAULT_EFFICIENCY_FACTOR = 0.7
+        private const val DEFAULT_FORCE_OFFSET = 1.0
+        private const val DEFAULT_FRICTION_COEFFICIENT= 0.7
+
         private const val DEFAULT_DELTA_TIME_SECONDS = 0.01
-        private const val DEFAULT_EFFICIENCY_FACTOR = 0.65f
     }
 }

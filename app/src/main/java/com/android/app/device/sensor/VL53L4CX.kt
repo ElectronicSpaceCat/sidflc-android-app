@@ -23,8 +23,8 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
         CAL_XTALK // Note: This seems to goof up the sensor, datasheet recommends running it with target at 600mm
     }
 
-    override val configs: Array<ISensor.Config> = Array(Config.values().size) {
-        ISensor.Config(Config.values()[it].name, Int.MAX_VALUE)
+    override val configs: Array<ISensor.Config> = Array(Config.entries.size) {
+        ISensor.Config(Config.entries[it].name, Int.MAX_VALUE)
     }
 
     override fun stopCalibration() {
@@ -229,14 +229,14 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
     }
 
     private fun setCalMessage(configId: Int){
-        if(configId < Config.values().size){
-            stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.values()[configId].name
+        if(configId < Config.entries.size){
+            stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.entries[configId].name
         }
     }
 
     private fun setCalResponseMessage(config: DeviceData.Config){
-        if(config.id < Config.values().size){
-            stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.values()[config.id].name + " : " + config.status.name
+        if(config.id < Config.entries.size){
+            stateMsg = "Sensor: " + sensor.id.toString() + "\nConfig: " + Config.entries[config.id].name + " : " + config.status.name
         }
     }
 

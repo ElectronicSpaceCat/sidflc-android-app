@@ -20,15 +20,12 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.camera.core.*
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -172,17 +169,8 @@ class CameraFragment : Fragment() {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
-        // ResolutionSelector
-        val screenSize = Size(width, height)
-        val resolutionSelector = ResolutionSelector.Builder().setResolutionStrategy(
-            ResolutionStrategy(screenSize, ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER)
-        ).build()
-
         // Preview
         preview = Preview.Builder()
-            // We request aspect ratio but no resolution
-         //   .setResolutionSelector(resolutionSelector)  // NOTE: Was causing studder
-            // Set initial target rotation
             .setTargetRotation(rotation)
             .build()
 
