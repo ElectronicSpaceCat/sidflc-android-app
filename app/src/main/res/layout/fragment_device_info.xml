@@ -15,7 +15,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/container_dfu"
-        android:name="com.android.greentech.plink.fragments.device.deviceDfu.DeviceDfuFragment"
+        android:name="com.android.app.fragments.device.deviceDfu.DeviceDfuFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout="@layout/fragment_device_dfu" />

@@ -18,7 +18,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/container_camera_overlay"
-        android:name="com.android.greentech.plink.fragments.cameraOverlay.CameraOverlayFragment"
+        android:name="com.android.app.fragments.cameraOverlay.CameraOverlayFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:layout="@layout/fragment_camera_overlay" />
@@ -31,7 +31,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/container_device_monitor"
-        android:name="com.android.greentech.plink.fragments.device.deviceMonitor.DeviceMonitorFragment"
+        android:name="com.android.app.fragments.device.deviceMonitor.DeviceMonitorFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:layout="@layout/fragment_device_monitor" />

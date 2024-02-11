@@ -188,7 +188,7 @@
     </string>
 
     <!-- Privacy -->
-    <string name="privacy_policy">This app does not record or use any personal data.</string>
+    <string name="privacy_policy">This app does not record or use any personal information.</string>
 
     <!-- Gyro Calibration Screen -->
     <string name="gyro_cal_instructions">Place phone on a flat <b>level</b> surface.

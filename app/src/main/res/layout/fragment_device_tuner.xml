@@ -22,7 +22,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <com.android.greentech.plink.utils.plotter.CanvasPlotterBox
+        <com.android.app.utils.plotter.CanvasPlotterBox
             android:id="@+id/graph_view_box"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -30,9 +30,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/graph_view_plotter">
 
-        </com.android.greentech.plink.utils.plotter.CanvasPlotterBox>
+        </com.android.app.utils.plotter.CanvasPlotterBox>
 
-        <com.android.greentech.plink.utils.plotter.GraphView
+        <com.android.app.utils.plotter.GraphView
             android:id="@+id/graph_view_plotter"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -41,7 +41,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        </com.android.greentech.plink.utils.plotter.GraphView>
+        </com.android.app.utils.plotter.GraphView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -899,7 +899,7 @@
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/container_device_model"
-                android:name="com.android.greentech.plink.fragments.device.deviceModel.DeviceModelFragment"
+                android:name="com.android.app.fragments.device.deviceModel.DeviceModelFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:layout="@layout/fragment_model_tuner" />

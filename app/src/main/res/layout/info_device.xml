@@ -78,7 +78,8 @@
 	<TableRow
 		android:id="@+id/item_device_manufacturer"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"
+		android:visibility="visible">
 
 		<TextView
 			android:id="@+id/ble_device_manufacturer_header"
@@ -101,7 +102,7 @@
 		android:id="@+id/item_device_model"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:visibility="gone">
+		android:visibility="visible">
 
 		<TextView
 			android:id="@+id/ble_device_model_header"
@@ -146,7 +147,8 @@
 	<TableRow
 		android:id="@+id/item_device_version_hw"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"
+		android:visibility="visible">
 
 		<TextView
 			android:id="@+id/ble_device_version_hw_header"

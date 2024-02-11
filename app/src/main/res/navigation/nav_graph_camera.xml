@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/camera_permissions_fragment"
-        android:name="com.android.greentech.plink.fragments.camera.CameraPermissionsFragment"
+        android:name="com.android.app.fragments.camera.CameraPermissionsFragment"
         android:label="CameraPermissionsFragment">
 
         <action
@@ -33,7 +33,7 @@
 
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.android.greentech.plink.fragments.camera.CameraFragment"
+        android:name="com.android.app.fragments.camera.CameraFragment"
         android:label="CameraFragment" >
 
         <action

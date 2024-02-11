@@ -22,7 +22,7 @@
     app:startDestination="@id/homeFragment">
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.android.greentech.plink.fragments.home.HomeFragment"
+        android:name="com.android.app.fragments.home.HomeFragment"
         android:label="" >
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
@@ -39,15 +39,15 @@
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
-        android:name="com.android.greentech.plink.fragments.about.AboutFragment"
+        android:name="com.android.app.fragments.about.AboutFragment"
         android:label="About" />
     <fragment
         android:id="@+id/privacyFragment"
-        android:name="com.android.greentech.plink.fragments.privacy.PrivacyFragment"
+        android:name="com.android.app.fragments.privacy.PrivacyFragment"
         android:label="Privacy Policy" />
     <fragment
         android:id="@+id/deviceScannerFragment"
-        android:name="com.android.greentech.plink.fragments.device.deviceScanner.DeviceScannerFragment"
+        android:name="com.android.app.fragments.device.deviceScanner.DeviceScannerFragment"
         android:label="Device Scanner" >
         <action
             android:id="@+id/action_deviceScannerFragment_to_deviceConnectedFragment"
@@ -56,7 +56,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.android.greentech.plink.fragments.settings.SettingsMainFragment"
+        android:name="com.android.app.fragments.settings.SettingsMainFragment"
         android:label="Settings" >
         <action
             android:id="@+id/action_settingsFragment_to_unitEditorFragment"
@@ -73,23 +73,23 @@
     </fragment>
     <fragment
         android:id="@+id/gyroCalFragment"
-        android:name="com.android.greentech.plink.fragments.gyroCal.GyroCalFragment"
+        android:name="com.android.app.fragments.gyroCal.GyroCalFragment"
         android:label="Gyro Calibrate" />
     <fragment
         android:id="@+id/unitEditorFragment"
-        android:name="com.android.greentech.plink.fragments.unitEditor.UnitEditorFragment"
+        android:name="com.android.app.fragments.unitEditor.UnitEditorFragment"
         android:label="Units" />
     <fragment
         android:id="@+id/projectileEditFragment"
-        android:name="com.android.greentech.plink.fragments.projectileEditor.ProjectileEditFragment"
+        android:name="com.android.app.fragments.projectileEditor.ProjectileEditFragment"
         android:label="Projectiles" />
     <fragment
         android:id="@+id/deviceTunerFragment"
-        android:name="com.android.greentech.plink.fragments.device.deviceTuner.DeviceTunerFragment"
+        android:name="com.android.app.fragments.device.deviceTuner.DeviceTunerFragment"
         android:label="Device Tuner" />
     <fragment
         android:id="@+id/deviceConnectedFragment"
-        android:name="com.android.greentech.plink.fragments.device.deviceConnected.DeviceConnectedFragment"
+        android:name="com.android.app.fragments.device.deviceConnected.DeviceConnectedFragment"
         android:label="Device Connected" >
         <action
             android:id="@+id/action_deviceConnectedFragment_to_deviceInfoFragment"
@@ -103,14 +103,14 @@
     </fragment>
     <fragment
         android:id="@+id/deviceCalibrateFragment"
-        android:name="com.android.greentech.plink.fragments.device.deviceCalibrate.DeviceCalibrateFragment"
+        android:name="com.android.app.fragments.device.deviceCalibrate.DeviceCalibrateFragment"
         android:label="Device Calibrate" />
     <fragment
         android:id="@+id/deviceInfoFragment"
-        android:name="com.android.greentech.plink.fragments.device.deviceInfo.DeviceInfoFragment"
+        android:name="com.android.app.fragments.device.deviceInfo.DeviceInfoFragment"
         android:label="Device Info" />
     <fragment
         android:id="@+id/settingsDeviceFragment"
-        android:name="com.android.greentech.plink.fragments.settings.SettingsDeviceFragment"
+        android:name="com.android.app.fragments.settings.SettingsDeviceFragment"
         android:label="Device Settings" />
 </navigation>
