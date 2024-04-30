@@ -12,10 +12,10 @@ import com.android.app.device.bluetooth.DeviceBluetoothManager
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.device.model.Model
+import com.android.app.device.model.ModelBallistics
 import com.android.app.device.model.ModelData
 import com.android.app.device.sensor.Sensor
 import com.android.app.device.springs.Spring
-import kotlinx.coroutines.*
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.log.Logger
@@ -30,36 +30,32 @@ class Device(context: Context) {
         SPRING_ID
     }
 
-    /**
-     * TODO: - Need a clean way of updating spring, projectile, and model when they change.
-     *       - I would like the spring, projectile, and model to be stored in a local database
-     *         and accessed. This would allow for custom of each.
-     *       - The model and default spring id will come from the firmware (set when programmed) but would like
-     *         the ability to override the ids if the pcb is placed in a different case or springs are swapped out.
-     *
-     * NOTE: - Not sure if I should handle math on what happens if two different types of springs are put in the device.
-     */
     /** Device model data */
     private var _model : MutableLiveData<ModelData>
 
-    /** Ballistics data */
-    private var _ballistics : DeviceBallistics
-
     /** BLE Device data */
-    private var _bleDevice: BluetoothDevice? = null
     private var _bleDeviceManager = DeviceBluetoothManager(context)
+    private var _bleDevice: BluetoothDevice ?= null
 
     private val _prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    private val _prefsModelIdKey = context.getString(R.string.PREFERENCE_FILTER_DEVICE_MODEL_ID)
 
     private var _configIdx = 0
     private var _isInitialized = false
 
     /** Device sensors */
-    val sensorCarriagePosition = Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.SHORT)
-    val sensorDeviceHeight = Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.LONG)
+    private val sensors : Array<Sensor> = Array(DeviceData.Sensor.Id.NUM_IDS.ordinal) {
+        Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.entries[it])
+    }
+
+    /** Associate the sensors to a parameter */
+    val sensorCarriagePosition = sensors[DeviceData.Sensor.Id.SHORT.ordinal]
+    val sensorDeviceHeight = sensors[DeviceData.Sensor.Id.LONG.ordinal]
 
     /** Active sensor (default to carriage position sensor) */
-    var activeSensor : Sensor = sensorCarriagePosition
+    private var _activeSensor = sensorCarriagePosition
+    val activeSensor : Sensor
+        get() = _activeSensor
 
     val isInitialized : Boolean
         get() = _isInitialized
@@ -73,26 +69,25 @@ class Device(context: Context) {
     /**
      * Set model data and store id to prefs
      */
-    var model: ModelData
+    var model : ModelData
         get() = _model.value!!
         set(value) {
             // Set the new model
             _model.value = value
-            // Set the calibration offset reference for the carrier position sensor
+            // Set the calibration offset reference for the carriage position sensor
             if(activeSensor.id == DeviceData.Sensor.Id.SHORT){
                 activeSensor.targetReference = model.getMaxCarriagePosition().toInt()
                 activeSensor.driftCompensationEnable = true
             }
             // Store the model to prefs if new
-            val idModel = _prefs.getString(model_pref_tag, Model.Name.V23.name)!!
+            val idModel = _prefs.getString(_prefsModelIdKey, Model.Name.V24.name)!!
             if(idModel != _model.value!!.name) {
-                _prefs.edit().putString(model_pref_tag, _model.value!!.name).apply()
+                _prefs.edit().putString(_prefsModelIdKey, _model.value!!.name).apply()
             }
         }
 
-    /** Device Ballistics Data */
-    val ballistics: DeviceBallistics
-        get() = _ballistics
+    val ballistics : ModelBallistics
+        get() = model.ballistics
 
     /** Device bluetooth information */
     val name: String
@@ -192,7 +187,7 @@ class Device(context: Context) {
      * @param id
      * @param value
      */
-    fun sendConfigCommand(target : DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int, value: Int) {
+    fun sendConfigCommand(target : DeviceData.Config.Target, command: DeviceData.Config.Command, id: Int = Int.MAX_VALUE, value: Int = Int.MAX_VALUE) {
         _bleDeviceManager.sendSensorConfigCommand(target, command, id, value)
     }
 
@@ -258,7 +253,7 @@ class Device(context: Context) {
         }
     }
 
-    private fun getConfigs(config : Int){
+    private fun getUserConfigurations(config : Int){
         // Is sensor configs initialized?
         if(!_isInitialized){
             // Yes - Is config index within range?
@@ -266,7 +261,7 @@ class Device(context: Context) {
                 // Yes - Is the config the same as the one we requested?
                 if(_configIdx == config){
                     // Yes - Send for the next one
-                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, ++_configIdx, Int.MAX_VALUE)
+                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, ++_configIdx)
                 }
             }
             // No - Finished..
@@ -278,23 +273,12 @@ class Device(context: Context) {
 
     init {
         // Load model data from stored preferences
-        val idModel = _prefs.getString(model_pref_tag, Model.Name.V24.name)!!
+        val idModel = _prefs.getString(_prefsModelIdKey, Model.Name.V24.name)!!
         val model = Model.getData(idModel)
         _model = MutableLiveData(model)
 
-        // NOTE: Currently the selected spring is set in the Preference Settings screen
-        val idSpring = _prefs.getString(
-            context.getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED),
-            _model.value?.defaultSpringName?.name
-        )!!
-        val spring = Spring.getData(idSpring)
-        _model.value!!.setSpring(spring)
-
         // Set model
         this.model = _model.value!!
-
-        // Set the ballistics manager
-        _ballistics = DeviceBallistics(this.model)
 
         /**
          * Observe the device model data and set the model if not the same
@@ -333,32 +317,21 @@ class Device(context: Context) {
          * Observe the selected sensor to update the activeSensor
          */
         sensorSelected.observe(context as LifecycleOwner) {
-            when(it.id){
-                DeviceData.Sensor.Id.SHORT,
-                DeviceData.Sensor.Id.LONG-> {
-                    // Switch sensor to selected
-                    activeSensor = if(it.id == DeviceData.Sensor.Id.SHORT) {
-                        sensorCarriagePosition
-                    } else{
-                        sensorDeviceHeight
-                    }
-                }
-                else -> {
-                    // Do nothing..
-                }
+            if(it.id.ordinal < DeviceData.Sensor.Id.NUM_IDS.ordinal){
+                _activeSensor = sensors[it.id.ordinal]
             }
         }
 
         /**
-         * Observe the sensor status. When ready,
-         * get all device specific stored data.
+         * Observe the sensor status.
+         * When ready and not initialized, get all device specific stored data.
          */
         sensorStatus.observe(context as LifecycleOwner) {
             when (it) {
                 DeviceData.Status.READY -> {
                     if(_isInitialized) return@observe
                     // Send command to get a stored configuration which will trigger getting the rest
-                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
+                    sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, _configIdx)
                 }
                 else -> {}
             }
@@ -374,13 +347,17 @@ class Device(context: Context) {
                 DeviceData.Config.Status.MISMATCH -> {
                     when(it.id){
                         USERDATA.FORCE_OFFSET.ordinal -> {
-                            _ballistics.forceOffset = intBitsToFloat(it.value).toDouble()
+                            this.model.ballistics.forceOffset = intBitsToFloat(it.value).toDouble()
                         }
                         USERDATA.EFFICIENCY.ordinal -> {
-                            _ballistics.efficiency = intBitsToFloat(it.value).toDouble()
+                            this.model.ballistics.efficiency = intBitsToFloat(it.value).toDouble()
                         }
                         USERDATA.FRICTION_COEFFICIENT.ordinal -> {
-                            _ballistics.frictionCoefficient = intBitsToFloat(it.value).toDouble()
+                            this.model.ballistics.frictionCoefficient = intBitsToFloat(it.value).toDouble()
+                        }
+                        USERDATA.SPRING_ID.ordinal -> {
+                            val spring = Spring.getData(it.value)
+                            this.model.setSpring(spring)
                         }
                     }
                 }
@@ -388,11 +365,7 @@ class Device(context: Context) {
             }
 
             // Run config init
-            getConfigs(it.id)
+            getUserConfigurations(it.id)
         }
-    }
-
-    companion object {
-        private const val model_pref_tag = "model_id"
     }
 }

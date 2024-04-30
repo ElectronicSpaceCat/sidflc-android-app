@@ -98,7 +98,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
         // Initialize the scanner search-by filters
         viewModel.filterByUuid(true)
-        viewModel.filterByDistance(false) // TODO: Had this fail to show device even when on..might need to adjust the rssi value to compare against
+        viewModel.filterByDistance(false)
 
         // Create view model containing utility methods for scanning
         viewModel.deviceScannerState.observe(viewLifecycleOwner) { state: DeviceScannerStateLiveData ->

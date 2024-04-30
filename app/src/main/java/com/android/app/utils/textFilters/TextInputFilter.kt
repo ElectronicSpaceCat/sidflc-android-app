@@ -14,16 +14,17 @@ object TextInputFilter {
         }
 
         override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dStart: Int, dEnd: Int): CharSequence? {
+            // Is negative value being entered
             if(source == "-"){
                 return source
             }
-
+            // Are leading digits "0." or "." for decimal entry
             if(this.intMin.toFloat() < 1.0){
                 if((dStart == 0 && source == "0") || (dStart == 1 && source == ".")) {
                     return null
                 }
             }
-
+            // Check if remanding characters entered can be converted to a float type
             try {
                 val input = (dest.toString() + source.toString()).toFloat()
                 if (isInRange(intMin.toFloat(), intMax.toFloat(), input)) {

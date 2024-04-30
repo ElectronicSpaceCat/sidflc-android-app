@@ -34,7 +34,7 @@ import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentCameraOverlayBinding
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.device.bluetooth.device.DeviceData
-import com.android.app.device.projectile.utils.ProjectilePrefUtils
+import com.android.app.device.projectile.ProjectilePrefUtils
 import com.android.app.fragments.dialogs.ProjectileSelectDialogFragment
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.converters.ConvertLength.Unit
@@ -96,10 +96,10 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Setup the ballistics button for Device Height
          */
-        btnDeviceHeight = object : BallisticsButton<LengthData>("DH",
-            "Device Height",
+        btnDeviceHeight = object : BallisticsButton<LengthData>("DH", "Device Height",
             fragmentCameraOverlayBinding.deviceHeight,
-            DataShared.deviceHeight) {
+            DataShared.deviceHeight,
+            View.GONE) {
             override fun onButtonClick() {
                 super.onButtonClick()
                 if (btnDeviceHeight.acquisitionMode == Mode.AUTO) {
@@ -180,16 +180,13 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             }
         }
 
-        // The deviceHeight has no use for the lock button so hide it
-        btnDeviceHeight.setIconVisibility(BallisticsButton.IconId.LOCK, View.GONE)
-
         /**
          * Setup the ballistics button for Target Distance
          */
-        btnTrgtDist = object : BallisticsButton<LengthData>("TD",
-            "Target Distance",
+        btnTrgtDist = object : BallisticsButton<LengthData>("TD", "Target Distance",
             fragmentCameraOverlayBinding.targetDistance,
-            DataShared.targetDistance) {
+            DataShared.targetDistance,
+            View.VISIBLE) {
             override fun onButtonClick() {
                 super.onButtonClick()
                 if (btnTrgtDist.acquisitionMode == Mode.AUTO && btnDeviceHeight.dataStatus == DataStatus.SET) {
@@ -253,10 +250,10 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Setup the ballistics button for Target Height
          */
-        btnTrgtHeight = object : BallisticsButton<LengthData>("TH",
-            "Target Height",
+        btnTrgtHeight = object : BallisticsButton<LengthData>("TH", "Target Height",
             fragmentCameraOverlayBinding.targetHeight,
-            DataShared.targetHeight) {
+            DataShared.targetHeight,
+            View.VISIBLE) {
             override fun onButtonClick() {
                 super.onButtonClick()
                 if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtDist.dataStatus == DataStatus.SET) {
@@ -301,7 +298,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.projectileSelected.setOnClickListener {
             ProjectileSelectDialogFragment(
                 getString(R.string.header_projectile),
-                getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED)
+                getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED),
+                null
             ).show(requireActivity().supportFragmentManager, null)
         }
 
@@ -770,7 +768,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private fun updateEngData(position : Double) {
         // If engineering view is visible then display the data
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.heightData.text = DataShared.deviceHeight.valueStr()
+            fragmentCameraOverlayBinding.engineerData.deviceHeightData.text = DataShared.deviceHeight.valueStr()
 
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = DataShared.targetDistance.valueStr()
 
@@ -801,24 +799,24 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
         // If engineering view is visible then display the data
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.heightAdjData.text = String.format(
+            fragmentCameraOverlayBinding.engineerData.projectileHeightData.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
                 ConvertLength.convert(Unit.M,
                     DataShared.deviceHeight.unit,
-                    DataShared.device.ballistics.getAdjustedLaunchHeight)
+                    viewModel.getAdjustedLaunchHeight)
             )
             fragmentCameraOverlayBinding.engineerData.targetDistanceAdjData.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
                 ConvertLength.convert(Unit.M,
                     DataShared.targetDistance.unit,
-                    DataShared.device.ballistics.adjustedTargetDistance)
+                    viewModel.adjustedTargetDistance)
             )
             fragmentCameraOverlayBinding.engineerData.velocityData.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
-                DataShared.device.ballistics.getVelocity
+                viewModel.velocity
             )
             fragmentCameraOverlayBinding.engineerData.impactDistanceData.text = String.format(
                 Locale.getDefault(),
@@ -830,6 +828,11 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 "%.3f",
                 viewModel.impactHeight
             )
+            fragmentCameraOverlayBinding.engineerData.netEnergyStoredData.text = String.format(
+                Locale.getDefault(),
+                "%.2f",
+                viewModel.netPotentialEnergy
+            )
         }
     }
 
@@ -838,17 +841,18 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.hitConfidenceValue.text = getString(R.string.value_unknown)
 
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE){
-            fragmentCameraOverlayBinding.engineerData.heightAdjData.text = getString(R.string.value_unknown)
+            fragmentCameraOverlayBinding.engineerData.projectileHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceAdjData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.velocityData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.impactDistanceData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.impactHeightData.text = getString(R.string.value_unknown)
+            fragmentCameraOverlayBinding.engineerData.netEnergyStoredData.text = getString(R.string.value_unknown)
         }
     }
 
     private fun clearEngBallisticsData() {
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.heightData.text = getString(R.string.value_unknown)
+            fragmentCameraOverlayBinding.engineerData.deviceHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.springAngleData.text = getString(R.string.value_unknown)
@@ -857,13 +861,14 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     }
 
     private fun initEngViewUnits(){
-        fragmentCameraOverlayBinding.engineerData.heightUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
-        fragmentCameraOverlayBinding.engineerData.heightAdjUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
+        fragmentCameraOverlayBinding.engineerData.deviceHeightUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
+        fragmentCameraOverlayBinding.engineerData.projectileHeightUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetDistanceUnit.text = ("(").plus(DataShared.targetDistance.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetDistanceAdjUnit.text = ("(").plus(DataShared.targetDistance.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetHeightUnit.text = ("(").plus(DataShared.targetHeight.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.springAngleUnit.text = "(deg)"
         fragmentCameraOverlayBinding.engineerData.potentialEnergyUnit.text = "(N-mm)"
+        fragmentCameraOverlayBinding.engineerData.netPotentialEnergyUnit.text = "(N-mm)"
         fragmentCameraOverlayBinding.engineerData.velocityUnit.text = "(m/s)"
         fragmentCameraOverlayBinding.engineerData.impactDistanceUnit.text = ("(").plus(DataShared.targetDistance.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.impactHeightUnit.text = ("(").plus(DataShared.targetHeight.unitStr() + ")")

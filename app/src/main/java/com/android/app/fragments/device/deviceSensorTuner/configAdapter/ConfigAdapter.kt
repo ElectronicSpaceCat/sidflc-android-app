@@ -1,4 +1,4 @@
-package com.android.app.fragments.device.deviceTuner.configAdapter
+package com.android.app.fragments.device.deviceSensorTuner.configAdapter
 
 import android.text.InputType
 import android.view.LayoutInflater
@@ -8,10 +8,10 @@ import com.android.app.R
 import com.android.app.databinding.ItemConfigBinding
 import com.android.app.device.Device
 import com.android.app.device.bluetooth.device.DeviceData
-import com.android.app.fragments.device.deviceTuner.DeviceTunerFragment
+import com.android.app.fragments.device.deviceSensorTuner.DeviceSensorTunerFragment
 import com.android.app.fragments.dialogs.InputDialogFragment
 
-class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerView.Adapter<ConfigAdapter.ViewHolder>() {
+class ConfigAdapter(activity: DeviceSensorTunerFragment, device : Device): RecyclerView.Adapter<ConfigAdapter.ViewHolder>() {
     private var _activity = activity
     private var _device = device
 
@@ -32,7 +32,7 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
         _device.sensorSelected.observe(activity.viewLifecycleOwner) {
             // Clear out existing configurations
             clearConfigs()
-            // Notify the adapter of change to the list to update it
+            // Notify the adapter to update the list
             notifyConfigChange()
             // Add the configurations to adapter list and set status as Requested,
             // even though it is not an actual request call to the device
@@ -116,7 +116,7 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
      * Get the configuration
      */
     private fun getConfig(position: Int) {
-        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.GET, position, Int.MAX_VALUE)
+        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.GET, position)
 
         // Set the sensor status to NA
         if(position < _configs.size) {
@@ -125,12 +125,10 @@ class ConfigAdapter(activity: DeviceTunerFragment, device : Device): RecyclerVie
     }
 
     /**
-     * Reset the configuration value to the app's initial hardcoded value.
-     * If the hardcoded value equals Int.MAX_VALUE then use the factory default
-     * value from the sensor.
+     * Reset the configuration value.
      */
     private fun resetConfig(position: Int) {
-        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.RESET, position, Int.MAX_VALUE)
+        _device.sendConfigCommand(DeviceData.Config.Target.SENSOR, DeviceData.Config.Command.RESET, position)
 
         // Set the sensor status to NA
         if(position < _configs.size) {

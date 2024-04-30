@@ -23,6 +23,7 @@
     <string name="notice">notice</string>
 
     <!-- Preferences Common -->
+    <string name="PREFERENCE_FILTER_DEVICE_MODEL_ID">device_model_id</string>
     <string name="PREFERENCE_FILTER_UNITS_EDIT">units_edit</string>
     <string name="PREFERENCE_FILTER_SENSOR_CAL_PHONE">gyro_calibration</string>
     <string name="PREFERENCE_FILTER_SENSOR_CAL_DEVICE">device_sensor_calibration</string>
@@ -32,6 +33,7 @@
     <string name="PREFERENCE_FILTER_PROJECTILE_WEIGHTS">projectile_weights</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_DIAMETERS">projectile_diameters</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_DRAGS">projectile_drags</string>
+    <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED_DRAG">projectile_selected_drag</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED">projectile_selected</string>
     <string name="PREFERENCE_FILTER_SPRING_SELECTED">spring_selected</string>
     <string name="PREFERENCE_FILTER_LENS_OFFSET">lens_offset</string>
@@ -40,6 +42,9 @@
     <string name="PREFERENCE_FILTER_FRICTION_COEFFICIENT">friction_coefficient</string>
     <string name="PREFERENCE_FILTER_CARRIAGE_POSITION_MODE">carriage_pos_mode</string>
     <string name="PREFERENCE_FILTER_ENGINEERING_VIEW">engineering_view</string>
+    <string name="PREFERENCE_FILTER_TEST_PITCH">test_pitch</string>
+    <string name="PREFERENCE_FILTER_TEST_HEIGHT">test_height</string>
+    <string name="PREFERENCE_FILTER_TEST_RECORDED_DATA_VALUES">test_recorded_data_values</string>
 
     <string name="unknown_device">Unknown Device</string>
 
@@ -49,6 +54,7 @@
     <string name="unit_range">ft</string>
     <string name="deviceInfo">…</string>
     <string name="value_unknown">…</string>
+    <string name="value">value</string>
 
     <string name="device_info_desc_name">Name: </string>
     <string name="device_info_desc_address">Address: </string>
@@ -82,9 +88,11 @@
     <string name="button_calibrate">Calibrate</string>
     <string name="button_calibrate_sensor_1">Cal Sensor 1</string>
     <string name="button_calibrate_sensor_2">Cal Sensor 2</string>
-    <string name="button_tune">Tuner</string>
+    <string name="button_sensor_tuner">Sensor Tuner</string>
+    <string name="button_ballistics">Ballistics</string>
     <string name="button_home">Home</string>
     <string name="button_ok">OK</string>
+    <string name="button_pop_out">Pop Out</string>
     <string name="button_continue">Continue</string>
     <string name="button_restart">Restart</string>
 
@@ -112,24 +120,32 @@
     <string name="header_display">Display</string>
     <string name="header_projectile">Projectile</string>
     <string name="header_projectiles_editor">Projectiles</string>
+    <string name="header_spring">Spring</string>
     <string name="header_height">Height</string>
     <string name="header_device">Device</string>
+    <string name="header_device_internal">Device Internal</string>
+    <string name="header_device_external">Device External</string>
+    <string name="header_hardware">Hardware</string>
     <string name="header_ballistics">Ballistics</string>
     <string name="header_calibrations">Calibrations</string>
+    <string name="header_orientation">Orientation (Test)</string>
 
     <!-- Preferences -->
     <string name="pref_title_edit_units">Units</string>
-    <string name="pref_title_projectile_select">Selected</string>
+    <string name="pref_title_projectile_edit">Projectile</string>
+    <string name="pref_title_projectiles_edit">Projectiles</string>
+    <string name="pref_title_projectile_selected_drag">Projectile Drag</string>
     <string name="pref_title_device">Device</string>
-    <string name="pref_title_projectile_edit">Projectiles</string>
     <string name="pref_title_spring_edit">Spring</string>
     <string name="pref_title_lens_offset">Lens Offset</string>
     <string name="pref_title_force_offset">Force Offset (N)</string>
     <string name="pref_title_efficiency">Efficiency Factor</string>
     <string name="pref_title_friction_coefficient">Friction Coefficient</string>
-    <string name="pref_title_calibrate_gyro">Calibrate Gyro</string>
-    <string name="pref_title_calibrate_sensors">Calibrate Device</string>
+    <string name="pref_title_calibrate_gyro">Gyro</string>
+    <string name="pref_title_calibrate_sensors">Device</string>
     <string name="pref_title_advanced">Device Configurations</string>
+    <string name="pref_title_height">Height</string>
+    <string name="pref_title_pitch">Pitch</string>
 
     <!-- Sync Preferences -->
     <string name="height_config_title">Acquisition</string>
@@ -143,6 +159,9 @@
     <string name="manual_height_input_title">Set Height</string>
     <string name="projectile_input_title">Set Projectile</string>
     <string name="config_input_title">Set Config</string>
+
+    <!-- Dialogue Data Point Title -->
+    <string name="data_point_input_title">Set Data Point</string>
 
     <!-- Screen Titles -->
     <string name="title_settings">Settings</string>
@@ -162,7 +181,7 @@
     <string name="calibration_procedure">Leave the carriage in the default position and place a flat object against the rear sensor.\n\nPress the Calibrate button when ready.</string>
     <string name="calibration_options">Long press the image to toggle options.</string>
 
-    <!-- Updatable Length Param Keys -->
+    <!-- Stored Preference Keys -->
     <string name="key_lens_offset">lens_offset</string>
     <string name="key_device_height">device_height</string>
     <string name="key_target_height">target_height</string>

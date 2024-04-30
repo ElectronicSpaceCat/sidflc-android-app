@@ -57,7 +57,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_circle" />
+                app:srcCompat="@drawable/ic_circle_background" />
 
             <TextView
                 android:id="@+id/acquisition_mode_value"
@@ -91,7 +91,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_circle" />
+                app:srcCompat="@drawable/ic_circle_background" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/btn_status_icon"
@@ -124,7 +124,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_circle" />
+                app:srcCompat="@drawable/ic_circle_background" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/btn_lock_icon"

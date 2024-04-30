@@ -29,7 +29,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.preference.PreferenceManager
 import com.android.app.databinding.ActivityMainBinding
 import com.android.app.dataShared.DataShared
-import com.android.app.device.projectile.utils.ProjectilePrefUtils
+import com.android.app.device.projectile.ProjectilePrefUtils
 import com.android.app.utils.misc.Utils
 
 private const val IMMERSIVE_FLAG_TIMEOUT = 500L
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
         // These fragments are handled like this because they require the full screen and not be
         // offset by the navigation handler action bar.
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // If id is a menu item then check it in the nav drawer
+            // If id is a menu item then set it as 'checked' it in the nav drawer
             navigationView.setCheckedItem(destination.id)
 
             if(destination.id == R.id.homeFragment){

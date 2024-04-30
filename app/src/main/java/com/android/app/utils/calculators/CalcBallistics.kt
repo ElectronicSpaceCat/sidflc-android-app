@@ -16,7 +16,7 @@ object CalcBallistics {
     }
 
     /**
-     * Get target height from device height, target angle @ target distance, pitch
+     * Get target height from launch height, target angle @ target distance, pitch
      *
      * @param height (m)
      * @param trgtDistAngle (deg)
@@ -142,5 +142,79 @@ object CalcBallistics {
      */
     private fun getVelocityDirectionX(velocity: Double, launchAngle: Double): Double {
         return (velocity * cos(Math.toRadians(launchAngle)))
+    }
+
+    /**
+     * (Blocking function)
+     *
+     * Run an ODE (ordinary differential equation) to pre-path the projectile with air drag
+     * until the height is less or equal to zero (when the projectile hit the ground).
+     */
+    class ImpactData(
+        var distance: Double = 0.0,
+        var height: Double = 0.0)
+    fun calculateProjectileWithQuadraticDrag(velocity : Double, launchAngle: Double, height: Double, targetDistance: Double, dragCoefficient : Double, deltaTimeSeconds : Double) : ImpactData {
+        val impactData = ImpactData(0.0, 0.0)
+
+        // Velocity in x/y component (initial)
+        val vXinit = velocity * cos(Math.toRadians(launchAngle))
+        val vYinit = velocity * sin(Math.toRadians(launchAngle))
+
+        // Velocity
+        var v: Double
+
+        // Velocity in x/y component
+        var vX = vXinit
+        var vY = vYinit
+
+        // Velocity in x/y component (previous)
+        var vXprev: Double
+        var vYprev: Double
+
+        // Distance in x/y component
+        var x = 0.0
+        var y = height
+
+        // Distance in x/y component (previous)
+        var xPrev: Double
+        var yPrev: Double
+
+        // Flag indicating the height at impact was found
+        var gotImpactHeight = false
+
+        // Run a quadratic drag routine until the height of the projectile reaches zero (hit the ground)
+        do{
+            v = sqrt(vX.pow(2) + vY.pow(2))
+
+            vXprev = vX
+            vYprev = vY
+
+            vX -= (dragCoefficient * vX * v * deltaTimeSeconds)
+            vY -= (ACCELERATION_OF_GRAVITY * deltaTimeSeconds) - (dragCoefficient * vY * v * deltaTimeSeconds)
+
+            xPrev = x
+            yPrev = y
+
+            // Get displacement from avg velocity
+            x += 0.5 * (vX + vXprev) * deltaTimeSeconds
+            y += 0.5 * (vY + vYprev) * deltaTimeSeconds
+
+            // Get impact height when x crosses the target distance
+            if(!gotImpactHeight && x >= targetDistance){
+                gotImpactHeight = true
+
+                impactData.height = CalcMisc.interpolate(targetDistance, x, xPrev, y, yPrev)
+            }
+        }while (y > 0.0)
+
+        // Set height to zero if it was not found
+        if(!gotImpactHeight){
+            impactData.height = 0.0
+        }
+
+        // Get the distance in the x-direction
+        impactData.distance = CalcMisc.interpolate(0.0, y, yPrev, x, xPrev)
+
+        return impactData
     }
 }

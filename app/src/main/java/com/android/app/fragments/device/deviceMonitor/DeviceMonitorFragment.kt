@@ -46,7 +46,6 @@ class DeviceMonitorFragment : Fragment() {
                 BluetoothAdapter.STATE_OFF,
                 BluetoothAdapter.STATE_TURNING_ON, -> {}
                 BluetoothAdapter.STATE_ON -> {
-                    // Attempt to connect device
                     connectDeviceIfMatch(requireContext())
                 }
             }
@@ -101,7 +100,7 @@ class DeviceMonitorFragment : Fragment() {
          * Observe the device connections state
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+      //      val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
 
             when (state.state) {
                 ConnectionState.State.READY -> {}
@@ -133,19 +132,19 @@ class DeviceMonitorFragment : Fragment() {
                         }
                     }
 
-                    // Navigate back to scanner page
-                    // Note: deviceDfuFragment handles disconnects differently
-                    if(navController.currentDestination?.id == R.id.deviceConnectedFragment
-                            || navController.currentDestination?.id == R.id.deviceCalibrateFragment
-                            || navController.currentDestination?.id == R.id.deviceTunerFragment
-                            || navController.currentDestination?.id == R.id.settingsDeviceFragment) {
-
-                        val options = NavOptions.Builder()
-                            .setPopUpTo(R.id.homeFragment, false)
-                            .setLaunchSingleTop(true)
-                            .build()
-                        navController.navigate(R.id.deviceScannerFragment, null, options)
-                    }
+//                    // Navigate back to scanner page
+//                    // Note: deviceDfuFragment handles disconnects differently
+//                    if(navController.currentDestination?.id == R.id.deviceConnectedFragment
+//                            || navController.currentDestination?.id == R.id.deviceCalibrateFragment
+//                            || navController.currentDestination?.id == R.id.deviceSensorTunerFragment
+//                            || navController.currentDestination?.id == R.id.deviceBallisticsFragment) {
+//
+//                        val options = NavOptions.Builder()
+//                            .setPopUpTo(R.id.homeFragment, false)
+//                            .setLaunchSingleTop(true)
+//                            .build()
+//                        navController.navigate(R.id.deviceScannerFragment, null, options)
+//                    }
                 }
                 else -> { }
             }

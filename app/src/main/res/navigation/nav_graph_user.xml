@@ -69,7 +69,7 @@
             app:destination="@id/gyroCalFragment" />
         <action
             android:id="@+id/action_settingsFragment_to_placeholder"
-            app:destination="@id/settingsDeviceFragment" />
+            app:destination="@id/deviceBallisticsFragment" />
     </fragment>
     <fragment
         android:id="@+id/gyroCalFragment"
@@ -84,9 +84,9 @@
         android:name="com.android.app.fragments.projectileEditor.ProjectileEditFragment"
         android:label="Projectiles" />
     <fragment
-        android:id="@+id/deviceTunerFragment"
-        android:name="com.android.app.fragments.device.deviceTuner.DeviceTunerFragment"
-        android:label="Device Tuner" />
+        android:id="@+id/deviceSensorTunerFragment"
+        android:name="com.android.app.fragments.device.deviceSensorTuner.DeviceSensorTunerFragment"
+        android:label="Device Sensor Tuner" />
     <fragment
         android:id="@+id/deviceConnectedFragment"
         android:name="com.android.app.fragments.device.deviceConnected.DeviceConnectedFragment"
@@ -95,11 +95,14 @@
             android:id="@+id/action_deviceConnectedFragment_to_deviceInfoFragment"
             app:destination="@id/deviceInfoFragment" />
         <action
-            android:id="@+id/action_deviceConnectedFragment_to_deviceTunerFragment"
-            app:destination="@id/deviceTunerFragment" />
+            android:id="@+id/action_deviceConnectedFragment_to_deviceSensorTunerFragment"
+            app:destination="@id/deviceSensorTunerFragment" />
         <action
             android:id="@+id/action_deviceConnectedFragment_to_deviceCalibrateFragment"
             app:destination="@id/deviceCalibrateFragment" />
+        <action
+            android:id="@+id/action_deviceConnectedFragment_to_deviceBallisticsFragment"
+            app:destination="@id/deviceBallisticsFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceCalibrateFragment"
@@ -110,7 +113,7 @@
         android:name="com.android.app.fragments.device.deviceInfo.DeviceInfoFragment"
         android:label="Device Info" />
     <fragment
-        android:id="@+id/settingsDeviceFragment"
-        android:name="com.android.app.fragments.settings.SettingsDeviceFragment"
-        android:label="Device Settings" />
+        android:id="@+id/deviceBallisticsFragment"
+        android:name="com.android.app.fragments.device.deviceBallistics.DeviceBallisticsFragment"
+        android:label="Device Ballistics" />
 </navigation>

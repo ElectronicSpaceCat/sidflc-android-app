@@ -106,9 +106,9 @@
         android:id="@+id/engineer_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="45dp"
-        android:layout_marginBottom="10dp"
-        android:visibility="invisible"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="5dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/hit_confidence"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline_vertical">
@@ -420,6 +420,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.60">
 

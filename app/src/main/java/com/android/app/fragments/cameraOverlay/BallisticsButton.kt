@@ -28,7 +28,12 @@ import com.android.app.utils.converters.ConverterData
  * - The button can be enabled/disabled
  * - The data can be enabled/disabled which toggles it's text color
  */
-open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, private val dialogTitle: String, button: WidgetBallisticsButtonBinding, data: K):
+open class BallisticsButton<K : ConverterData<*, *>>(
+    private val title: String,
+    private val dialogTitle: String,
+    button: WidgetBallisticsButtonBinding,
+    data: K,
+    isLockVisible : Int):
     InputDialogFragment.InputDialogListener {
 
     enum class IconId{
@@ -92,7 +97,7 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
     }
 
     /**
-     * Enable/Disable the data value visual updating
+     * Enable/Disable visual updating of the data value
      * Only works for AUTO mode, MANUAL mode disables this.
      */
     var dataUpdateEnable : Boolean
@@ -130,8 +135,8 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
 
     private fun getAutoModeLockStatus() : LockStatus {
         val lockStatus = prefs.getInt(title + prefLockTag, LockStatus.UNLOCKED.ordinal)
-        return if(lockStatus < LockStatus.values().size){
-            LockStatus.values()[lockStatus]
+        return if(lockStatus < LockStatus.entries.size){
+            LockStatus.entries[lockStatus]
         } else {
             LockStatus.NA
         }
@@ -150,7 +155,7 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
         }
     }
 
-    fun setIconVisibility(icon : IconId, visibility : Int){
+    private fun setIconVisibility(icon : IconId, visibility : Int){
         val locVis = if(visibility != View.VISIBLE && visibility != View.INVISIBLE && visibility != View.GONE){
             View.VISIBLE
         }
@@ -177,14 +182,15 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
             _acquisitionMode = value
             when(_acquisitionMode) {
                 Mode.AUTO -> {
+                    _data.loadFromPrefs(_button.root.context)
                     _button.acquisitionModeValue.text = "A"
                     setLockStatus(getAutoModeLockStatus())
                     dataUpdateEnable = false
                     dataStatus = DataStatus.NOT_SET
                 }
                 Mode.MANUAL -> {
-                    _button.acquisitionModeValue.text = "M"
                     _data.loadFromPrefs(_button.root.context)
+                    _button.acquisitionModeValue.text = "M"
                     _button.data.text = _data.valueStr()
                     setLockStatus(LockStatus.DISABLED)
                     _button.btn.setTextColor(Color.WHITE)
@@ -264,8 +270,8 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
 
     init {
         val mode = prefs.getInt(title + prefModeTag, Mode.AUTO.ordinal)
-        if(mode < Mode.values().size){
-            setAcquisitionMode(Mode.values()[mode])
+        if(mode < Mode.entries.size){
+            setAcquisitionMode(Mode.entries[mode])
         }
 
         // Setup onClick listener for main button
@@ -281,6 +287,9 @@ open class BallisticsButton<K : ConverterData<*, *>>(private val title: String, 
                 onButtonClickDisabled()
             }
         }
+
+        // Set lock icon visibility
+        setIconVisibility(IconId.LOCK, isLockVisible)
 
         // Setup onClick listener for mode button
         _button.mode.setOnClickListener {

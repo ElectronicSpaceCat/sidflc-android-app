@@ -22,13 +22,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import com.android.app.R
+import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceCalibrateBinding
 import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.device.sensor.ISensorCalibrate
 import com.android.app.device.sensor.ISensorCalibrate.State
 import com.android.app.fragments.device.deviceCalibrate.DeviceCalibrateViewModel.CalSelect
+import no.nordicsemi.android.ble.livedata.state.ConnectionState
 
 class DeviceCalibrateFragment : Fragment() {
     private var _fragmentDeviceCalibrateBinding: FragmentDeviceCalibrateBinding? = null
@@ -47,6 +50,20 @@ class DeviceCalibrateFragment : Fragment() {
         viewModel = ViewModelProvider(this)[DeviceCalibrateViewModel::class.java]
 
         fragmentDeviceCalibrateBinding.calibrationProgressBar.isIndeterminate = true
+
+        /**
+         * Observe connection state navigate back to scanner page on disconnect
+         */
+        DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
+            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+            if (state.state == ConnectionState.State.DISCONNECTED) {
+                val options = NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, false)
+                    .setLaunchSingleTop(true)
+                    .build()
+                navController.navigate(R.id.deviceScannerFragment, null, options)
+            }
+        }
 
         /**
          * Observe sensorCarrierPosition calibration status

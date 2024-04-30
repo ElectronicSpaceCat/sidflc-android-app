@@ -90,11 +90,8 @@ class UnitEditorFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
                 if(selectedUnit != DataShared.lensOffset.unit){
-                    val valuePrev = DataShared.lensOffset.getValueFromPrefs(requireContext())
-                    val valueNew = ConvertLength.convert(DataShared.lensOffset.unit, selectedUnit, valuePrev)
-                    DataShared.lensOffset.storeValueToPrefs(requireContext(), valueNew)
-                    DataShared.lensOffset.storeUnitToPrefs(requireContext(), selectedUnit)
                     DataShared.lensOffset.setUnit(selectedUnit)
+                    DataShared.lensOffset.storeToPrefs(requireContext())
                 }
             }
         }
@@ -106,11 +103,8 @@ class UnitEditorFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
                 if(selectedUnit != DataShared.carriagePosition.unit){
-                    val valuePrev = DataShared.carriagePosition.getValueFromPrefs(requireContext())
-                    val valueNew = ConvertLength.convert(DataShared.carriagePosition.unit, selectedUnit, valuePrev)
-                    DataShared.carriagePosition.storeValueToPrefs(requireContext(), valueNew)
-                    DataShared.carriagePosition.storeUnitToPrefs(requireContext(), selectedUnit)
                     DataShared.carriagePosition.setUnit(selectedUnit)
+                    DataShared.carriagePosition.storeToPrefs(requireContext())
                 }
             }
         }
@@ -122,11 +116,8 @@ class UnitEditorFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.deviceHeight.unit){
-                    val valuePrev = DataShared.deviceHeight.getValueFromPrefs(requireContext())
-                    val valueNew = ConvertLength.convert(DataShared.deviceHeight.unit, selectedUnit, valuePrev)
-                    DataShared.deviceHeight.storeValueToPrefs(requireContext(), valueNew)
-                    DataShared.deviceHeight.storeUnitToPrefs(requireContext(), selectedUnit)
                     DataShared.deviceHeight.setUnit(selectedUnit)
+                    DataShared.deviceHeight.storeToPrefs(requireContext())
                 }
             }
         }
@@ -138,11 +129,8 @@ class UnitEditorFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.targetDistance.unit){
-                    val valuePrev = DataShared.targetDistance.getValueFromPrefs(requireContext())
-                    val valueNew = ConvertLength.convert(DataShared.targetDistance.unit, selectedUnit, valuePrev)
-                    DataShared.targetDistance.storeValueToPrefs(requireContext(), valueNew)
-                    DataShared.targetDistance.storeUnitToPrefs(requireContext(), selectedUnit)
                     DataShared.targetDistance.setUnit(selectedUnit)
+                    DataShared.targetDistance.storeToPrefs(requireContext())
                 }
             }
         }
@@ -154,11 +142,8 @@ class UnitEditorFragment : Fragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
                 if(selectedUnit != DataShared.targetHeight.unit){
-                    val valuePrev = DataShared.targetHeight.getValueFromPrefs(requireContext())
-                    val valueNew = ConvertLength.convert(DataShared.targetHeight.unit, selectedUnit, valuePrev)
-                    DataShared.targetHeight.storeValueToPrefs(requireContext(), valueNew)
-                    DataShared.targetHeight.storeUnitToPrefs(requireContext(), selectedUnit)
                     DataShared.targetHeight.setUnit(selectedUnit)
+                    DataShared.targetHeight.storeToPrefs(requireContext())
                 }
             }
         }

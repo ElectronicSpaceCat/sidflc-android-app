@@ -12,18 +12,23 @@ import com.android.app.utils.prefs.PrefUtils
 class ProjectileSelectDialogFragment(
     private val _listTitle: String,
     private val _settingKey: String,
+    private val _listener: OnItemSelectedListener?
 ) : DialogFragment() {
     private var mEntries: Array<String> = emptyArray()
     private lateinit var mValue: String
     private var mClickedDialogEntryIndex : Int = 0
     private lateinit var prefs: SharedPreferences
 
+    interface OnItemSelectedListener {
+        fun onItemSelectedListener(name: String)
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        val data = PrefUtils.getStringArrayFromPrefs(requireContext(), requireContext().getString(
+        val projectileList = PrefUtils.getStringArrayFromPrefs(requireContext(), requireContext().getString(
             com.android.app.R.string.PREFERENCE_FILTER_PROJECTILE_NAMES), ";")
-        if(!data.isNullOrEmpty()){
-            mEntries = data.toTypedArray()
+        if(!projectileList.isNullOrEmpty()){
+            mEntries = projectileList.toTypedArray()
         }
         mValue = prefs.getString(_settingKey, "").toString()
 
@@ -55,7 +60,10 @@ class ProjectileSelectDialogFragment(
         if (mClickedDialogEntryIndex != idx) {
             mClickedDialogEntryIndex = idx
             mValue = mEntries[mClickedDialogEntryIndex]
+
             prefs.edit().putString(_settingKey, mValue).apply()
+
+            _listener?.onItemSelectedListener(mValue)
         }
         dialog.dismiss()
     }

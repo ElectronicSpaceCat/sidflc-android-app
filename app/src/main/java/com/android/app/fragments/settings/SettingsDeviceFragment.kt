@@ -21,203 +21,392 @@ import android.text.InputFilter
 import android.text.InputType
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.preference.*
+import androidx.recyclerview.widget.RecyclerView
 import com.android.app.dataShared.DataShared
 import com.android.app.device.Device
 import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.device.springs.Spring
 import com.android.app.fragments.dialogs.SpringSelectDialogFragment
 import com.android.app.utils.misc.Utils
-import com.android.app.utils.textFilters.TextInputFilter
 import com.android.app.R
-import java.util.*
-
+import com.android.app.device.projectile.Projectile
+import com.android.app.device.projectile.ProjectilePrefUtils
+import com.android.app.fragments.dialogs.ProjectileSelectDialogFragment
+import java.util.Locale
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsDeviceFragment : PreferenceFragmentCompat() {
-    // These preferences require special handling
     private lateinit var forceOffset: EditTextPreference
     private lateinit var efficiency: EditTextPreference
     private lateinit var frictionCoefficient: EditTextPreference
-    private lateinit var editSpringList: Preference
+    private lateinit var springSelected: Preference
+    private lateinit var projectileSelected: Preference
+    private lateinit var projectileSelectedDrag: EditTextPreference
+    private lateinit var testHeight: EditTextPreference
+    private lateinit var testPitch: EditTextPreference
 
-    private var _dataWasModified = false
+    private lateinit var _onChildAttachListener : RecyclerView.OnChildAttachStateChangeListener
+
+    private var _isDeviceUserDataModified = false // Indicates if data stored in the device should be overridden
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-
         setPreferencesFromResource(R.xml.prefs_device, rootKey)
 
+        /** Stored in Device User Configs */
         forceOffset = findPreference(getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET))!!
         efficiency = findPreference(getString(R.string.PREFERENCE_FILTER_EFFICIENCY))!!
         frictionCoefficient = findPreference(getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT))!!
-        editSpringList = findPreference(getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED))!!
+        springSelected = findPreference(getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED))!!
+        /** Projectile data */
+        projectileSelected = findPreference(getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED))!!
+        projectileSelectedDrag = findPreference(getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED_DRAG))!!
+        /** Test data */
+        testHeight = findPreference(getString(R.string.PREFERENCE_FILTER_TEST_HEIGHT))!!
+        testPitch = findPreference(getString(R.string.PREFERENCE_FILTER_TEST_PITCH))!!
+
+        /** Set Id's to preferences with reset buttons */
+        forceOffset.setViewId(PREF_ID_FORCE_OFFSET)
+        efficiency.setViewId(PREF_ID_EFFICIENCY)
+        frictionCoefficient.setViewId(PREF_ID_FRICTION_COEFFICIENT)
+        springSelected.setViewId(PREF_ID_SPRING_SELECT)
+        projectileSelectedDrag.setViewId(PREF_ID_PROJECTILE_DRAG)
 
         /** The following setting not available to public - yet */
         frictionCoefficient.isVisible = false
 
-        // Create generic text input listener with filters
-        val forceOffsetFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
-            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            val filters = arrayOf(
-                InputFilter.LengthFilter(7)
-            )
-            editText.filters = filters
-            editText.setSelection(editText.text.length)
-        }
-
-        // Configure input dialog for the forceOffset
-        forceOffset.setOnBindEditTextListener(forceOffsetFilter)
-
-        // Create generic text input listener with filters
-        val efficiencyFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
-            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            val filters = arrayOf(
-                InputFilter.LengthFilter(7)
-            )
-            editText.filters = filters
-            editText.setSelection(editText.text.length)
-        }
-
-        // Configure input dialog for the Efficiency
-        efficiency.setOnBindEditTextListener(efficiencyFilter)
-
-        // Create generic text input listener with filters
-        val frictionCoefficientFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
-            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            val filters = arrayOf(
-                InputFilter.LengthFilter(7)
-            )
-            editText.filters = filters
-            editText.setSelection(editText.text.length)
-        }
-
-        // Configure input dialog for the Friction Coefficient
-        frictionCoefficient.setOnBindEditTextListener(frictionCoefficientFilter)
-
-        // Navigate to the spring list editor when preference clicked
-        editSpringList.setOnPreferenceClickListener {
-            val springSelectedListener = object : SpringSelectDialogFragment.OnItemSelectedListener {
-                override fun onItemSelectedListener(name: String) {
-                    editSpringList.summary = name
-                    val spring = Spring.getData(Spring.Name.valueOf(name))
-                    DataShared.device.model.setSpring(spring)
+        _onChildAttachListener = object : RecyclerView.OnChildAttachStateChangeListener {
+            override fun onChildViewAttachedToWindow(view: View) {
+                when(view.id){
+                    PREF_ID_FORCE_OFFSET -> {
+                        view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
+                            DataShared.device.model.ballistics.resetForceOffset()
+                        }
+                    }
+                    PREF_ID_EFFICIENCY -> {
+                        view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
+                            DataShared.device.model.ballistics.resetEfficiency()
+                        }
+                    }
+                    PREF_ID_FRICTION_COEFFICIENT -> {
+                        view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
+                            DataShared.device.model.ballistics.resetFrictionCoefficient()
+                        }
+                    }
+                    PREF_ID_SPRING_SELECT -> {
+                        view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
+                            DataShared.device.model.resetSpring()
+                        }
+                    }
+                    PREF_ID_PROJECTILE_DRAG -> {
+                        view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
+                            if(null != DataShared.device.model.projectile){
+                                if(null != Projectile.getData(DataShared.device.model.projectile!!.name)) {
+                                    DataShared.device.model.projectile!!.setDrag(0.0)
+                                }
+                                else{
+                                    DataShared.device.model.setProjectile(Projectile.getData(DataShared.device.model.projectile!!.name))
+                                }
+                                projectileSelectedDrag.callChangeListener(DataShared.device.model.projectile!!.drag.toString())
+                            }
+                        }
+                    }
                 }
             }
-            // Set up the dialog and show
-            SpringSelectDialogFragment(
-                "Spring",
-                getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED),
-                springSelectedListener
-            ).show(requireActivity().supportFragmentManager, null)
-            true
+            override fun onChildViewDetachedFromWindow(view: View) {
+                // Do nothing..
+            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Generic text input filter
+        val editTextListener = EditTextPreference.OnBindEditTextListener { editText: EditText ->
+            editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            val filters = arrayOf(
+                InputFilter.LengthFilter(7)
+            )
+            editText.filters = filters
+            editText.setSelection(editText.text.length)
+        }
 
         /**
-         * Force Offset
+         * ForceOffset
          */
-        forceOffset.text = String.format(
-            Locale.getDefault(),
-            "%.3f",
-            DataShared.device.ballistics.forceOffset
-        )
+        forceOffset.setOnBindEditTextListener(editTextListener)
+
         forceOffset.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
-                if (forceOffset.text != newValue as String) {
-                    if(TextInputFilter.isStrInRange(0.0, 2.0, newValue)) {
-                        _dataWasModified = true
-                        DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.USER,
-                            DeviceData.Config.Command.SET,
-                            Device.USERDATA.FORCE_OFFSET.ordinal,
-                            Utils.convertStrToFloat(newValue).toBits()
-                        )
-                        retVal = true
-                    }
+                val value = Utils.convertStrToDouble(newValue as String)
+                if (DataShared.device.model.ballistics.forceOffset != value) {
+                    DataShared.device.sendConfigCommand(
+                        DeviceData.Config.Target.USER,
+                        DeviceData.Config.Command.SET,
+                        Device.USERDATA.FORCE_OFFSET.ordinal,
+                        value.toFloat().toBits()
+                    )
+                    _isDeviceUserDataModified = true
+                    retVal = true
                 }
                 retVal
             }
 
+        DataShared.device.model.ballistics.forceOffsetOnChange.observe(viewLifecycleOwner) {
+            forceOffset.text = String.format(
+                Locale.getDefault(),
+                "%.3f",
+                it
+            )
+        }
+
         /**
-         * Efficiency Factor
+         * Efficiency
          */
-        efficiency.text = String.format(
-            Locale.getDefault(),
-            "%.3f",
-            DataShared.device.ballistics.efficiency
-        )
+        efficiency.setOnBindEditTextListener(editTextListener)
+
         efficiency.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
-                if (efficiency.text != newValue as String) {
-                    if(TextInputFilter.isStrInRange(0.5, 1.0, newValue)) {
-                        _dataWasModified = true
-                        DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.USER,
-                            DeviceData.Config.Command.SET,
-                            Device.USERDATA.EFFICIENCY.ordinal,
-                            Utils.convertStrToFloat(newValue).toBits()
-                        )
-                        retVal = true
-                    }
+                val value = Utils.convertStrToDouble(newValue as String)
+                if (DataShared.device.model.ballistics.efficiency != value) {
+                    DataShared.device.sendConfigCommand(
+                        DeviceData.Config.Target.USER,
+                        DeviceData.Config.Command.SET,
+                        Device.USERDATA.EFFICIENCY.ordinal,
+                        value.toFloat().toBits()
+                    )
+                    _isDeviceUserDataModified = true
+                    retVal = true
                 }
                 retVal
             }
+
+        DataShared.device.model.ballistics.efficiencyOnChange.observe(viewLifecycleOwner) {
+            efficiency.text = String.format(
+                Locale.getDefault(),
+                "%.3f",
+                it
+            )
+        }
 
         /**
          * Friction Coefficient
          */
-        frictionCoefficient.text = String.format(
-            Locale.getDefault(),
-            "%.3f",
-            DataShared.device.ballistics.frictionCoefficient
-        )
+        frictionCoefficient.setOnBindEditTextListener(editTextListener)
+
         frictionCoefficient.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
-                if (frictionCoefficient.text != newValue as String) {
-                    if(TextInputFilter.isStrInRange(0.0, 1.0, newValue)) {
-                        _dataWasModified = true
-                        DataShared.device.sendConfigCommand(
-                            DeviceData.Config.Target.USER,
-                            DeviceData.Config.Command.SET,
-                            Device.USERDATA.FRICTION_COEFFICIENT.ordinal,
-                            Utils.convertStrToFloat(newValue).toBits()
-                        )
-                        retVal = true
+                val value = Utils.convertStrToDouble(newValue as String)
+                if (DataShared.device.model.ballistics.frictionCoefficient != value) {
+                    _isDeviceUserDataModified = true
+                    DataShared.device.sendConfigCommand(
+                        DeviceData.Config.Target.USER,
+                        DeviceData.Config.Command.SET,
+                        Device.USERDATA.FRICTION_COEFFICIENT.ordinal,
+                        value.toFloat().toBits()
+                    )
+                    _isDeviceUserDataModified = true
+                    retVal = true
+                }
+                retVal
+            }
+
+        DataShared.device.model.ballistics.frictionCoefficientOnChange.observe(viewLifecycleOwner) {
+            frictionCoefficient.text = String.format(
+                Locale.getDefault(),
+                "%.3f",
+                it
+            )
+        }
+
+        /**
+         * Spring Selected
+         */
+        springSelected.setOnPreferenceClickListener {
+            val springSelectedListener = object : SpringSelectDialogFragment.OnItemSelectedListener {
+                override fun onItemSelectedListener(name: String) {
+                    springSelected.callChangeListener(name)
+                }
+            }
+
+            // Set up the dialog and show
+            SpringSelectDialogFragment(
+                getString(R.string.header_spring),
+                DataShared.device.model.spring?.name ?: "",
+                springSelectedListener
+            ).show(requireActivity().supportFragmentManager, null)
+            true
+        }
+
+        springSelected.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+            var retVal = false
+            if (DataShared.device.model.spring?.name != newValue as String) {
+                val spring = Spring.getData(newValue)
+                if(null != spring) {
+                    DataShared.device.sendConfigCommand(
+                        DeviceData.Config.Target.USER,
+                        DeviceData.Config.Command.SET,
+                        Device.USERDATA.SPRING_ID.ordinal,
+                        Spring.Name.valueOf(spring.name).ordinal
+                    )
+                    _isDeviceUserDataModified = true
+                    retVal = true
+                }
+            }
+            retVal
+        }
+
+        DataShared.device.model.springOnChange.observe(viewLifecycleOwner) {
+            if(null == it){
+                springSelected.summary = "not set"
+            }
+            else {
+                springSelected.summary = it.name
+            }
+        }
+
+        /**
+         * Projectile Selected
+         */
+        projectileSelected.setOnPreferenceClickListener {
+            val projectileSelectedListener = object : ProjectileSelectDialogFragment.OnItemSelectedListener {
+                override fun onItemSelectedListener(name: String) {
+                    projectileSelected.callChangeListener(name)
+                }
+            }
+            // Set up the dialog and show
+            ProjectileSelectDialogFragment(
+                getString(R.string.header_projectile),
+                getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED),
+                projectileSelectedListener
+            ).show(requireActivity().supportFragmentManager, null)
+            true
+        }
+
+        projectileSelected.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+            var retVal = false
+            if (DataShared.device.model.projectile?.name != newValue as String) {
+                val projectile = Projectile.getData(newValue)
+                DataShared.device.model.setProjectile(projectile)
+                retVal = true
+            }
+            retVal
+        }
+
+        DataShared.device.model.projectileOnChange.observe(viewLifecycleOwner) {
+            if(null == it){
+                projectileSelected.summary = "not set"
+                projectileSelectedDrag.text = "0.0"
+            }
+            else {
+                projectileSelected.summary = it.name
+                projectileSelectedDrag.text = String.format(
+                    Locale.getDefault(),
+                    "%.3f",
+                    it.drag
+                )
+            }
+        }
+
+        /**
+         * Projectile Selected Drag
+         */
+        val drag = if (null != DataShared.device.model.projectile){
+            DataShared.device.model.projectile!!.drag
+        }
+        else {
+            0.0
+        }
+
+        projectileSelectedDrag.text = String.format(
+            Locale.getDefault(),
+            "%.3f",
+            drag
+        )
+
+        projectileSelectedDrag.setOnBindEditTextListener(editTextListener)
+
+        projectileSelectedDrag.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+                var retVal = false
+                val value = Utils.convertStrToDouble(newValue as String)
+                if (null != DataShared.device.model.projectile){
+                    if (DataShared.device.model.projectile!!.drag != value) {
+                        // Get projectiles from prefs
+                        val projectiles = ProjectilePrefUtils.getProjectileListFromPrefs(requireContext())
+                        // Find the matching projectile in list, set the drag, then store to prefs
+                        projectiles.forEach {
+                            if(it.name == DataShared.device.model.projectile?.name) {
+                                it.setDrag(newValue.toDouble())
+                                // Store to prefs
+                                ProjectilePrefUtils.setProjectileListPref(requireContext(), projectiles.toList())
+                                DataShared.device.model.setProjectile(it)
+                                retVal = true
+                            }
+                        }
                     }
+                }
+                else{
+                    projectileSelectedDrag.text = "0.0"
                 }
                 retVal
             }
 
         /**
-         * Selected Spring - set the summary TODO - Should store spring ID to device
+         * Test Height (based off of DataShared.deviceHeight units)
          */
-        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        val prefsKey = requireContext().getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED)
+        testHeight.title = getString(R.string.pref_title_height) + " (" + DataShared.deviceHeight.unitStr() + ")"
+        testHeight.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+                var retVal = false
+                if (testHeight.text != newValue as String) {
+                    retVal = true
+                }
+                retVal
+            }
 
-        editSpringList.summary = try {
-            prefs.getString(prefsKey, Spring.Name.MC9287K33.name).toString()
-        }
-        catch (e : ClassCastException){
-            "not set"
-        }
+        /**
+         * Test Pitch
+         */
+        testPitch.title = getString(R.string.pref_title_pitch) + " (deg)"
+        testPitch.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+                var retVal = false
+                if (testPitch.text != newValue as String) {
+                    retVal = true
+                }
+                retVal
+            }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        listView?.addOnChildAttachStateChangeListener(_onChildAttachListener)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        if(!_dataWasModified) return
+        listView?.removeOnChildAttachStateChangeListener(_onChildAttachListener)
 
         // Send command to store the configurations if any changed
-        DataShared.device.sendConfigCommand(
-            DeviceData.Config.Target.USER,
-            DeviceData.Config.Command.STORE,
-            Int.MAX_VALUE, // Ignored
-            Int.MAX_VALUE) // Ignored
+        if(_isDeviceUserDataModified) {
+            DataShared.device.sendConfigCommand(
+                DeviceData.Config.Target.USER,
+                DeviceData.Config.Command.STORE
+            )
+        }
+    }
+
+    companion object {
+        // Note: Set pref view ID's to anything but 0
+        private const val PREF_ID_FORCE_OFFSET = 1
+        private const val PREF_ID_EFFICIENCY = 2
+        private const val PREF_ID_FRICTION_COEFFICIENT = 3
+        private const val PREF_ID_SPRING_SELECT = 4
+        private const val PREF_ID_PROJECTILE_DRAG = 5
     }
 }

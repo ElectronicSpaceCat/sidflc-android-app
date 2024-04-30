@@ -5,8 +5,8 @@
     tools:visibility="visible">
 
     <PreferenceCategory
-        app:title="@string/header_display"
-        app:iconSpaceReserved="false">
+        app:iconSpaceReserved="false"
+        app:title="@string/header_display">
         <Preference
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_UNITS_EDIT"
@@ -27,20 +27,20 @@
             app:title="@string/pref_title_lens_offset"
             app:useSimpleSummaryProvider="true" />
         <Preference
-            app:iconSpaceReserved="false"
-            app:key="@string/PREFERENCE_FILTER_DEVICE_SETTINGS"
-            app:persistent="false"
-            app:title="@string/pref_title_device"
-            app:useSimpleSummaryProvider="true"
-            app:widgetLayout="@layout/widget_open_window" />
-        <Preference
             android:id="@+id/preference"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_PROJECTILE_EDIT"
             app:persistent="false"
-            app:title="@string/pref_title_projectile_edit"
+            app:title="@string/pref_title_projectiles_edit"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_DEVICE_SETTINGS"
+            app:persistent="false"
+            app:title="@string/pref_title_device"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
     </PreferenceCategory>
@@ -50,18 +50,19 @@
         app:title="@string/header_calibrations">
         <Preference
             app:iconSpaceReserved="false"
-            app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"
-            app:persistent="false"
-            app:title="@string/pref_title_calibrate_sensors"
-            app:useSimpleSummaryProvider="true"
-            app:widgetLayout="@layout/widget_open_window" />
-        <Preference
-            app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_PHONE"
             app:persistent="false"
             app:title="@string/pref_title_calibrate_gyro"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_open_window" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_SENSOR_CAL_DEVICE"
+            app:persistent="false"
+            app:title="@string/pref_title_calibrate_sensors"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_open_window" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

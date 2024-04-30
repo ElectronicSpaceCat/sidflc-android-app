@@ -24,7 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.android.app.dataShared.DataShared
-import com.android.app.databinding.FragmentModelTunerBinding
+import com.android.app.databinding.FragmentDeviceModelBinding
 import com.android.app.utils.converters.ConvertDispUnits
 import com.android.app.utils.misc.Utils
 import org.xmlpull.v1.XmlPullParser
@@ -33,13 +33,13 @@ import java.util.*
 import kotlin.math.roundToInt
 
 class DeviceModelFragment : Fragment() {
-    private var _deviceModelBinding: FragmentModelTunerBinding? = null
+    private var _deviceModelBinding: FragmentDeviceModelBinding? = null
     private val deviceModelBinding get() = _deviceModelBinding!!
 
     private var _lastPosition = 0.0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _deviceModelBinding = FragmentModelTunerBinding.inflate(inflater, container, false)
+        _deviceModelBinding = FragmentDeviceModelBinding.inflate(inflater, container, false)
         return deviceModelBinding.root
     }
 
@@ -151,7 +151,7 @@ class DeviceModelFragment : Fragment() {
         private const val MODEL_DRAWABLE = "res/drawable/ic_plink_v24_top_bottom.xml"
         private const val MODEL_DRAWABLE_WIDTH_XML_ATTR = "viewportWidth"
 
-        private const val MODEL_LAYOUT = "res/layout/fragment_model_tuner.xml"
+        private const val MODEL_LAYOUT = "res/layout/fragment_device_model.xml"
         private const val MODEL_LAYOUT_WIDTH_XML_ATTR = "layout_width"
     }
 }

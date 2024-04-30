@@ -8,9 +8,9 @@ android {
     compileSdk = 34
 
     // Note: Need the NDK attribute to ensure library debug symbols get removed.
-    //       The version can be found in SDK Manager -> SDK Tools -> NDK (Side by side)
+    //       The version can be found in Tools -> SDK Manager -> SDK Tools -> NDK (Side by side)
     //       Click "Show package details" to view the versions.
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "26.3.11579264"
 
     defaultConfig {
         applicationId = "com.android.app"
@@ -49,7 +49,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
 
     // Kotlin lang
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.13.0")
 
     // App compat and UI things
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -65,16 +65,16 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     // CameraX library
-    implementation("androidx.camera:camera-core:1.3.1")
-    implementation("androidx.camera:camera-camera2:1.3.1")
-    implementation("androidx.camera:camera-lifecycle:1.3.1")
-    implementation("androidx.camera:camera-view:1.3.1")
+    implementation("androidx.camera:camera-core:1.3.3")
+    implementation("androidx.camera:camera-camera2:1.3.3")
+    implementation("androidx.camera:camera-lifecycle:1.3.3")
+    implementation("androidx.camera:camera-view:1.3.3")
 
     //WindowManager
     implementation("androidx.window:window:1.2.0")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     // Nordic Semiconductor libraries
     // The libraries may be included from jcenter. If you want to modify the code,
@@ -83,9 +83,9 @@ dependencies {
     implementation("no.nordicsemi.android:log:2.3.0")
     implementation("no.nordicsemi.android.support.v18:scanner:1.6.0")
     implementation("no.nordicsemi.android:dfu:2.4.2")
-    implementation("no.nordicsemi.android:ble:2.7.2")
-    implementation("no.nordicsemi.android:ble-common:2.7.2")
-    implementation("no.nordicsemi.android:ble-livedata:2.7.2")
+    implementation("no.nordicsemi.android:ble:2.7.4")
+    implementation("no.nordicsemi.android:ble-common:2.7.4")
+    implementation("no.nordicsemi.android:ble-livedata:2.7.4")
 //    implementation(project(":dfu"))          // https://github.com/NordicSemiconductor/Android-DFU-Library
 //    implementation(project(":ble"))          // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble
 //    implementation(project(":ble-common"))   // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble-common

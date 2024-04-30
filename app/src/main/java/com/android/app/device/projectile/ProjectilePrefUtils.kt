@@ -1,11 +1,9 @@
-package com.android.app.device.projectile.utils
+package com.android.app.device.projectile
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.android.app.R
-import com.android.app.device.projectile.Projectile
-import com.android.app.device.projectile.ProjectileData
 import com.android.app.utils.prefs.PrefUtils
 import com.android.app.utils.misc.Utils
 
@@ -146,7 +144,7 @@ object ProjectilePrefUtils {
             val idx = names.indexOf(projectile)
             if(-1 != idx){
                 projectileData =
-                    ProjectileData(names[idx], Utils.convertStrToDouble(weights[idx]), Utils.convertStrToDouble(diameters[idx]))
+                    ProjectileData(names[idx], Utils.convertStrToDouble(weights[idx]), Utils.convertStrToDouble(diameters[idx]), Utils.convertStrToDouble(drags[idx]))
             }
         }
         return projectileData

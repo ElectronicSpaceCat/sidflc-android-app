@@ -10,8 +10,13 @@ object Spring {
         MC9287K155
     }
 
+    /**
+     * Map of default springs.
+     * NOTE: Make sure entered data is in (mm)
+     */
     private val springs : Map<String, SpringData> = mapOf(
-        getName(Name.MC9287K33) to SpringData(getName(Name.MC9287K33),
+        getName(Name.MC9287K33) to SpringData(
+            getName(Name.MC9287K33),
             1.016,
             7.8486,
             3.25,
@@ -19,28 +24,31 @@ object Spring {
             31.75,
             Material.Name.STAINLESS_302_304),
 
-        getName(Name.MC9287K141) to SpringData(getName(Name.MC9287K141),
-            0.045,
-            0.357,
+        getName(Name.MC9287K141) to SpringData(
+            getName(Name.MC9287K141),
+            1.143,
+            9.0678,
             3.25,
-            1.25,
-            1.25,
+            31.75,
+            31.75,
             Material.Name.STAINLESS_302_304),
 
-        getName(Name.MC9287K83) to SpringData(getName(Name.MC9287K83),
-            0.048,
-            0.375,
+        getName(Name.MC9287K83) to SpringData(
+            getName(Name.MC9287K83),
+            1.2192,
+            9.525,
             3.25,
-            1.25,
-            1.25,
+            31.75,
+            31.75,
             Material.Name.STAINLESS_302_304),
 
-        getName(Name.MC9287K155) to SpringData(getName(Name.MC9287K155),
-            0.051,
-            0.408,
+        getName(Name.MC9287K155) to SpringData(
+            getName(Name.MC9287K155),
+            1.2954,
+            10.3632,
             2.25,
-            2.0,
-            2.0,
+            50.8,
+            50.8,
             Material.Name.STAINLESS_302_304)
     )
 
@@ -65,10 +73,25 @@ object Spring {
      * @return springData
      */
     fun getData(name: String): SpringData? {
-        return try{
+        return try {
             val id = Name.valueOf(name)
             springs.getValue(getName(id))
         } catch (e : Exception) {
+            null
+        }
+    }
+
+    /**
+     * Get data for specified spring
+     *
+     * @param id (spring id)
+     * @return springData
+     */
+    fun getData(id: Int): SpringData? {
+        return if(id < Name.entries.size) {
+            springs.getValue(Name.entries[id].name)
+        }
+        else {
             null
         }
     }

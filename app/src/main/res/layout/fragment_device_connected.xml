@@ -21,7 +21,7 @@
 
             <Button
                 android:id="@+id/btn_device_info"
-                android:layout_width="150dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
                 android:text="@string/button_device_info"
@@ -29,7 +29,7 @@
 
             <Button
                 android:id="@+id/btn_disconnect"
-                android:layout_width="150dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
                 android:text="@string/button_disconnect"
@@ -37,23 +37,31 @@
 
             <Button
                 android:id="@+id/btn_calibrate"
-                android:layout_width="150dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
                 android:text="@string/button_calibrate"
                 android:textColor="@color/text_primary_color_selector" />
 
             <Button
-                android:id="@+id/btn_tune"
-                android:layout_width="150dp"
+                android:id="@+id/btn_sensor_turner"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
-                android:text="@string/button_tune"
+                android:text="@string/button_sensor_tuner"
+                android:textColor="@color/text_primary_color_selector" />
+
+            <Button
+                android:id="@+id/btn_ballistics"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:text="@string/button_ballistics"
                 android:textColor="@color/text_primary_color_selector" />
 
             <Button
                 android:id="@+id/btn_home"
-                android:layout_width="150dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
                 android:text="@string/button_home"

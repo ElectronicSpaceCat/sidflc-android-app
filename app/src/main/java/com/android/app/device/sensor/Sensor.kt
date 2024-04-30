@@ -221,7 +221,7 @@ class Sensor(
      * into permanent storage internal to the device
      */
     fun storeConfigData() {
-        device.sendSensorConfigCommand(DeviceData.Config.Target.SENSOR,  DeviceData.Config.Command.STORE, Int.MAX_VALUE, Int.MAX_VALUE)
+        device.sendSensorConfigCommand(DeviceData.Config.Target.SENSOR,  DeviceData.Config.Command.STORE)
     }
 
     /**
@@ -327,8 +327,7 @@ class Sensor(
     private fun onStatusUpdate(status : DeviceData.Status) {
         when (status) {
             DeviceData.Status.BOOTING -> {
-                _isInitialized = false
-                _configIdx = 0
+                dataInit()
             }
             else -> {}
         }
@@ -341,11 +340,18 @@ class Sensor(
     private fun onConnectionStateUpdate(connection: ConnectionState) {
         when(connection.state){
             ConnectionState.State.DISCONNECTED -> {
-                _isInitialized = false
-                _configIdx = 0
+                dataInit()
             }
             else -> {}
         }
+    }
+
+    /**
+     * Initialize data
+     */
+    private fun dataInit() {
+        _isInitialized = false
+        _configIdx = 0
     }
 
     init {

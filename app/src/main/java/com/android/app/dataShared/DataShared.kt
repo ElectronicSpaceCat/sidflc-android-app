@@ -13,13 +13,14 @@ import com.android.app.R
 class DataShared(context: Context) {
     companion object{
         lateinit var device : Device
-
+        // Device location
         lateinit var deviceHeight : LengthData
+        // Target location
         lateinit var targetDistance : LengthData
         lateinit var targetHeight : LengthData
-
+        // Device offset from phone camera lens
         lateinit var lensOffset : LengthData
-
+        // Device carriage position, used for display
         lateinit var carriagePosition : LengthData
         lateinit var carriagePositionOverride : LengthData
     }
@@ -27,18 +28,18 @@ class DataShared(context: Context) {
     init {
         device = Device(context)
 
-        deviceHeight = ConverterData(ConvertLength, context.getString(R.string.key_device_height), ConvertLength.Unit.FT)
-        targetDistance = ConverterData(ConvertLength, context.getString(R.string.key_target_distance), ConvertLength.Unit.FT)
-        targetHeight = ConverterData(ConvertLength, context.getString(R.string.key_target_height), ConvertLength.Unit.FT)
+        deviceHeight = ConverterData(context.getString(R.string.key_device_height), ConvertLength, ConvertLength.Unit.FT)
+        targetDistance = ConverterData(context.getString(R.string.key_target_distance), ConvertLength, ConvertLength.Unit.FT)
+        targetHeight = ConverterData(context.getString(R.string.key_target_height), ConvertLength, ConvertLength.Unit.FT)
 
-        lensOffset = ConverterData(ConvertLength, context.getString(R.string.key_lens_offset), ConvertLength.Unit.IN)
+        lensOffset = ConverterData(context.getString(R.string.key_lens_offset), ConvertLength, ConvertLength.Unit.IN)
         lensOffset.loadFromPrefs(context)
 
-        carriagePosition = ConverterData(ConvertLength, context.getString(R.string.key_carriage_position), ConvertLength.Unit.MM, 0.0, 0)
+        carriagePosition = ConverterData(context.getString(R.string.key_carriage_position), ConvertLength, ConvertLength.Unit.MM, 0.0, 0)
         // Only need the stored unit, not the value since it is dynamic
         carriagePosition.loadUnitFromPrefs(context)
 
-        carriagePositionOverride = ConverterData(ConvertLength, context.getString(R.string.key_carriage_positionOverride), ConvertLength.Unit.MM, device.model.getMaxCarriagePosition(), 0)
+        carriagePositionOverride = ConverterData( context.getString(R.string.key_carriage_positionOverride), ConvertLength, ConvertLength.Unit.MM, device.model.getMaxCarriagePosition(), 0)
         carriagePositionOverride.loadUnitFromPrefs(context)
     }
 }

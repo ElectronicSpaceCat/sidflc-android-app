@@ -12,17 +12,17 @@ object Projectile {
         getName(Name.Penny) to ProjectileData(getName(Name.Penny),
             2.5,
             19.05,
-            0.02),
+            0.065),
 
         getName(Name.Nickel) to ProjectileData(getName(Name.Nickel),
             5.0,
             21.21,
-            0.03),
+            0.05),
 
         getName(Name.Dime) to ProjectileData(getName(Name.Dime),
             2.268,
             17.91,
-            0.01),
+            0.07),
 
         getName(Name.Quarter) to ProjectileData(getName(Name.Quarter),
             5.67,

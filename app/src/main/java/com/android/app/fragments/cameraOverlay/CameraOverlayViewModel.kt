@@ -45,14 +45,31 @@ enum class DataType{
 class CameraOverlayViewModel(application: Application) : AndroidViewModel(application) {
     private val _isCalculationPaused = MutableLiveData(true)
     private val _dataToGet = MutableLiveData(DataType.NA)
-    private var _totalLengthTarget = 0.0
-    private var _totalLengthEst = 0.0
-
     private val carriagePosMerger = MediatorLiveData<Double>()
+    private var _isPositionAutoMode = MutableLiveData(true)
+    private var _isEngViewActive = MutableLiveData(false)
+    private val _hitConfidence = MutableLiveData(0.0)
 
     val gyro = SensorGyro()
 
-    private var _isPositionAutoMode = MutableLiveData(true)
+    val hitConfidence : LiveData<Double>
+        get() = _hitConfidence
+    val getAdjustedLaunchHeight: Double
+        get() = DataShared.device.ballistics.adjustedLaunchHeight
+    val adjustedTargetDistance: Double
+        get() = DataShared.device.ballistics.adjustedTargetDistance
+    val impactDistance : Double
+        get() = ConvertLength.convert(
+            ConvertLength.Unit.M, DataShared.targetDistance.unit, DataShared.device.ballistics.impactData.distance)
+    val impactHeight : Double
+        get() = ConvertLength.convert(
+            ConvertLength.Unit.M, DataShared.targetHeight.unit, DataShared.device.ballistics.impactData.height)
+    val velocity : Double
+        get() = DataShared.device.ballistics.projectileBallistics.velocity
+    val netPotentialEnergy : Double
+        get() = DataShared.device.ballistics.projectileBallistics.netPotentialEnergy
+
+
     val isPositionAutoModeOnChange : LiveData<Boolean>
         get() = _isPositionAutoMode
 
@@ -64,7 +81,6 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
             }
         }
 
-    private var _isEngViewActive = MutableLiveData(false)
     val isEngViewActiveOnChange : LiveData<Boolean>
         get() = _isEngViewActive
 
@@ -75,13 +91,6 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
                 _isEngViewActive.value = value
             }
         }
-
-    var impactDistance = 0.0
-    var impactHeight = 0.0
-
-    private var _hitConfidence = MutableLiveData(0.0)
-    val hitConfidence : LiveData<Double>
-        get() = _hitConfidence
 
     var isRollInRange = false
     var isPitchInRange = false
@@ -115,11 +124,10 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         isRollInRange = roll in -1.5..1.5
         isPitchInRange = (90.0 - pitch) in -1.5..1.5
 
-        if(isPositionAutoMode){
-            isCalculationPaused = !(isRollInRange && isPitchInRange) || !DataShared.device.connectionState.value!!.isReady
-        }
-        else{
-            isCalculationPaused = !(isRollInRange && isPitchInRange)
+        isCalculationPaused = if(isPositionAutoMode){
+            !(isRollInRange && isPitchInRange) || !DataShared.device.connectionState.value!!.isReady
+        } else{
+            !(isRollInRange && isPitchInRange)
         }
 
         if(!isCalculationPaused) {
@@ -171,6 +179,9 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         isCalculationPaused = !(isRollInRange && isPitchInRange)
     }
 
+    /**
+     * Called periodically by gyro.setOnSensorChangedListener()
+     */
     private fun calcData(pitch: Double, roll: Double) {
         when(dataToGet){
             DataType.DEVICE_HEIGHT -> {
@@ -199,41 +210,25 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
      * This should be called on a background thread since it blocks
      */
     private fun calcBallistics(position : Double) {
-        // Get impact data
-        val impactData = DataShared.device.ballistics.getImpactData(
+        // Convert data to the necessary units for ballistic calculations
+        val lensOffset = DataShared.lensOffset.getConverted(ConvertLength.Unit.MM)
+        val height = DataShared.deviceHeight.getConverted(ConvertLength.Unit.M)
+        val targetDistance = DataShared.targetDistance.getConverted(ConvertLength.Unit.M)
+        val targetHeight = DataShared.targetHeight.getConverted(ConvertLength.Unit.M)
+
+        // Calculate the projectile impact data
+        DataShared.device.ballistics.calcImpactData(
             position,
+            lensOffset,
+            height,
             gyro.pitch,
-            DataShared.deviceHeight.getConverted(Unit.M),
-            DataShared.targetDistance.getConverted(Unit.M),
-            DataShared.lensOffset.getConverted(Unit.MM)
+            targetDistance
         )
 
-        // Convert impactDistance to same units as targetDistance
-        impactDistance = ConvertLength.convert(Unit.M, DataShared.targetDistance.unit, impactData.distance)
-        // Convert impactHeight to same units as targetHeight
-        impactHeight = ConvertLength.convert(Unit.M, DataShared.targetHeight.unit, impactData.height)
-
-        // Target distance + target height
-        _totalLengthEst = if(impactDistance >= DataShared.targetDistance.value && DataShared.targetHeight.value > 0.0){
-            DataShared.targetDistance.value + impactHeight
-        } else{
-            impactDistance
-        }
-
-        // Get the totalLengthTarget
-        _totalLengthTarget = (DataShared.targetDistance.value + DataShared.targetHeight.value)
-
-        // Calculate the hit confidence percentage based on the total length
-        _hitConfidence.postValue(if(_totalLengthEst == 0.0 || _totalLengthTarget == 0.0){
-            0.0 // Return 0 if no target or estimate length = 0
-        } else{
-            // Flip the percentage calculation if the estimate length is above or below the target length
-            if (_totalLengthEst > _totalLengthTarget) {
-                (_totalLengthTarget / _totalLengthEst) * 100.0
-            } else {
-                (_totalLengthEst / _totalLengthTarget) * 100.0
-            }
-        })
+        // Update the hit confidence
+        _hitConfidence.postValue(
+            DataShared.device.ballistics.calcHitConfidence(targetDistance, targetHeight)
+        )
     }
 
     fun onActive(context: Context) {
@@ -280,5 +275,9 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
                 }
             }
         }
+    }
+
+    companion object {
+        private const val DEFAULT_DELTA_TIME_SECONDS = 0.01
     }
 }

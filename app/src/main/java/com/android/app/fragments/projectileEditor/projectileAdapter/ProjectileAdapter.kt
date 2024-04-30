@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.app.R
 import com.android.app.databinding.ItemProjectileBinding
 import com.android.app.device.projectile.ProjectileData
-import com.android.app.device.projectile.utils.ProjectilePrefUtils
+import com.android.app.device.projectile.ProjectilePrefUtils
 import com.android.app.fragments.dialogs.ProjectileInputDialogFragment
 
 class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapter.ViewHolder>() {

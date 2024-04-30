@@ -79,7 +79,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
             }
             else {
                 Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
-                    R.id.settingsDeviceFragment
+                    R.id.deviceBallisticsFragment
                 )
             }
             true

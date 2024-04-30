@@ -6,6 +6,30 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
+        app:title="@string/header_hardware">
+        <Preference
+            android:layout_width="wrap_content"
+            app:defaultValue=""
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
+            app:persistent="false"
+            app:summary="spring selected"
+            app:title="@string/pref_title_spring_edit"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_reset_data" />
+        <Preference
+            app:defaultValue=""
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_PROJECTILE_SELECTED"
+            app:persistent="false"
+            app:summary="projectile selected"
+            app:title="@string/pref_title_projectile_edit"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false"
         app:title="@string/header_ballistics">
         <EditTextPreference
             app:defaultValue="0.0"
@@ -13,14 +37,16 @@
             app:key="@string/PREFERENCE_FILTER_FORCE_OFFSET"
             app:persistent="false"
             app:title="@string/pref_title_force_offset"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_reset_data" />
         <EditTextPreference
             app:defaultValue="1.0"
             app:iconSpaceReserved="false"
             app:key="@string/PREFERENCE_FILTER_EFFICIENCY"
             app:persistent="false"
             app:title="@string/pref_title_efficiency"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_reset_data" />
         <EditTextPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,20 +55,42 @@
             app:key="@string/PREFERENCE_FILTER_FRICTION_COEFFICIENT"
             app:persistent="false"
             app:title="@string/pref_title_friction_coefficient"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_reset_data" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_PROJECTILE_SELECTED_DRAG"
+            app:persistent="false"
+            app:title="@string/pref_title_projectile_selected_drag"
+            app:useSimpleSummaryProvider="true"
+            app:widgetLayout="@layout/widget_reset_data" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Hardware">
-            <Preference
-                app:defaultValue=""
-                app:iconSpaceReserved="false"
-                app:key="@string/PREFERENCE_FILTER_SPRING_SELECTED"
-                app:persistent="false"
-                app:summary="spring selected"
-                app:title="@string/pref_title_spring_edit"
-                app:useSimpleSummaryProvider="true" />
+        android:title="@string/header_orientation"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_TEST_HEIGHT"
+            app:persistent="true"
+            app:title="@string/pref_title_height"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_TEST_PITCH"
+            app:persistent="true"
+            app:title="@string/pref_title_pitch"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

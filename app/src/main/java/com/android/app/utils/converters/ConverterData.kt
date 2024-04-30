@@ -8,15 +8,15 @@ import com.android.app.utils.misc.Utils
 import java.util.*
 
 typealias LengthData = ConverterData<ConvertLength, ConvertLength.Unit>
-typealias WeightData = ConverterData<ConvertLength, ConvertLength.Unit>
+typealias WeightData = ConverterData<ConvertWeight, ConvertWeight.Unit>
 
 /**
  * The purpose of this class is to manage unit conversions for various unit types
  * such as weight or length.
  */
 class ConverterData<T: IConvert<E>, E : Enum<E>>(
-    private val converter: T,
     private val keyData: String,
+    private val converter: T,
     unit: E,
     dataInit: Double = 0.0,
     var precision: Int = 2) {

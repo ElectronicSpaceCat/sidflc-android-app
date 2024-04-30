@@ -1,5 +1,7 @@
 package com.android.app.device.model
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.android.app.device.projectile.ProjectileData
 import com.android.app.device.springs.Spring
 import com.android.app.device.springs.SpringData
@@ -14,7 +16,6 @@ import kotlin.math.*
  * @param studCenterToStudCenter Distance from left spring stud center to right spring stud center (mm)
  * @param sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud (mm)
  * @param sensorToCarriageBackFace Distance from face of sensor to carriage back face (mm)
- * @param carriageSpringGripAngle Angle of the spring grip (deg)
  * @param carriageBackFaceToSpringPoint Distance from the back face of the carriage to the point where the springs meet (mm)
  * @param carriageBackFaceToCarriageSlotPoint Distance from the back face of the carriage to back point of the carriage pocket (mm)
  * @param carriageWeight Weight of the carriage (g)
@@ -30,7 +31,6 @@ import kotlin.math.*
     studCenterToStudCenter: Double,
     sensorToStudCenter: Double,
     sensorToCarriageBackFace: Double,
-    carriageSpringGripAngle : Double,
     carriageBackFaceToSpringPoint : Double,
     carriageBackFaceToCarriageSlotPoint : Double,
     carriageWeight: Double,
@@ -48,7 +48,6 @@ import kotlin.math.*
     private val _studCenterToStudCenter = studCenterToStudCenter
     private val _sensorToStudCenter = sensorToStudCenter
     private val _sensorToCarriageBackFace = sensorToCarriageBackFace
-    private val _carriageSpringGripAngle = carriageSpringGripAngle
     private val _carriageBackFaceToSpringPoint = carriageBackFaceToSpringPoint
     private val _carriageBackFaceToCarriageSlotPoint = carriageBackFaceToCarriageSlotPoint
     private val _carriageWeight = carriageWeight
@@ -69,8 +68,8 @@ import kotlin.math.*
     /**
      * Device model calculated dependencies that are dependent on spring and projectile used
      */
-    private var _spring : SpringData ?= null
-    private var _projectile : ProjectileData ?= null
+    private var _spring = MutableLiveData<SpringData?>(null)
+    private var _projectile = MutableLiveData<ProjectileData?>(null)
 
     private var _projectileOffset : Double = 0.0
     private var _totalWeight : Double = 0.0 // Total weight of (carriage + projectile)
@@ -97,6 +96,8 @@ import kotlin.math.*
     private class TableData(var position: Double = 0.0, var potentialEnergy: Double = 0.0)
     private var _lookUpTable: ArrayList<TableData> = arrayListOf()
 
+    private val _balllistics = ModelBallistics(this)
+
     val caseBodyLength : Double
         get() = _caseBodyLength
 
@@ -106,39 +107,46 @@ import kotlin.math.*
     val defaultSpringName : Spring.Name
         get() = _defaultSpringName
 
+    val ballistics : ModelBallistics
+        get() = _balllistics
+
     inner class Point(val x : Double = 0.0, val y : Double = 0.0)
 
     /**
-     * Set the spring and updates spring related parameters
-     *
-     * @param spring
+     * Spring getter/setter
      */
-    fun setSpring(spring: SpringData?){
-        // Set spring data
-        _spring = spring
+    val springOnChange : LiveData<SpringData?>
+        get() = _spring
+    val spring : SpringData?
+        get() = _spring.value
 
+    fun resetSpring() {
+        setSpring(Spring.getData(this.defaultSpringName))
+    }
+
+    fun setSpring(spring : SpringData?) {
         // Reset data if spring is null or both unload ref values are not valid
-        if(_spring == null) {
+        if(spring == null) {
             _unloadedSpringAngle = 0.0
             _carriageBackFaceToSpringPointAdj = 0.0
-
             _lookUpTable.clear()
-
+            _spring.value = null
             return
         }
 
-        // Get adjusted distance from carriage back face to the spring leg center when springs are loaded in the carriage
-        _carriageBackFaceToSpringPointAdj = _carriageBackFaceToSpringPoint - CalcTrig.getSideGiven1Side2Angles(_spring!!.wireDiameter/2.0, 90.0 , _carriageSpringGripAngle/2.0)
+        // Get adjusted distance from carriage back face to the estimated center of the spring leg where
+        // it touches the point of the carriage
+        _carriageBackFaceToSpringPointAdj = _carriageBackFaceToSpringPoint - (spring.wireDiameter / 2.0)
 
         // Case dimension reference data
         val r1 = _springStudRadius
-        val r2 = _spring!!.meanDiameter / 2.0
-        val d1 = _spring!!.wireDiameter / 2.0
+        val r2 = spring.meanDiameter / 2.0
+        val d1 = spring.wireDiameter / 2.0
         val d2 = r1 + d1
         val d3 = r2 - d2
 
         // Hourglass 1
-        val h1angleA = CalcTrig.getAngleAGivenSideASideC((_springStudRadius + _springSupportRadius + spring!!.wireDiameter), _studCenterToSpringSupportCenter)
+        val h1angleA = CalcTrig.getAngleAGivenSideASideC((_springStudRadius + _springSupportRadius + spring.wireDiameter), _studCenterToSpringSupportCenter)
         val h1angleB = 90.0 - h1angleA
         val h1angleC = CalcTrig.getAngleGiven2Angles(_springSupportAngleFromHorizontal, h1angleB)
 
@@ -185,41 +193,35 @@ import kotlin.math.*
         _yMax = (slopeTangentLine * (_xMax-_pXunloaded)) + _pYunloaded
 
         // Regenerate potential energy table
-        generatePotentialEnergyTable()
+        generatePotentialEnergyTable(spring)
+
+        // Set spring data
+        _spring.value = spring
     }
 
     /**
-     * Get spring data
+     * Projectile getter/setter
      */
-    val spring: SpringData?
-        get() = _spring
+    val projectileOnChange : LiveData<ProjectileData?>
+        get() = _projectile
+    val projectile : ProjectileData?
+        get() = _projectile.value
 
-    /**
-     * Set projectile and projectile related parameters
-     *
-     * @param projectile
-     */
     fun setProjectile(projectile: ProjectileData?){
-        // Set the projectile data
-        _projectile = projectile
-
-        if(_projectile == null){
+        if(projectile == null){
             _totalWeight = _carriageWeight
             _projectileOffset = 0.0
+            _projectile.value = null
             return
         }
 
         // Set the total weight
-        _totalWeight = (projectile!!.weight + _carriageWeight)
+        _totalWeight = (projectile.weight + _carriageWeight)
         // Set the total height offset
         _projectileOffset = calcProjectileOffset(projectile.diameter)
+        // Set the projectile data
+        _projectile.value = projectile
     }
-
-    /**
-     * Get projectile data
-     */
-    val projectile: ProjectileData?
-        get() = _projectile
 
     /**
      * Get max carriage position
@@ -282,21 +284,34 @@ import kotlin.math.*
     }
 
     /**
+     * Public:
+     * Get the active spring angle which
+     * is calculated based on the carriage
+     * position.
+     *
+     * @param position (mm)
+     * @return activeAngle (deg)
+     */
+    fun getSpringAngleAtPosition(position: Double): Double {
+        return getSpringAngleAtPosition(position, spring)
+    }
+
+    /**
      * Get total forward force which is the forward force of one
      * spring multiplied by 2 since there are two springs in the device
      */
-    private fun getTotalForwardForce(position: Double) : Double{
-        return (2.0 * getForwardForce(position))
+    private fun getTotalForwardForce(position: Double, spring: SpringData?) : Double{
+        return (2.0 * getForwardForce(position, spring))
     }
 
     /**
      * Get total the forward force acting on the carriage from the springs
      * which depends on the position of the carriage
      */
-    private fun getForwardForce(position: Double) : Double{
-        if(_spring == null) return 0.0
+    private fun getForwardForce(position: Double, spring: SpringData?) : Double{
+        if(spring == null) return 0.0
 
-        val springMeanRadius = _spring!!.meanDiameter/2.0
+        val springMeanRadius = spring.meanDiameter/2.0
 
         val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
         val pX = _xMax
@@ -311,7 +326,7 @@ import kotlin.math.*
         val springAngle = CalcTrig.getAngleGiven3Sides(ref, springMeanRadius, springMeanRadius)
 
         // Get resultant force acting on carriage from single spring
-        val netForce = spring!!.getForceAtDegree(springAngle, springMomentArmLength)
+        val netForce = spring.getForceAtDegree(springAngle, springMomentArmLength)
 
         val angleRefToHorizontal = CalcTrig.getAngleGiven3Sides(springAdjacentArmLength, springMomentArmLength, springOppositeArmLength)
 
@@ -325,12 +340,13 @@ import kotlin.math.*
      * position.
      *
      * @param position (mm)
+     * @param spring
      * @return activeAngle (deg)
      */
-    fun getSpringAngleAtPosition(position: Double): Double {
-        if(_spring == null) return 0.0
+    private fun getSpringAngleAtPosition(position: Double, spring: SpringData?): Double {
+        if(spring == null) return 0.0
 
-        val springMeanRadius = _spring!!.meanDiameter/2.0
+        val springMeanRadius = spring.meanDiameter/2.0
 
         val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
         val pX = _xMax
@@ -391,7 +407,7 @@ import kotlin.math.*
      * Generates a look-up-table for PotentialEnergy/position
      * over a range of resolution size to sensorToCarriageBackFace
      */
-    private fun generatePotentialEnergyTable(){
+    private fun generatePotentialEnergyTable(spring: SpringData?){
         var lastPotentialEnergyValue = 0.0
         var lastPositionValue = _sensorToCarriageBackFace
         // Clear tables
@@ -404,7 +420,7 @@ import kotlin.math.*
             // Decrement the position by the resolution size
             lastPositionValue -= _resolutionSize
             // Integrate the force value over position
-            lastPotentialEnergyValue += getTotalForwardForce(lastPositionValue)
+            lastPotentialEnergyValue += getTotalForwardForce(lastPositionValue, spring)
             // Add data to table
             _lookUpTable.add(TableData(lastPositionValue, lastPotentialEnergyValue))
         }
