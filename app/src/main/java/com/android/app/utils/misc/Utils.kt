@@ -70,8 +70,8 @@ object Utils {
      * @param permissions
      * @return true if permission granted
      */
-    fun hasPermission(context: Context, permissions : Array<String>) {
-        permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+    fun hasPermission(context: Context, permissions : Array<String>) : Boolean {
+        return permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
     }
 
     /**

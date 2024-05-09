@@ -23,18 +23,21 @@ package com.android.app.fragments.device.deviceScanner
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context.BLUETOOTH_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -164,22 +167,53 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         DataShared.device.connect(requireActivity(), target.device, !target.isBootloader)
         Toast.makeText(requireActivity(),
             "Device selected: " + target.name,
-            Toast.LENGTH_SHORT
-        ).show()
+            Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("MissingPermission")
     private fun onEnableBluetoothClicked() {
-        val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        startActivity(intent)
-        requireContext().sendBroadcast(intent)
-
-//        // Use this block if not wanting to prompt user to turn on bluetooth
-//        val manager = requireContext().getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-//        if(!manager.adapter.isEnabled){
-//            manager.adapter.enable()
-//        }
+        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        requestEnableBluetooth.launch(enableBtIntent)
+        requireContext().sendBroadcast(enableBtIntent)
     }
+
+    private val requestEnableBluetooth =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if(result.resultCode == RESULT_OK) {
+                // check android 12+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    requestMultiplePermissions.launch(
+                        arrayOf(
+                            Manifest.permission.BLUETOOTH_SCAN,
+                            Manifest.permission.BLUETOOTH_CONNECT,
+                        )
+                    )
+                }
+                else {
+                    Toast.makeText(requireActivity(),
+                        "${Manifest.permission.BLUETOOTH} granted",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            else {
+                Toast.makeText(requireActivity(),
+                    "${Manifest.permission.BLUETOOTH} denied",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+    private val requestMultiplePermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                val resultStr = if(it.value) "granted" else "denied"
+                Toast.makeText(requireActivity(),
+                    "${it.key} = $resultStr",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     private fun onEnableLocationClicked() {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
@@ -231,11 +265,20 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
     private fun startScan(state: DeviceScannerStateLiveData) {
         // Check device connection status
         val connState = DataShared.device.connectionState.value!!
-
-        // Determine which scan state to be in...
+        // Is Bluetooth available and active
         val btAvailable = state.isBluetoothAvailable()
-        val btHasPermission = Utils.hasPermission(requireContext(), Manifest.permission.BLUETOOTH)
-        if (!btAvailable || !btHasPermission) {
+        // Are Bluetooth permissions allowed
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Utils.hasPermission(requireContext(), arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ))
+        }
+        else {
+            Utils.hasPermission(requireContext(), Manifest.permission.BLUETOOTH)
+        }
+        // Determine which scan state to be in...
+        if (!btAvailable || !hasPermission) {
             scanState = ScanState.SCAN_NO_BLUETOOTH
         }
         else if (connState.isReady) {
