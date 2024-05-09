@@ -9,13 +9,14 @@ object PrefUtils {
     /**
      * Converts a MutableList<String> to a delimited string sequence
      * and then stores the string to preferences.
+     * Passing 'array' as null removes data from the list.
      *
      * @param context :Context
      * @param key :String (Preference key)
-     * @param array :MutableList<String>
+     * @param array :MutableList<String>?
      * @param delimiter :String
      */
-    fun addStringArrayToPrefs(context: Context, key: String, array: MutableList<String>?, delimiter: String){
+    fun addStringArrayToPrefs(context: Context, key: String, array: List<String>?, delimiter: String){
         var newStr: String? = null
         if(array != null){
             newStr = TextUtils.join(delimiter, array)

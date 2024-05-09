@@ -20,7 +20,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -30,15 +29,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
 import com.android.app.R
-import com.android.app.dataShared.DataShared
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.android.app.utils.misc.Utils
 import kotlinx.coroutines.launch
-
-private const val PERMISSION_REQUIRED = Manifest.permission.CAMERA
-
-// NOTE: Use if wanting to check multiple permissions
-//private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
 /**
  * The sole purpose of this fragment is to request permissions and, once granted, display the
@@ -100,15 +92,20 @@ class CameraPermissionsFragment : Fragment() {
     }
 
     companion object {
+        private const val PERMISSION_REQUIRED = Manifest.permission.CAMERA
+
+//        // NOTE: Use if wanting to check multiple permissions
+//        private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
+
 //        // NOTE: Use if wanting to check multiple permissions
 //        /** Convenience method used to check if all permissions required by this app are granted */
-//        fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
-//            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+//        fun hasPermissions(context: Context) : Boolean {
+//            return Utils.hasPermission(context, PERMISSIONS_REQUIRED)
 //        }
 
         /** Convenience method used to check if all permissions required by this app are granted */
         fun hasPermission(context: Context) : Boolean{
-            return ContextCompat.checkSelfPermission(context, PERMISSION_REQUIRED) == PackageManager.PERMISSION_GRANTED
+            return Utils.hasPermission(context, PERMISSION_REQUIRED)
         }
     }
 }

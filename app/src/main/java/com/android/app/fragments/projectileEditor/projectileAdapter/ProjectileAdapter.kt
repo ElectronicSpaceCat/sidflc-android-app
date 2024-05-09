@@ -18,8 +18,8 @@ import com.android.app.device.projectile.ProjectilePrefUtils
 import com.android.app.fragments.dialogs.ProjectileInputDialogFragment
 
 class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapter.ViewHolder>() {
-    private var _projectiles = ProjectilePrefUtils.getProjectileListFromPrefs(context)
-    private var _projectileSelected = ProjectilePrefUtils.getProjectileSelectedData(context)?.name
+    private var _projectiles = ProjectilePrefUtils.getProjectileList(context)
+    private var _projectileSelected = ProjectilePrefUtils.getProjectileSelected(context)?.name
     private lateinit var _onItemClickListener: OnItemClickListener
     private var _bindingLast : ItemProjectileBinding ?= null
 
@@ -51,16 +51,16 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
         // Notify that projectiles have been removed
         notifyItemRangeRemoved(0, indexSizePrev)
         // Reset to a default projectile list
-        _projectiles = ProjectilePrefUtils.setDefaultProjectilesPref(context)
+        _projectiles = ProjectilePrefUtils.setDefaultProjectiles(context)
         // Notify that projectiles have been added
         notifyItemRangeInserted(0, _projectiles.lastIndex)
     }
 
     private fun updateProjectilePrefList(context: Context){
         // Update the projectile list in preferences
-        ProjectilePrefUtils.setProjectileListPref(context, _projectiles)
+        ProjectilePrefUtils.setProjectileList(context, _projectiles)
         // Update the selected projectile in preferences
-        ProjectilePrefUtils.setProjectileSelectedPref(context, _projectileSelected)
+        ProjectilePrefUtils.setProjectileSelected(context, _projectileSelected)
     }
 
     fun setOnItemClickListener(listener: OnItemClickListener?) {
@@ -210,6 +210,10 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
     }
 
     private fun removeProjectileFromList(position: Int){
+        // Clear the selected projectile if it is being removed
+        if(_projectileSelected == _projectiles[position].name) {
+            _projectileSelected = ""
+        }
         _projectiles.removeAt(position)
         notifyItemRemoved(position)
     }

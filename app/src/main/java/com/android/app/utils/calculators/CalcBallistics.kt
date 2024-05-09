@@ -38,7 +38,7 @@ object CalcBallistics {
      *
      * Formula: KE = 0.5 * m * v²
      *
-     * rearrange to..
+     * rearranged to..
      *
      * v = √(2 * KE / m)
      *
@@ -189,15 +189,15 @@ object CalcBallistics {
             vXprev = vX
             vYprev = vY
 
-            vX -= (dragCoefficient * vX * v * deltaTimeSeconds)
-            vY -= (ACCELERATION_OF_GRAVITY * deltaTimeSeconds) - (dragCoefficient * vY * v * deltaTimeSeconds)
+            vX -= (dragCoefficient * vXprev * v * deltaTimeSeconds)
+            vY = (vYprev - (ACCELERATION_OF_GRAVITY * deltaTimeSeconds) - (dragCoefficient * vYprev * v * deltaTimeSeconds))
 
             xPrev = x
             yPrev = y
 
             // Get displacement from avg velocity
-            x += 0.5 * (vX + vXprev) * deltaTimeSeconds
-            y += 0.5 * (vY + vYprev) * deltaTimeSeconds
+            x += (0.5 * (vX + vXprev) * deltaTimeSeconds)
+            y += (0.5 * (vY + vYprev) * deltaTimeSeconds)
 
             // Get impact height when x crosses the target distance
             if(!gotImpactHeight && x >= targetDistance){
@@ -205,7 +205,7 @@ object CalcBallistics {
 
                 impactData.height = CalcMisc.interpolate(targetDistance, x, xPrev, y, yPrev)
             }
-        }while (y > 0.0)
+        } while (y > 0.0)
 
         // Set height to zero if it was not found
         if(!gotImpactHeight){

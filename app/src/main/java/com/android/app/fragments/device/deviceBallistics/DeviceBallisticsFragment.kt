@@ -16,8 +16,6 @@
 
 package com.android.app.fragments.device.deviceBallistics
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +23,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withCreated
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.preference.PreferenceManager
@@ -35,14 +35,24 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.android.app.R
 import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceBallisticsBinding
+import com.android.app.device.projectile.ProjectileData
+import com.android.app.device.projectile.ProjectilePrefUtils
 import com.android.app.fragments.device.deviceBallistics.dataPointsAdapter.DataPointsAdapter
 import com.android.app.fragments.settings.SettingsDeviceFragment
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.misc.Utils
 import com.android.app.utils.plotter.CanvasPlotter
 import com.android.app.utils.plotter.DataPoint
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import kotlin.math.roundToInt
+
+/**
+ * TODO: Need way to remove projectile test data if associated projectile does not exist
+ */
 
 class DeviceBallisticsFragment : Fragment() {
     private var _fragmentDeviceBallisticsBinding: FragmentDeviceBallisticsBinding? = null
@@ -51,12 +61,14 @@ class DeviceBallisticsFragment : Fragment() {
     private var _settingsDeviceFragment : SettingsDeviceFragment ?= null
     private val settingsDeviceFragment get() = _settingsDeviceFragment!!
 
-    private lateinit var _prefsListener : SharedPreferences.OnSharedPreferenceChangeListener
+    private val _numDataPoints = ((DataShared.device.model.getMaxCarriagePosition().toInt() - DataShared.device.model.getMinCarriagePosition().toInt()) / POS_INCREMENTS)
 
-    private val _numDataPoints = ((DataShared.device.model.getMaxCarriagePosition().toInt() - POS_START) / POS_INCREMENTS)
+    private var _projectileSelectedPrev : ProjectileData ?= null
 
-    private var _testHeight = 0.0
-    private var _testPitch = 0.0
+    @Serializable
+    private class RecData(var height : Double, var heightUnit : ConvertLength.Unit, var pitch : Double, val recDist : Array<Double>)
+
+    private var _recData = RecData(0.0, DataShared.deviceHeight.unit, 0.0, Array(_numDataPoints) {0.0})
 
     private inner class PlotData {
         var xMin : Float = 0f
@@ -109,7 +121,7 @@ class DeviceBallisticsFragment : Fragment() {
         _plotters["rec"] = fragmentDeviceBallisticsBinding.graphViewPlotter2
         _plotters["rec"]?.plotType = CanvasPlotter.PlotType.PLOT
 
-        initPrefsListener(requireContext())
+        setDefaultPlotterBounds()
 
         /**
          * Observe connection state navigate back to scanner page on disconnect
@@ -146,6 +158,7 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe the recorded impact data changed
          */
         _adapter.onRecDataChanged.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             plotRecordedImpactData()
         }
 
@@ -153,6 +166,7 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe forceOffsetOnChange
          */
         DataShared.device.model.ballistics.forceOffsetOnChange.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             plotCalculatedImpactData()
         }
 
@@ -160,6 +174,7 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe efficiencyOnChange
          */
         DataShared.device.model.ballistics.efficiencyOnChange.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             plotCalculatedImpactData()
         }
 
@@ -167,6 +182,7 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe frictionCoefficientOnChange
          */
         DataShared.device.model.ballistics.frictionCoefficientOnChange.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             plotCalculatedImpactData()
         }
 
@@ -174,14 +190,56 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe springOnChange
          */
         DataShared.device.model.springOnChange.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             plotCalculatedImpactData()
         }
 
         /**
-         * Observe projectileOnChange
+         * NOTE: Set observers with references to SettingsDeviceFragment
+         *       after it has been created, otherwise will get errors.
          */
-        DataShared.device.model.projectileOnChange.observe(viewLifecycleOwner) {
-            plotCalculatedImpactData()
+        lifecycleScope.launch {
+            settingsDeviceFragment.lifecycle.withCreated {
+                /**
+                 * Observe projectileOnChange
+                 */
+                DataShared.device.model.projectileOnChange.observe(viewLifecycleOwner) {
+                    // If projectile changed, store the recorded test data
+                    if(_projectileSelectedPrev != it) {
+                        storeRecordedDataToPrefs(_projectileSelectedPrev)
+                        _projectileSelectedPrev = it
+                    }
+                    loadRecordedDataFromPrefs(it)
+                    plotCalculatedImpactData()
+                    plotRecordedImpactData()
+                }
+
+                /**
+                 * Observe Test Pitch
+                 */
+                settingsDeviceFragment.prefTestPitch.setOnPreferenceChangeListener { _, newValue ->
+                    var retVal = false
+                    if (settingsDeviceFragment.prefTestPitch.text != newValue as String) {
+                        _recData.pitch = Utils.convertStrToDouble(newValue)
+                        plotCalculatedImpactData()
+                        retVal = true
+                    }
+                    retVal
+                }
+
+                /**
+                 * Observe Test Height
+                 */
+                settingsDeviceFragment.prefTestHeight.setOnPreferenceChangeListener { _, newValue ->
+                    var retVal = false
+                    if (settingsDeviceFragment.prefTestHeight.text != newValue as String) {
+                        _recData.height = Utils.convertStrToDouble(newValue)
+                        plotCalculatedImpactData()
+                        retVal = true
+                    }
+                    retVal
+                }
+            }
         }
 
         /**
@@ -249,10 +307,6 @@ class DeviceBallisticsFragment : Fragment() {
             _plotBounds.yMax += _plotBounds.xIncrement
             updateAllPlots()
         }
-
-        setDefaultPlotterBounds()
-        plotRecordedImpactData()
-        plotCalculatedImpactData()
     }
 
     /**
@@ -264,12 +318,12 @@ class DeviceBallisticsFragment : Fragment() {
         // Create the data set to plot
         var rowId = 0
         val data = mutableListOf<DataPoint>()
-        for(idx in POS_START.. DataShared.device.model.getMaxCarriagePosition().toInt()) {
+        for(idx in DataShared.device.model.getMinCarriagePosition().toInt().. DataShared.device.model.getMaxCarriagePosition().toInt()) {
             val impactDistance = DataShared.device.model.ballistics.calcImpactData(
                 idx.toDouble(),
                 lensOffset,
-                _testHeight,
-                _testPitch,
+                _recData.height,
+                _recData.pitch,
                 0.0
             )
 
@@ -296,21 +350,10 @@ class DeviceBallisticsFragment : Fragment() {
      */
     private fun plotRecordedImpactData() {
         val dataPoints = _adapter.getData()
-
         val data = mutableListOf<DataPoint>()
 
-        // Reset if size does not match
-        if(dataPoints.lastIndex != _numDataPoints){
-            val newData = (0.._numDataPoints).map { idx ->
-                DataPointsAdapter.DataPoint((POS_START + idx * POS_INCREMENTS).toDouble(), 0.0, 0.0)
-            }
-            _adapter.setDataList(newData)
-        }
-        // Get stored data
-        else {
-            dataPoints.forEach {
-                data.add(DataPoint(it.pos.toFloat(), it.rec.toFloat()))
-            }
+        dataPoints.forEach {
+            data.add(DataPoint(it.pos.toFloat(), it.rec.toFloat()))
         }
 
         _plotters["rec"]?.setData(data)
@@ -318,7 +361,7 @@ class DeviceBallisticsFragment : Fragment() {
     }
 
     private fun setDefaultPlotterBounds() {
-        _plotBounds.xMin = POS_START.toFloat()
+        _plotBounds.xMin = DataShared.device.model.getMinCarriagePosition().toFloat()
         _plotBounds.xMax = 50f
         _plotBounds.yMin = 0f
         _plotBounds.yMax = 30f
@@ -358,56 +401,67 @@ class DeviceBallisticsFragment : Fragment() {
         recyclerView.addItemDecoration(
             DividerItemDecoration(requireActivity(), DividerItemDecoration.VERTICAL)
         )
-    }
 
-    /**
-     * Create listeners
-     */
-    private fun initPrefsListener(context: Context) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.all.keys.forEach{ key ->
-            preferencesHandler(context, prefs, key)
-        }
-
-        /**
-         * Listen for preference changes
-         */
-        _prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { pref: SharedPreferences?, key: String? ->
-            if (pref != null && key != null) {
-                preferencesHandler(context, pref, key)
+        // Create zeroed list in the adapter if the size does not match
+        val dataPoints = _adapter.getData()
+        if(dataPoints.lastIndex != _numDataPoints){
+            val newData = (0.._numDataPoints).map { idx ->
+                DataPointsAdapter.DataPoint((DataShared.device.model.getMinCarriagePosition() + idx * POS_INCREMENTS).toDouble(), 0.0, 0.0)
             }
+            _adapter.setDataList(newData)
         }
     }
 
-    /**
-     * Handler for preferences, if any are modified then notify a recalculation on the graphs.
-     */
-    private fun preferencesHandler(context: Context, pref: SharedPreferences, key: String) {
-        when(key){
-            context.getString(R.string.PREFERENCE_FILTER_TEST_HEIGHT) -> {
-                _testHeight = Utils.convertStrToDouble(pref.getString(key, "0.0"))
-                plotCalculatedImpactData()
-            }
-            context.getString(R.string.PREFERENCE_FILTER_TEST_PITCH) -> {
-                _testPitch = Utils.convertStrToDouble(pref.getString(key, "0.0"))
-                plotCalculatedImpactData()
-            }
+    private fun storeRecordedDataToPrefs(projectile: ProjectileData?) {
+        projectile?.let {
+            val json = Json.encodeToString(_recData)
+            val editor = PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
+            editor.putString(it.name + REC_DATA_PREF_TAG, json).apply()
         }
     }
 
-    override fun onResume() {
-        PreferenceManager.getDefaultSharedPreferences(requireContext()).registerOnSharedPreferenceChangeListener(_prefsListener)
-        super.onResume()
-    }
+    private fun loadRecordedDataFromPrefs(projectile: ProjectileData?) {
+        try{
+            val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            val str = prefs.getString(projectile?.name + REC_DATA_PREF_TAG, "")
+            val data = Json.decodeFromString<RecData>(str!!)
+            _recData = data
+        }
+        catch (e : Exception) {
+            _recData.height = 0.0
+            _recData.pitch = 0.0
+            _recData.recDist.fill(0.0)
+        }
 
-    override fun onPause() {
-        PreferenceManager.getDefaultSharedPreferences(requireContext()).unregisterOnSharedPreferenceChangeListener(_prefsListener)
-        super.onPause()
+        // Set the preferences when recorded data loaded
+        try {
+            settingsDeviceFragment.prefTestPitch.text = _recData.pitch.toString()
+            settingsDeviceFragment.prefTestHeight.text = _recData.height.toString()
+        }
+        catch (e : Exception) {
+            // Ignore...
+        }
+
+        // Set the recorded data in the adapter
+        val dataPoints = _adapter.getData()
+        dataPoints.forEachIndexed { idx, _ ->
+            if(idx < _recData.recDist.size){
+                _adapter.setRec(idx, _recData.recDist[idx], true)
+            }
+            else {
+                _adapter.setRec(idx, 0.0, true)
+            }
+        }
     }
 
     override fun onDestroyView() {
         _plotters.clear()
-        _adapter.storeDataToPrefs()
+
+        storeRecordedDataToPrefs(DataShared.device.model.projectile)
+
+        // Set the projectile back to the selected
+        val projectile = ProjectilePrefUtils.getProjectileSelected(requireContext())
+        DataShared.device.model.setProjectile(projectile)
 
         val fragMan: FragmentManager = parentFragmentManager
         val fragTransaction: FragmentTransaction = fragMan.beginTransaction()
@@ -420,7 +474,7 @@ class DeviceBallisticsFragment : Fragment() {
     }
 
     companion object {
-        const val POS_START = 10
         const val POS_INCREMENTS = 5
+        const val REC_DATA_PREF_TAG = "_rec_data"
     }
 }

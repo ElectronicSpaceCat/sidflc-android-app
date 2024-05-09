@@ -25,8 +25,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context.BLUETOOTH_SERVICE
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -35,7 +36,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -47,6 +47,7 @@ import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceScannerBinding
 import com.android.app.fragments.device.deviceScanner.deviceAdapter.DevicesAdapter
 import com.android.app.fragments.device.deviceScanner.deviceAdapter.DiscoveredBluetoothDevice
+import com.android.app.utils.misc.Utils
 import com.android.app.utils.misc.Utils.isLocationPermissionDeniedForever
 import com.android.app.utils.misc.Utils.isLocationPermissionsGranted
 import com.android.app.utils.misc.Utils.markLocationPermissionRequested
@@ -174,7 +175,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         requireContext().sendBroadcast(intent)
 
 //        // Use this block if not wanting to prompt user to turn on bluetooth
-//        val manager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+//        val manager = requireContext().getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
 //        if(!manager.adapter.isEnabled){
 //            manager.adapter.enable()
 //        }
@@ -186,9 +187,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
     }
 
     private fun onGrantLocationPermissionClicked() {
-        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (Utils.hasPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
             viewModel.refresh()
         } else {
             markLocationPermissionRequested(requireActivity())
@@ -233,8 +232,10 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         // Check device connection status
         val connState = DataShared.device.connectionState.value!!
 
-        // Determine which scan state to be in
-        if (!state.isBluetoothEnabled()) {
+        // Determine which scan state to be in...
+        val btAvailable = state.isBluetoothAvailable()
+        val btHasPermission = Utils.hasPermission(requireContext(), Manifest.permission.BLUETOOTH)
+        if (!btAvailable || !btHasPermission) {
             scanState = ScanState.SCAN_NO_BLUETOOTH
         }
         else if (connState.isReady) {
@@ -330,7 +331,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                     fragmentDeviceScannerBinding.noLocationPermission.actionPermissionSettings.visibility =
                         if (deniedForever) View.VISIBLE else View.GONE
 
-                }else if(!state.isLocationEnabled()){
+                }else if(!state.isLocationAvailable()){
                     fragmentDeviceScannerBinding.noDevices.root.visibility = View.VISIBLE
                     fragmentDeviceScannerBinding.noDevices.noLocation.visibility = View.VISIBLE
                     fragmentDeviceScannerBinding.noLocationPermission.root.visibility = View.GONE

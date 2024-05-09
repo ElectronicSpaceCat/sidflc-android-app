@@ -27,8 +27,8 @@ import androidx.lifecycle.LiveData
  * This class keeps the current state of the scanner.
  */
 class DeviceScannerStateLiveData/* package */(
-    private var bluetoothEnabled: Boolean,
-    private var locationEnabled: Boolean
+    private var bluetoothAvailable: Boolean,
+    private var locationAvailable: Boolean
 ) : LiveData<DeviceScannerStateLiveData>() {
     private var scanningStarted = false
     private var hasRecords = false
@@ -56,20 +56,20 @@ class DeviceScannerStateLiveData/* package */(
 
     /* package */
     fun bluetoothEnabled() {
-        bluetoothEnabled = true
+        bluetoothAvailable = true
         postValue(this)
     }
 
     /* package */
     fun bluetoothDisabled() {
-        bluetoothEnabled = false
+        bluetoothAvailable = false
         hasRecords = false
         postValue(this)
     }
 
     /* package */
     fun setLocationEnabled(enabled: Boolean) {
-        locationEnabled = enabled
+        locationAvailable = enabled
         postValue(this)
     }
 
@@ -102,16 +102,16 @@ class DeviceScannerStateLiveData/* package */(
     }
 
     /**
-     * Returns whether Bluetooth adapter is enabled.
+     * Returns whether Bluetooth adapter is available.
      */
-    fun isBluetoothEnabled(): Boolean {
-        return bluetoothEnabled
+    fun isBluetoothAvailable(): Boolean {
+        return bluetoothAvailable
     }
 
     /**
-     * Returns whether Location is enabled.
+     * Returns whether Location is available.
      */
-    fun isLocationEnabled(): Boolean {
-        return locationEnabled
+    fun isLocationAvailable(): Boolean {
+        return locationAvailable
     }
 }

@@ -7,7 +7,10 @@ import android.graphics.Paint
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
+import com.android.app.dataShared.DataShared
 import com.android.app.utils.calculators.CalcMisc
+import com.android.app.utils.converters.ConvertLength
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -204,6 +207,17 @@ class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context
         }
     }
 
+    private fun drawPlotPoints(canvas: Canvas) {
+        // Plot the data set
+        for(idx in 0.._dataSet.lastIndex) {
+            if(_dataSet[idx].xVal < xMin || _dataSet[idx].yVal < yMin) {
+                continue
+            }
+            // Draw point
+            canvas.drawPoint(_dataSet[idx].xVal.toRealX(), _dataSet[idx].yVal.toRealY(), dataPointLinePaint)
+        }
+    }
+
     private fun drawOutline(canvas: Canvas) {
         // Box side left
         canvas.drawLine(0f, 0f, 0f, height.toFloat(), axisLinePaint)
@@ -223,7 +237,7 @@ class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context
         for(i in 0..numSections){
             val x = xMin + (xIncrement * i)
             // Draw the increment values
-            canvas.drawText(x.toString(), x.toRealX() + textOffset, height.toFloat() - textOffset, textPaint)
+            canvas.drawText(String.format(Locale.getDefault(), "%.1f", x), x.toRealX() + textOffset, height.toFloat() - textOffset, textPaint)
             // Draw the increment separation lines
             canvas.drawLine(x.toRealX(), 0f, x.toRealX() , height.toFloat(),  linePaint)
         }
@@ -241,7 +255,7 @@ class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context
         for(i in 0..numSections){
             val y = yMin + (yIncrement * i)
             // Draw the increment values
-            canvas.drawText(y.toString(), textOffset, y.toRealY() - textOffset, textPaint)
+            canvas.drawText(String.format(Locale.getDefault(), "%.1f", y), textOffset, y.toRealY() - textOffset, textPaint)
             // Draw the increment separation lines
             canvas.drawLine(0f, y.toRealY(), width.toFloat(), y.toRealY(), linePaint)
         }

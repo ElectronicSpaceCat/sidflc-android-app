@@ -64,13 +64,23 @@ object Utils {
     }
 
     /**
+     * Checks whether a permission is granted.
+     *
+     * @param context
+     * @param permissions
+     * @return true if permission granted
+     */
+    fun hasPermission(context: Context, permissions : Array<String>) {
+        permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+    }
+
+    /**
      * Checks whether Bluetooth is enabled.
      *
      * @return true if Bluetooth is enabled, false otherwise.
      */
     fun isBleEnabled(context: Context): Boolean {
-        val mBluetoothManager =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val mBluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val mBtAdapter = mBluetoothManager.adapter
         return mBtAdapter != null && mBtAdapter.isEnabled
     }

@@ -62,239 +62,168 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/section_graph_controls"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <TableRow
-                    android:id="@+id/tableRow2"
+                <LinearLayout
+                    android:id="@+id/linearLayout4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="2dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tableLayout4">
-
-                    <TextView
-                        android:id="@+id/queue_size"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="Queue Size"
-                        android:textColor="@color/textprimary" />
-
-                    <TextView
-                        android:id="@+id/queue_size_value"
-                        android:layout_width="30dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/value_unknown"
-                        android:textColor="@color/lightgray" />
-
-                    <ImageView
-                        android:id="@+id/btn_edit_queue_size"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        app:srcCompat="@drawable/ic_edit"
-                        tools:ignore="ContentDescription" />
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tableRow2">
-
-                    <TextView
-                        android:id="@+id/increments"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="Y Increment"
-                        android:textColor="@color/textprimary" />
-
-                    <TextView
-                        android:id="@+id/increments_value"
-                        android:layout_width="30dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/value_unknown"
-                        android:textColor="@color/lightgray" />
-
-                    <ImageView
-                        android:id="@+id/btn_edit_increments"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        app:srcCompat="@drawable/ic_edit"
-                        tools:ignore="ContentDescription" />
-                </TableRow>
-
-                <TableLayout
-                    android:id="@+id/tableLayout4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/tableLayout3"
-                    app:layout_constraintStart_toEndOf="@+id/tableRow2"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:id="@+id/tableRow2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tableLayout4">
 
                         <TextView
-                            android:id="@+id/textView31"
-                            android:layout_width="25dp"
+                            android:id="@+id/queue_size"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="U +"
-                            android:textAlignment="center"
+                            android:layout_marginEnd="5dp"
+                            android:text="Queue Size"
                             android:textColor="@color/textprimary" />
 
-                        <ImageButton
-                            android:id="@+id/ymax_inc"
-                            style="@android:style/Widget.Holo.Light.ImageButton"
+                        <TextView
+                            android:id="@+id/queue_size_value"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/value_unknown"
+                            android:textColor="@color/lightgray" />
+
+                        <ImageView
+                            android:id="@+id/btn_edit_queue_size"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
-                            app:srcCompat="@drawable/ic_keyboard_arrow_up_24"
-                            tools:ignore="ContentDescription,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+                            app:srcCompat="@drawable/ic_edit"
+                            tools:ignore="ContentDescription" />
                     </TableRow>
 
                     <TableRow
+                        android:id="@+id/tableRow"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="32dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tableRow2">
 
                         <TextView
-                            android:id="@+id/textView32"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/increments"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="U  -"
-                            android:textAlignment="center"
+                            android:layout_marginEnd="5dp"
+                            android:text="Y Increment"
                             android:textColor="@color/textprimary" />
 
-                        <ImageButton
-                            android:id="@+id/ymax_dec"
-                            style="@android:style/Widget.Holo.Light.ImageButton"
+                        <TextView
+                            android:id="@+id/increments_value"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/value_unknown"
+                            android:textColor="@color/lightgray" />
+
+                        <ImageView
+                            android:id="@+id/btn_edit_increments"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
-                            app:srcCompat="@drawable/ic_keyboard_arrow_down_24"
-                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
+                            app:srcCompat="@drawable/ic_edit"
+                            tools:ignore="ContentDescription" />
                     </TableRow>
 
-                </TableLayout>
+                </LinearLayout>
 
-                <TableLayout
-                    android:id="@+id/tableLayout3"
+                <LinearLayout
+                    android:id="@+id/linearLayout3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/tableRow4"
-                    app:layout_constraintStart_toEndOf="@+id/tableLayout4"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:orientation="vertical"
+                    android:padding="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/linearLayout6"
+                    app:layout_constraintStart_toEndOf="@+id/linearLayout4"
+                    app:layout_constraintTop_toTopOf="@+id/linearLayout4">
 
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                    <ImageButton
+                        android:id="@+id/nav_up"
+                        style="@android:style/Widget.Holo.Light.ImageButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        app:srcCompat="@drawable/ic_keyboard_arrow_up_24"
+                        tools:ignore="ContentDescription,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
-                        <TextView
-                            android:id="@+id/textView33"
-                            android:layout_width="25dp"
-                            android:layout_height="wrap_content"
-                            android:text="L +"
-                            android:textAlignment="center"
-                            android:textColor="@color/textprimary" />
+                    <ImageButton
+                        android:id="@+id/nav_down"
+                        style="@android:style/Widget.Holo.Light.ImageButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        app:srcCompat="@drawable/ic_keyboard_arrow_down_24"
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
-                        <ImageButton
-                            android:id="@+id/ymin_inc"
-                            style="@android:style/Widget.Holo.Light.ImageButton"
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            app:srcCompat="@drawable/ic_keyboard_arrow_up_24"
-                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+                </LinearLayout>
 
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <TextView
-                            android:id="@+id/textView34"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="L  -"
-                            android:textAlignment="center"
-                            android:textColor="@color/textprimary" />
-
-                        <ImageButton
-                            android:id="@+id/ymin_dec"
-                            style="@android:style/Widget.Holo.Light.ImageButton"
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            app:srcCompat="@drawable/ic_keyboard_arrow_down_24"
-                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                    </TableRow>
-                </TableLayout>
-
-                <TableRow
-                    android:id="@+id/tableRow4"
+                <LinearLayout
+                    android:id="@+id/linearLayout6"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="2dp"
+                    app:layout_constraintEnd_toStartOf="@+id/linearLayout7"
+                    app:layout_constraintStart_toEndOf="@+id/linearLayout3"
+                    app:layout_constraintTop_toTopOf="@+id/linearLayout3">
 
-                    <TextView
-                        android:id="@+id/textView26"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="Auto Scale"
-                        android:textColor="@color/textprimary"
-                        app:layout_constraintBottom_toBottomOf="@+id/btn_auto_scale"
-                        app:layout_constraintEnd_toStartOf="@+id/btn_auto_scale"
-                        app:layout_constraintTop_toTopOf="@+id/btn_auto_scale" />
+                    <ImageButton
+                        android:id="@+id/zoom_out"
+                        style="@android:style/Widget.Holo.Light.ImageButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        app:srcCompat="@drawable/ic_expand_24"
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                    <ImageButton
+                        android:id="@+id/zoom_in"
+                        style="@android:style/Widget.Holo.Light.ImageButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        app:srcCompat="@drawable/ic_contract_24"
+                        tools:ignore="ContentDescription,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayout7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:orientation="vertical"
+                    android:padding="2dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
                     <ImageButton
                         android:id="@+id/btn_auto_scale"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/ic_fit_24"
                         tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tableRow4">
-
-                    <TextView
-                        android:id="@+id/textView27"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="Reset"
-                        android:textColor="@color/textprimary"
-                        app:layout_constraintBottom_toBottomOf="@+id/btn_auto_scale"
-                        app:layout_constraintEnd_toStartOf="@+id/btn_auto_scale"
-                        app:layout_constraintTop_toTopOf="@+id/btn_auto_scale" />
 
                     <ImageButton
                         android:id="@+id/btn_plot_reset"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="2dp"
                         app:srcCompat="@drawable/ic_rotation_24"
                         tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-                </TableRow>
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -692,8 +621,8 @@
 
                             <ImageView
                                 android:id="@+id/btn_edit_ref"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
                                 app:srcCompat="@drawable/ic_edit"
                                 tools:ignore="ContentDescription" />
 
@@ -722,8 +651,8 @@
 
                             <ImageView
                                 android:id="@+id/btn_edit_sample_size"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
                                 app:srcCompat="@drawable/ic_edit"
                                 tools:ignore="ContentDescription" />
 
@@ -757,8 +686,8 @@
                     <ImageButton
                         android:id="@+id/btn_reset_sd"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView2"
@@ -788,8 +717,8 @@
                     <ImageButton
                         android:id="@+id/btn_store_configs"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/btn_reset_sensor_default"
                         app:layout_constraintHorizontal_bias="0.5"
@@ -811,8 +740,8 @@
                     <ImageButton
                         android:id="@+id/btn_reset_sensor_default"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/btn_reset_sensor_factory"
                         app:layout_constraintHorizontal_bias="0.5"
@@ -834,8 +763,8 @@
                     <ImageButton
                         android:id="@+id/btn_reset_sensor_factory"
                         style="@android:style/Widget.Holo.Light.ImageButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.5"

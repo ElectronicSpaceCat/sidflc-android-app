@@ -102,13 +102,7 @@ class DeviceModelFragment : Fragment() {
         /**
          * Set spring name
          */
-        deviceModelBinding.springId.text =
-            if(DataShared.device.model.spring == null){
-                "N/A"
-            } else
-            {
-                DataShared.device.model.spring!!.name
-            }
+        deviceModelBinding.springId.text = DataShared.device.model.spring?.name ?: "N/A"
     }
 
     private fun parseXmlForWidthValue(xml : String, attr : String) : String? {
@@ -131,7 +125,7 @@ class DeviceModelFragment : Fragment() {
                     str = parser.getAttributeValue("http://schemas.android.com/apk/res/android", attr)
                     if (str != null && str.length > 1 && str[0] == '@') {
                         val id: Int = str.substring(1).toInt()
-                        str = getString(id).removeSuffix("dip") // 'dip' is correct, not 'dp'
+                        str = getString(id).removeSuffix("dip") // NOTE: 'dip' is correct, not 'dp'
                     }
                     break
                 }
@@ -143,8 +137,8 @@ class DeviceModelFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        _deviceModelBinding = null
         super.onDestroyView()
+        _deviceModelBinding = null
     }
 
     companion object{

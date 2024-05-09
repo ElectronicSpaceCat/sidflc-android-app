@@ -64,16 +64,6 @@
             app:layout_constraintStart_toEndOf="@+id/view2"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textView46"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Graph Controls"
-                android:textColor="@color/textprimary"
-                app:layout_constraintEnd_toEndOf="@+id/linearLayout6"
-                app:layout_constraintStart_toStartOf="@+id/linearLayout4"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <LinearLayout
                 android:id="@+id/linearLayout4"
                 android:layout_width="wrap_content"
@@ -82,7 +72,7 @@
                 android:padding="2dp"
                 app:layout_constraintEnd_toStartOf="@+id/linearLayout3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView46">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <ImageButton
                     android:id="@+id/nav_left"
@@ -158,26 +148,15 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textView27"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reset"
-                android:textColor="@color/textprimary"
-                app:layout_constraintEnd_toEndOf="@+id/linearLayout7"
-                app:layout_constraintStart_toStartOf="@+id/linearLayout7"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <LinearLayout
                 android:id="@+id/linearLayout7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:orientation="vertical"
                 android:padding="2dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView27">
+                app:layout_constraintStart_toEndOf="@+id/linearLayout6"
+                app:layout_constraintTop_toTopOf="@+id/linearLayout6">
 
                 <ImageButton
                     android:id="@+id/btn_plot_reset"

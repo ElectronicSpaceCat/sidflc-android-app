@@ -145,7 +145,7 @@ class DeviceSensorTunerFragment : Fragment() {
             setPlotterBounds(_activePlotterData)
 
             fragmentDeviceSensorTunerBinding.refData.text = _activePlotterData.ref.toString()
-            fragmentDeviceSensorTunerBinding.incrementsValue.text = _activePlotterData.yIncrement.toString()
+            fragmentDeviceSensorTunerBinding.incrementsValue.text = _activePlotterData.yIncrement.toInt().toString()
             fragmentDeviceSensorTunerBinding.sampleSizeData.text = DataShared.device.activeSensor.sampleSize.toString()
             fragmentDeviceSensorTunerBinding.sensorType.text = DataShared.device.activeSensor.type.name
             fragmentDeviceSensorTunerBinding.switchDriftCompEnable.isChecked = DataShared.device.activeSensor.driftCompensationEnable
@@ -420,32 +420,36 @@ class DeviceSensorTunerFragment : Fragment() {
         /**
          * Increases the y upper bound of the graph by 1 increment
          */
-        fragmentDeviceSensorTunerBinding.ymaxInc.setOnClickListener {
-            _activePlotterData.yMax += _activePlotterData.yIncrement
+        fragmentDeviceSensorTunerBinding.navUp.setOnClickListener {
+            _activePlotterData.yMin -= _activePlotterData.yIncrement
+            _activePlotterData.yMax -= _activePlotterData.yIncrement
             setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Decreases the y upper bound of the graph by 1 increment
          */
-        fragmentDeviceSensorTunerBinding.ymaxDec.setOnClickListener {
-            _activePlotterData.yMax -= _activePlotterData.yIncrement
+        fragmentDeviceSensorTunerBinding.navDown.setOnClickListener {
+            _activePlotterData.yMin += _activePlotterData.yIncrement
+            _activePlotterData.yMax += _activePlotterData.yIncrement
             setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Increases the y lower bound of the graph by 1 increment
          */
-        fragmentDeviceSensorTunerBinding.yminInc.setOnClickListener {
-            _activePlotterData.yMin += _activePlotterData.yIncrement
+        fragmentDeviceSensorTunerBinding.zoomIn.setOnClickListener {
+            _activePlotterData.yMin -= _activePlotterData.yIncrement
+            _activePlotterData.yMax += _activePlotterData.yIncrement
             setPlotterBounds(_activePlotterData)
         }
 
         /**
          * Decreases the y lower bound of the graph by 1 increment
          */
-        fragmentDeviceSensorTunerBinding.yminDec.setOnClickListener {
-            _activePlotterData.yMin -= _activePlotterData.yIncrement
+        fragmentDeviceSensorTunerBinding.zoomOut.setOnClickListener {
+            _activePlotterData.yMin += _activePlotterData.yIncrement
+            _activePlotterData.yMax -= _activePlotterData.yIncrement
             setPlotterBounds(_activePlotterData)
         }
     }

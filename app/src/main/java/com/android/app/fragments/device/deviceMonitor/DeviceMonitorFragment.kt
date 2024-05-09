@@ -81,7 +81,7 @@ class DeviceMonitorFragment : Fragment() {
             fragmentDeviceMonitorBinding.deviceShutdownPrompt.root.visibility = View.GONE
         }
 
-        /** Register broadcast receiver to watch bluetooth state */
+        /** Register Bluetooth receiver */
         requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
 
         /** Attempt to connect device if bluetooth is enabled and device is advertising */
@@ -192,23 +192,23 @@ class DeviceMonitorFragment : Fragment() {
     }
 
     override fun onResume() {
+        super.onResume()
         if(_sensorEnablePrev){
             DataShared.device.setSensorEnable(true)
         }
-        super.onResume()
     }
 
     override fun onPause() {
+        super.onPause()
         _sensorEnablePrev = DataShared.device.sensorEnabled.value!!
         DataShared.device.setSensorEnable(false)
-        super.onPause()
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         // Disconnect device
         DataShared.device.disconnect()
-        requireContext().unregisterReceiver(mReceiver)
         _fragmentDeviceMonitorBinding = null
-        super.onDestroy()
+        requireContext().unregisterReceiver(mReceiver)
     }
 }

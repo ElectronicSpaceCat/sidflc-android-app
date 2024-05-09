@@ -35,7 +35,7 @@ import com.android.app.databinding.FragmentCameraOverlayBinding
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.device.projectile.ProjectilePrefUtils
-import com.android.app.fragments.dialogs.ProjectileSelectDialogFragment
+import com.android.app.fragments.dialogs.ListDialogFragment
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.converters.ConvertLength.Unit
 import com.android.app.utils.converters.LengthData
@@ -296,10 +296,25 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * OnClick for selecting the projectile
          */
         fragmentCameraOverlayBinding.projectileSelected.setOnClickListener {
-            ProjectileSelectDialogFragment(
+            val projectiles = ProjectilePrefUtils.getProjectileList(requireContext()).toTypedArray()
+            val projectileNames : Array<String> = Array(projectiles.size) {
+                projectiles[it].name
+            }
+
+            val projectileSelected = ProjectilePrefUtils.getProjectileSelected(requireContext())
+            val projectileSelectedName = projectileSelected?.name ?: ""
+
+            val projectileSelectedListener = object : ListDialogFragment.OnItemSelectedListener {
+                override fun onItemSelectedListener(name: String) {
+                    ProjectilePrefUtils.setProjectileSelected(requireContext(), name)
+                }
+            }
+
+            ListDialogFragment(
                 getString(R.string.header_projectile),
-                getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED),
-                null
+                projectileSelectedName,
+                projectileNames,
+                projectileSelectedListener
             ).show(requireActivity().supportFragmentManager, null)
         }
 
@@ -744,7 +759,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         when(key){
             /** Preference - Selected Projectile */
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED) -> {
-                val projectile = ProjectilePrefUtils.getProjectileSelectedData(context)
+                val projectile = ProjectilePrefUtils.getProjectileSelected(context)
                 DataShared.device.model.setProjectile(projectile)
                 if(projectile != null){
                     fragmentCameraOverlayBinding.projectileSelectedName.text = projectile.name
@@ -753,7 +768,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     fragmentCameraOverlayBinding.projectileSelectedName.text = getString(R.string.value_unknown)
                 }
             }
-
             /** Preference - carriage Position Mode */
             context.getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE) -> {
                 viewModel.isPositionAutoMode = pref!!.getBoolean(key, true)

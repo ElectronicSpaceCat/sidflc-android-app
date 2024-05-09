@@ -10,51 +10,36 @@ import com.android.app.utils.calculators.CalcTrig
 import kotlin.math.*
 
 /**
- * @param name Model name
- * @param defaultSpringName Default spring that comes with the model
- * @param caseBodyLength Length of the case (mm)
- * @param studCenterToStudCenter Distance from left spring stud center to right spring stud center (mm)
- * @param sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud (mm)
- * @param sensorToCarriageBackFace Distance from face of sensor to carriage back face (mm)
- * @param carriageBackFaceToSpringPoint Distance from the back face of the carriage to the point where the springs meet (mm)
- * @param carriageBackFaceToCarriageSlotPoint Distance from the back face of the carriage to back point of the carriage pocket (mm)
- * @param carriageWeight Weight of the carriage (g)
- * @param springStudRadius Radius of the stud that the spring sits on (mm)
- * @param springSupportRadius Radius of the spring support that holds against the lower spring leg (mm)
- * @param springSupportAngleFromHorizontal Angle of the imaginary line between the spring stud center to the spring support center (deg)
- * @param studCenterToSpringSupportCenter Distance of the imaginary line between the spring stud center to the spring support center(mm)
+ * @param _name Model name
+ * @param _defaultSpringName Default spring that comes with the model
+ * @param _caseBodyLength Length of the case (mm)
+ * @param _studCenterToStudCenter Distance from left spring stud center to right spring stud center (mm)
+ * @param _sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud (mm)
+ * @param _sensorToCarriageBackFace Distance from face of sensor to carriage back face (mm)
+ * @param _minCarriagePosition Minimum distance the carriage back face is allowed from the sensor (mm)
+ * @param _carriageBackFaceToSpringPoint Distance from the back face of the carriage to the point where the springs meet (mm)
+ * @param _carriageBackFaceToCarriageSlotPoint Distance from the back face of the carriage to back point of the carriage pocket (mm)
+ * @param _carriageWeight Weight of the carriage (g)
+ * @param _springStudRadius Radius of the stud that the spring sits on (mm)
+ * @param _springSupportRadius Radius of the spring support that holds against the lower spring leg (mm)
+ * @param _springSupportAngleFromHorizontal Angle of the imaginary line between the spring stud center to the spring support center (deg)
+ * @param _studCenterToSpringSupportCenter Distance of the imaginary line between the spring stud center to the spring support center(mm)
  */
  class ModelData(
-    name: String,
-    defaultSpringName: Spring.Name,
-    caseBodyLength: Double,
-    studCenterToStudCenter: Double,
-    sensorToStudCenter: Double,
-    sensorToCarriageBackFace: Double,
-    carriageBackFaceToSpringPoint : Double,
-    carriageBackFaceToCarriageSlotPoint : Double,
-    carriageWeight: Double,
-    springStudRadius : Double,
-    springSupportRadius : Double,
-    springSupportAngleFromHorizontal : Double,
-    studCenterToSpringSupportCenter : Double)
-{
-    /**
-     * Device model constants
-     */
-    private val _name = name
-    private val _defaultSpringName = defaultSpringName
-    private val _caseBodyLength = caseBodyLength
-    private val _studCenterToStudCenter = studCenterToStudCenter
-    private val _sensorToStudCenter = sensorToStudCenter
-    private val _sensorToCarriageBackFace = sensorToCarriageBackFace
-    private val _carriageBackFaceToSpringPoint = carriageBackFaceToSpringPoint
-    private val _carriageBackFaceToCarriageSlotPoint = carriageBackFaceToCarriageSlotPoint
-    private val _carriageWeight = carriageWeight
-    private val _springStudRadius = springStudRadius
-    private val _springSupportRadius = springSupportRadius
-    private val _springSupportAngleFromHorizontal = springSupportAngleFromHorizontal
-    private val _studCenterToSpringSupportCenter = studCenterToSpringSupportCenter
+    private val _name : String,
+    private val _defaultSpringName : Spring.Name,
+    private val _caseBodyLength : Double,
+    private val _studCenterToStudCenter : Double,
+    private val _sensorToStudCenter : Double,
+    private val _sensorToCarriageBackFace : Double,
+    private val _minCarriagePosition : Double,
+    private val _carriageBackFaceToSpringPoint : Double,
+    private val _carriageBackFaceToCarriageSlotPoint : Double,
+    private val _carriageWeight : Double,
+    private val _springStudRadius : Double,
+    private val _springSupportRadius : Double,
+    private val _springSupportAngleFromHorizontal : Double,
+    private val _studCenterToSpringSupportCenter : Double) {
 
     /**
      * Device model calculated dependencies that are constant
@@ -221,6 +206,14 @@ import kotlin.math.*
         _projectileOffset = calcProjectileOffset(projectile.diameter)
         // Set the projectile data
         _projectile.value = projectile
+    }
+
+    /**
+     * Get min carriage position
+     * @return minPosition (mm)
+     */
+    fun getMinCarriagePosition() : Double{
+        return _minCarriagePosition
     }
 
     /**

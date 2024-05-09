@@ -35,6 +35,7 @@
     <string name="PREFERENCE_FILTER_PROJECTILE_DRAGS">projectile_drags</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED_DRAG">projectile_selected_drag</string>
     <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED">projectile_selected</string>
+    <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED_BALLISTICS">projectile_selected_ballistic</string>
     <string name="PREFERENCE_FILTER_SPRING_SELECTED">spring_selected</string>
     <string name="PREFERENCE_FILTER_LENS_OFFSET">lens_offset</string>
     <string name="PREFERENCE_FILTER_FORCE_OFFSET">force_offset</string>
@@ -44,7 +45,7 @@
     <string name="PREFERENCE_FILTER_ENGINEERING_VIEW">engineering_view</string>
     <string name="PREFERENCE_FILTER_TEST_PITCH">test_pitch</string>
     <string name="PREFERENCE_FILTER_TEST_HEIGHT">test_height</string>
-    <string name="PREFERENCE_FILTER_TEST_RECORDED_DATA_VALUES">test_recorded_data_values</string>
+    <string name="PREFERENCE_FILTER_RECORDED_DATA_VALUES">recorded_data_values</string>
 
     <string name="unknown_device">Unknown Device</string>
 
@@ -128,7 +129,7 @@
     <string name="header_hardware">Hardware</string>
     <string name="header_ballistics">Ballistics</string>
     <string name="header_calibrations">Calibrations</string>
-    <string name="header_orientation">Orientation (Test)</string>
+    <string name="header_orientation">Orientation</string>
 
     <!-- Preferences -->
     <string name="pref_title_edit_units">Units</string>

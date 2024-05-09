@@ -273,6 +273,7 @@ class Device(context: Context) {
 
     init {
         // Load model data from stored preferences
+        // TODO: This should be stored in the device
         val idModel = _prefs.getString(_prefsModelIdKey, Model.Name.V24.name)!!
         val model = Model.getData(idModel)
         _model = MutableLiveData(model)

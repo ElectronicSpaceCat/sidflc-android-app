@@ -14,25 +14,21 @@ object ProjectilePrefUtils {
      * @param context :Context
      * @return MutableList<ProjectileData>
      */
-    fun getProjectileListFromPrefs(context: Context): MutableList<ProjectileData> {
+    fun getProjectileList(context: Context): MutableList<ProjectileData> {
         val list: MutableList<ProjectileData> = mutableListOf()
-        val setNames: List<String>? = PrefUtils.getStringArrayFromPrefs(
-            context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_NAMES), ";")
-        val setWeights: List<String>? = PrefUtils.getStringArrayFromPrefs(
-            context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_WEIGHTS),";")
-        val setDiameters: List<String>? = PrefUtils.getStringArrayFromPrefs(
-            context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),";")
-        val setDrags: List<String>? = PrefUtils.getStringArrayFromPrefs(
-            context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),";")
-        if (setNames != null && setWeights != null && setDiameters != null && setDrags != null
-            && setNames.size == setWeights.size && setNames.size == setDiameters.size && setNames.size == setDrags.size) {
-            for (i in setNames.indices) {
+        val names: List<String>? = PrefUtils.getStringArrayFromPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_NAMES), ";")
+        val weights: List<String>? = PrefUtils.getStringArrayFromPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_WEIGHTS),";")
+        val diameters: List<String>? = PrefUtils.getStringArrayFromPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),";")
+        val drags: List<String>? = PrefUtils.getStringArrayFromPrefs(context, context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),";")
+        if (names != null && weights != null && diameters != null && drags != null
+            && names.size == weights.size && names.size == diameters.size && names.size == drags.size) {
+            for (i in names.indices) {
                 list.add(
                     ProjectileData(
-                        setNames[i],
-                        Utils.convertStrToDouble(setWeights[i]),
-                        Utils.convertStrToDouble(setDiameters[i]),
-                        Utils.convertStrToDouble(setDrags[i]))
+                        names[i],
+                        Utils.convertStrToDouble(weights[i]),
+                        Utils.convertStrToDouble(diameters[i]),
+                        Utils.convertStrToDouble(drags[i]))
                 )
             }
         }
@@ -45,7 +41,7 @@ object ProjectilePrefUtils {
      * @param context :Context
      * @param list :String (selected projected)
      */
-    fun setProjectileListPref(context: Context, list: List<ProjectileData>){
+    fun setProjectileList(context: Context, list: List<ProjectileData>){
         var names: MutableList<String> ?= mutableListOf()
         var weights: MutableList<String> ?= mutableListOf()
         var diameters: MutableList<String> ?= mutableListOf()
@@ -83,7 +79,7 @@ object ProjectilePrefUtils {
      *
      * @return True if success, False no success
      */
-    fun setProjectileSelectedPref(context: Context, selected: String?){
+    fun setProjectileSelected(context: Context, selected: String?){
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val editor: SharedPreferences.Editor = prefs.edit()
         var name : String? = null
@@ -111,7 +107,7 @@ object ProjectilePrefUtils {
      * @param context the context.
      * @return ProjectileData
      */
-    fun getProjectileSelectedData(context: Context) : ProjectileData?{
+    fun getProjectileSelected(context: Context) : ProjectileData?{
         var projectileData: ProjectileData?= null
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -150,7 +146,7 @@ object ProjectilePrefUtils {
         return projectileData
     }
 
-    fun setDefaultProjectilesPref(context: Context) : MutableList<ProjectileData> {
+    fun setDefaultProjectiles(context: Context) : MutableList<ProjectileData> {
         // Init data lists
         val names: MutableList<String> = mutableListOf()
         val weights: MutableList<String> = mutableListOf()
@@ -202,7 +198,7 @@ object ProjectilePrefUtils {
         )
 
         // Set the selected projectile to the first element
-        setProjectileSelectedPref(context, Projectile.Name.Quarter.name)
+        setProjectileSelected(context, Projectile.Name.Quarter.name)
 
         return projectiles
     }

@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -36,9 +37,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         viewBinding = true
     }
@@ -46,10 +49,10 @@ android {
 
 dependencies {
     // Materials
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
 
     // Kotlin lang
-    implementation("androidx.core:core-ktx:1.13.0")
+    implementation("androidx.core:core-ktx:1.13.1")
 
     // App compat and UI things
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -76,6 +79,9 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
     // Nordic Semiconductor libraries
     // The libraries may be included from jcenter. If you want to modify the code,
     // clone the projects from GitHub and put them in the project root folder.
@@ -83,9 +89,9 @@ dependencies {
     implementation("no.nordicsemi.android:log:2.3.0")
     implementation("no.nordicsemi.android.support.v18:scanner:1.6.0")
     implementation("no.nordicsemi.android:dfu:2.4.2")
-    implementation("no.nordicsemi.android:ble:2.7.4")
-    implementation("no.nordicsemi.android:ble-common:2.7.4")
-    implementation("no.nordicsemi.android:ble-livedata:2.7.4")
+    implementation("no.nordicsemi.android:ble:2.7.5")
+    implementation("no.nordicsemi.android:ble-common:2.7.5")
+    implementation("no.nordicsemi.android:ble-livedata:2.7.5")
 //    implementation(project(":dfu"))          // https://github.com/NordicSemiconductor/Android-DFU-Library
 //    implementation(project(":ble"))          // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble
 //    implementation(project(":ble-common"))   // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble-common

@@ -51,8 +51,6 @@ class CameraFragment : Fragment() {
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
 
     private var preview: Preview? = null
-    private var imageCapture: ImageCapture? = null
-    private var imageAnalyzer: ImageAnalysis? = null
 
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null

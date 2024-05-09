@@ -10,14 +10,10 @@ import com.android.app.R
 import com.android.app.databinding.ItemImpactDistanceBinding
 import com.android.app.fragments.device.deviceBallistics.DeviceBallisticsFragment
 import com.android.app.fragments.dialogs.InputDialogFragment
-import com.android.app.utils.misc.Utils
-import com.android.app.utils.prefs.PrefUtils
 import java.math.RoundingMode
 
 class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapter<DataPointsAdapter.ViewHolder>() {
     private var _fragment : DeviceBallisticsFragment = fragment
-
-    private val _prefsRecDataValueKey = _fragment.requireContext().getString(R.string.PREFERENCE_FILTER_TEST_RECORDED_DATA_VALUES)
 
     data class DataPoint(var pos : Double, var cal : Double, var rec : Double)
 
@@ -27,10 +23,6 @@ class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapte
 
     val onRecDataChanged : LiveData<Boolean>
         get() = _onRecDataChanged
-
-    init {
-        loadDataFromPrefs()
-    }
 
     inner class ViewHolder(val dataPointBinding: ItemImpactDistanceBinding) :
         RecyclerView.ViewHolder(dataPointBinding.root) {
@@ -116,31 +108,6 @@ class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapte
 
     fun getData() : List<DataPoint> {
         return _dataPoints
-    }
-
-    fun storeDataToPrefs() {
-        var valueStrings: MutableList<String> ?= mutableListOf()
-
-        if(_dataPoints.isNotEmpty()){
-            // Create the string lists
-            _dataPoints.forEach { idx ->
-                valueStrings?.add(idx.rec.toString())
-            }
-        }
-        else{
-            valueStrings = null
-        }
-
-        // Store to prefs
-        PrefUtils.addStringArrayToPrefs(_fragment.requireContext(), _prefsRecDataValueKey, valueStrings, ";")
-    }
-
-    private fun loadDataFromPrefs() {
-        _dataPoints.clear()
-        val recValues = PrefUtils.getStringArrayFromPrefs(_fragment.requireContext(), _prefsRecDataValueKey, ";") ?: return
-        recValues.forEach {
-            _dataPoints.add(DataPoint(0.0, 0.0, Utils.convertStrToDouble(it)))
-        }
     }
 
     private fun showDataEditorDialog(position: Int) {

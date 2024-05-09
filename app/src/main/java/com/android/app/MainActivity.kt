@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
             // Init preferences on first time application starts
             PreferenceManager.setDefaultValues(this, R.xml.prefs_main, false)
             // Init any additional defaults preferences here
-            ProjectilePrefUtils.setDefaultProjectilesPref(this)
+            ProjectilePrefUtils.setDefaultProjectiles(this)
         }
 
         // Init the shared data

@@ -116,7 +116,7 @@ class DeviceScannerViewModel(application: Application) : AndroidViewModel(applic
      * Stop scanning for bluetooth devices.
      */
     fun stopScan() {
-        if (deviceScannerState.isScanning() && deviceScannerState.isBluetoothEnabled()) {
+        if (deviceScannerState.isScanning() && deviceScannerState.isBluetoothAvailable()) {
             val scanner = BluetoothLeScannerCompat.getScanner()
             scanner.stopScan(scanCallback)
             deviceScannerState.scanningStopped()
