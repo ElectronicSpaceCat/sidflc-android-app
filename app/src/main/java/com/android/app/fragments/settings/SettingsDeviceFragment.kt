@@ -22,8 +22,6 @@ import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
 import com.android.app.dataShared.DataShared
@@ -33,13 +31,14 @@ import com.android.app.device.springs.Spring
 import com.android.app.fragments.dialogs.ListDialogFragment
 import com.android.app.utils.misc.Utils
 import com.android.app.R
+import com.android.app.device.model.ModelBallistics
 import com.android.app.device.projectile.Projectile
 import com.android.app.device.projectile.ProjectilePrefUtils
 import java.util.Locale
 
 /** Fragment used to present the user with a gallery of photos taken */
 open class SettingsDeviceFragment : PreferenceFragmentCompat() {
-    private lateinit var preForceOffset: EditTextPreference
+    private lateinit var prefForceOffset: EditTextPreference
     private lateinit var prefEfficiency: EditTextPreference
     private lateinit var prefFrictionCoefficient: EditTextPreference
     private lateinit var prefSpringSelected: Preference
@@ -57,7 +56,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.prefs_device, rootKey)
 
         /** Stored in Device User Configs */
-        preForceOffset = findPreference(getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET))!!
+        prefForceOffset = findPreference(getString(R.string.PREFERENCE_FILTER_FORCE_OFFSET))!!
         prefEfficiency = findPreference(getString(R.string.PREFERENCE_FILTER_EFFICIENCY))!!
         prefFrictionCoefficient = findPreference(getString(R.string.PREFERENCE_FILTER_FRICTION_COEFFICIENT))!!
         prefSpringSelected = findPreference(getString(R.string.PREFERENCE_FILTER_SPRING_SELECTED))!!
@@ -69,7 +68,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
         prefTestPitch = findPreference(getString(R.string.PREFERENCE_FILTER_TEST_PITCH))!!
 
         /** Set Id's to preferences with reset buttons */
-        preForceOffset.setViewId(PREF_ID_FORCE_OFFSET)
+        prefForceOffset.setViewId(PREF_ID_FORCE_OFFSET)
         prefEfficiency.setViewId(PREF_ID_EFFICIENCY)
         prefFrictionCoefficient.setViewId(PREF_ID_FRICTION_COEFFICIENT)
         prefSpringSelected.setViewId(PREF_ID_SPRING_SELECT)
@@ -83,22 +82,22 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
                 when(view.id){
                     PREF_ID_FORCE_OFFSET -> {
                         view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
-                            DataShared.device.model.ballistics.resetForceOffset()
+                            prefForceOffset.callChangeListener(ModelBallistics.DEFAULT_FORCE_OFFSET.toString())
                         }
                     }
                     PREF_ID_EFFICIENCY -> {
                         view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
-                            DataShared.device.model.ballistics.resetEfficiency()
+                            prefEfficiency.callChangeListener(ModelBallistics.DEFAULT_EFFICIENCY_FACTOR.toString())
                         }
                     }
                     PREF_ID_FRICTION_COEFFICIENT -> {
                         view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
-                            DataShared.device.model.ballistics.resetFrictionCoefficient()
+                            prefFrictionCoefficient.callChangeListener(ModelBallistics.DEFAULT_FRICTION_COEFFICIENT.toString())
                         }
                     }
                     PREF_ID_SPRING_SELECT -> {
                         view.findViewById<ImageButton>(R.id.btn_reset).setOnClickListener {
-                            DataShared.device.model.resetSpring()
+                            prefSpringSelected.callChangeListener(DataShared.device.model.defaultSpring.name)
                         }
                     }
                     PREF_ID_PROJECTILE_DRAG -> {
@@ -134,8 +133,8 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
         /**
          * ForceOffset
          */
-        preForceOffset.setOnBindEditTextListener(editTextListener)
-        preForceOffset.setOnPreferenceChangeListener { _ : Preference, newValue: Any ->
+        prefForceOffset.setOnBindEditTextListener(editTextListener)
+        prefForceOffset.setOnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 val value = Utils.convertStrToDouble(newValue as String)
                 if (DataShared.device.model.ballistics.forceOffset != value) {
@@ -152,7 +151,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
             }
 
         DataShared.device.model.ballistics.forceOffsetOnChange.observe(viewLifecycleOwner) {
-            preForceOffset.text = String.format(
+            prefForceOffset.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
                 it
@@ -195,7 +194,6 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
                 var retVal = false
                 val value = Utils.convertStrToDouble(newValue as String)
                 if (DataShared.device.model.ballistics.frictionCoefficient != value) {
-                    _isDeviceUserDataModified = true
                     DataShared.device.sendConfigCommand(
                         DeviceData.Config.Target.USER,
                         DeviceData.Config.Command.SET,
@@ -380,7 +378,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
         /**
          * Test Height Setting Handler
          */
-        prefTestHeight.title = getString(R.string.pref_title_height) + " (" + DataShared.deviceHeight.unitStr() + ")"
+        prefTestHeight.title = getString(R.string.pref_title_height) + " (" + DataShared.phoneHeight.unitStr() + ")"
         prefTestHeight.setOnBindEditTextListener(editTextListener)
 //        prefTestHeight.setOnPreferenceChangeListener { _ : Preference, newValue: Any ->
 //            var retVal = false

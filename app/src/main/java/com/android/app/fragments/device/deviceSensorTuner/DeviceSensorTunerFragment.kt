@@ -224,13 +224,12 @@ class DeviceSensorTunerFragment : Fragment() {
             if(!DataShared.device.activeSensor.isInitialized) return@observe
             // Don't update data if not enabled
             if(!fragmentDeviceSensorTunerBinding.switchSensorEnable.isChecked) return@observe
-
             // Update the raw value
             fragmentDeviceSensorTunerBinding.rawData.text = value.toString()
             // Update the standard deviation
             _cumStdDeviation.sd(value.toDouble())
             // Reset SD is out of normal range
-            if(_cumStdDeviation.sd > SD_RESET_THRESHOLD){
+            if(_cumStdDeviation.sd > SD_RESET_THRESHOLD) {
                 _cumStdDeviation.reset()
             }
             fragmentDeviceSensorTunerBinding.sdData.text = String.format(Locale.getDefault(), "%.1f", _cumStdDeviation.sd)
@@ -239,7 +238,7 @@ class DeviceSensorTunerFragment : Fragment() {
             fragmentDeviceSensorTunerBinding.filteredData.text = String.format(
                 Locale.getDefault(),
                 "%.1f",
-                DataShared.device.activeSensor.rangeFiltered.value!!)
+                DataShared.device.activeSensor.rangeFiltered)
 
             // Update the drift offset value
             fragmentDeviceSensorTunerBinding.driftData.text = String.format(
@@ -251,7 +250,7 @@ class DeviceSensorTunerFragment : Fragment() {
             if(_arrayDequeue.count() >= _queueSize){
                 _arrayDequeue.removeFirst()
             }
-            _arrayDequeue.add(DataShared.device.activeSensor.rangeFiltered.value!!)
+            _arrayDequeue.add(DataShared.device.activeSensor.rangeFiltered)
 
             // Update the plotter
             val data = (0 until _queueSize).map {
@@ -264,8 +263,8 @@ class DeviceSensorTunerFragment : Fragment() {
          * Handler for the plotter auto-scale enable button
          */
         fragmentDeviceSensorTunerBinding.btnAutoScale.setOnClickListener {
-            _activePlotterData.yMax = (DataShared.device.activeSensor.rangeFiltered.value!! + _activePlotterData.yIncrement * 2).toFloat()
-            _activePlotterData.yMin = (DataShared.device.activeSensor.rangeFiltered.value!! - _activePlotterData.yIncrement * 2).toFloat()
+            _activePlotterData.yMax = (DataShared.device.activeSensor.rangeFiltered + _activePlotterData.yIncrement * 2).toFloat()
+            _activePlotterData.yMin = (DataShared.device.activeSensor.rangeFiltered - _activePlotterData.yIncrement * 2).toFloat()
             setPlotterBounds(_activePlotterData)
         }
 

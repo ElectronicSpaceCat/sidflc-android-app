@@ -44,7 +44,7 @@ class Device(context: Context) {
     private var _isInitialized = false
 
     /** Device sensors */
-    private val sensors : Array<Sensor> = Array(DeviceData.Sensor.Id.NUM_IDS.ordinal) {
+    val sensors : Array<Sensor> = Array(DeviceData.Sensor.Id.NUM_IDS.ordinal) {
         Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.entries[it])
     }
 

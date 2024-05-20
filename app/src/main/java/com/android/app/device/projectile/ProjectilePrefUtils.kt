@@ -4,10 +4,20 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.android.app.R
+import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.prefs.PrefUtils
 import com.android.app.utils.misc.Utils
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 object ProjectilePrefUtils {
+
+    private const val REC_DATA_PREF_TAG = "_rec_data"
+
+    @Serializable
+    class RecData(var height : Double, var heightUnit : ConvertLength.Unit, var pitch : Double, val recDist : Array<Double>)
+
     /**
      * Get the current list of projectiles from preferences
      *
@@ -28,7 +38,7 @@ object ProjectilePrefUtils {
                         names[i],
                         Utils.convertStrToDouble(weights[i]),
                         Utils.convertStrToDouble(diameters[i]),
-                        Utils.convertStrToDouble(drags[i]))
+                        Utils.convertStrToDouble(drags[i])),
                 )
             }
         }
@@ -47,6 +57,13 @@ object ProjectilePrefUtils {
         var diameters: MutableList<String> ?= mutableListOf()
         var drags: MutableList<String> ?= mutableListOf()
 
+        // Remove projectile recorded data if projectile not in the new list
+        getProjectileList(context).forEach {
+            if(!list.contains(it)){
+                PrefUtils.removeStringArrayFromPrefs(context, it.name + REC_DATA_PREF_TAG)
+            }
+        }
+        // Add projectile data
         if(list.isNotEmpty()) {
             list.forEach { data ->
                 names?.add(data.name)
@@ -146,6 +163,28 @@ object ProjectilePrefUtils {
         return projectileData
     }
 
+    fun setProjectileRecData(context: Context, selected: String?, recData: RecData) {
+        getProjectileList(context).forEach {
+            if(it.name == selected) {
+                val json = Json.encodeToString(recData)
+                val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+                editor.putString(it.name + REC_DATA_PREF_TAG, json).apply()
+            }
+        }
+    }
+
+    fun getProjectileRecData(context: Context, selected: String?) : RecData? {
+        return try{
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val str = prefs.getString(selected + REC_DATA_PREF_TAG, "")
+            val data = Json.decodeFromString<RecData>(str!!)
+            data
+        }
+        catch (e : Exception) {
+            null
+        }
+    }
+
     fun setDefaultProjectiles(context: Context) : MutableList<ProjectileData> {
         // Init data lists
         val names: MutableList<String> = mutableListOf()
@@ -155,10 +194,9 @@ object ProjectilePrefUtils {
 
         // Create the default list
         val projectiles: MutableList<ProjectileData> = mutableListOf()
-        projectiles.add(Projectile.getData(Projectile.Name.Penny)!!)
-        projectiles.add(Projectile.getData(Projectile.Name.Nickel)!!)
-        projectiles.add(Projectile.getData(Projectile.Name.Dime)!!)
-        projectiles.add(Projectile.getData(Projectile.Name.Quarter)!!)
+        Projectile.Name.entries.forEach {
+            projectiles.add(Projectile.getData(it.name)!!)
+        }
 
         // Build the string arrays
         projectiles.forEach { projectile ->

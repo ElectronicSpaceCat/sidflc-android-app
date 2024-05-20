@@ -5,13 +5,15 @@ import androidx.lifecycle.MutableLiveData
 import com.android.app.device.projectile.ProjectileData
 import com.android.app.device.springs.Spring
 import com.android.app.device.springs.SpringData
-import com.android.app.utils.calculators.CalcMisc
+import com.android.app.utils.calculators.CalcGeometry
+import com.android.app.utils.calculators.CalcLinear
 import com.android.app.utils.calculators.CalcTrig
+import com.android.app.utils.calculators.Point
 import kotlin.math.*
 
 /**
  * @param _name Model name
- * @param _defaultSpringName Default spring that comes with the model
+ * @param _defaultSpring Default spring that comes with the model
  * @param _caseBodyLength Length of the case (mm)
  * @param _studCenterToStudCenter Distance from left spring stud center to right spring stud center (mm)
  * @param _sensorToStudCenter Distance from face of sensor to horizontal center of the spring stud (mm)
@@ -27,7 +29,7 @@ import kotlin.math.*
  */
  class ModelData(
     private val _name : String,
-    private val _defaultSpringName : Spring.Name,
+    private val _defaultSpring : Spring.Name,
     private val _caseBodyLength : Double,
     private val _studCenterToStudCenter : Double,
     private val _sensorToStudCenter : Double,
@@ -89,13 +91,11 @@ import kotlin.math.*
     val unloadedSpringAngle : Double
         get() = _unloadedSpringAngle
 
-    val defaultSpringName : Spring.Name
-        get() = _defaultSpringName
+    val defaultSpring : Spring.Name
+        get() = _defaultSpring
 
     val ballistics : ModelBallistics
         get() = _balllistics
-
-    inner class Point(val x : Double = 0.0, val y : Double = 0.0)
 
     /**
      * Spring getter/setter
@@ -104,10 +104,6 @@ import kotlin.math.*
         get() = _spring
     val spring : SpringData?
         get() = _spring.value
-
-    fun resetSpring() {
-        setSpring(Spring.getData(this.defaultSpringName))
-    }
 
     fun setSpring(spring : SpringData?) {
         // Reset data if spring is null or both unload ref values are not valid
@@ -131,7 +127,7 @@ import kotlin.math.*
         val d3 = r2 - d2
 
         // Hourglass 1
-        val h1angleA = CalcTrig.getAngleAGivenSideASideC((_springStudRadius + _springSupportRadius + spring.wireDiameter), _studCenterToSpringSupportCenter)
+        val h1angleA = CalcTrig.getAngleBetweenSideHypotenuseSideOpposite(_studCenterToSpringSupportCenter, (_springStudRadius + _springSupportRadius + spring.wireDiameter))
         val h1angleB = 90.0 - h1angleA
         val h1angleC = CalcTrig.getAngleGiven2Angles(_springSupportAngleFromHorizontal, h1angleB)
 
@@ -264,7 +260,7 @@ import kotlin.math.*
             // Position found?
             if (position >= _lookUpTable[i].position) {
                 // Yes - Now interpolate between the two points
-                return CalcMisc.interpolate(
+                return CalcLinear.interpolate(
                     position,
                     _lookUpTable[i].position,
                     _lookUpTable[i - 1].position,
@@ -309,12 +305,12 @@ import kotlin.math.*
         val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
         val pX = _xMax
         val pY = _yMax - pointUnloadedToLoaded
-        val tangentPoint = getTangentPoint(springMeanRadius, _cX, _cY, pX, pY)
-        val springMomentArmLength = sqrt((pX - tangentPoint.x).pow(2) + (pY - tangentPoint.y).pow(2))
-        val springOppositeArmLength = sqrt((tangentPoint.x - pX).pow(2) + (tangentPoint.y - tangentPoint.y).pow(2))
+        val tangentPoints = CalcGeometry.getTangentPointsOfLine(Point(_cX, _cY), springMeanRadius, Point(pX, pY))!!
+        val springMomentArmLength = sqrt((pX - tangentPoints.t1.x).pow(2) + (pY - tangentPoints.t1.y).pow(2))
+        val springOppositeArmLength = sqrt((tangentPoints.t1.x - pX).pow(2) + (tangentPoints.t1.y - tangentPoints.t1.y).pow(2))
         val springAdjacentArmLength = sqrt(springMomentArmLength.pow(2) - springOppositeArmLength.pow(2))
 
-        val ref = sqrt((_pXunloaded - tangentPoint.x).pow(2) + (_pYunloaded - tangentPoint.y).pow(2))
+        val ref = sqrt((_pXunloaded - tangentPoints.t1.x).pow(2) + (_pYunloaded - tangentPoints.t1.y).pow(2))
 
         val springAngle = CalcTrig.getAngleGiven3Sides(ref, springMeanRadius, springMeanRadius)
 
@@ -344,9 +340,10 @@ import kotlin.math.*
         val pointUnloadedToLoaded = (_sensorToStudCenter + _yMax + _yOffset) - getSensorToSpringPoint(position)
         val pX = _xMax
         val pY = _yMax - pointUnloadedToLoaded
-        val tangentPoint = getTangentPoint(springMeanRadius, _cX, _cY, pX, pY)
 
-        val ref = sqrt((_pXunloaded - tangentPoint.x).pow(2) + (_pYunloaded - tangentPoint.y).pow(2))
+        val tangentPoints = CalcGeometry.getTangentPointsOfLine(Point(_cX, _cY), springMeanRadius, Point(pX, pY))!!
+
+        val ref = sqrt((_pXunloaded - tangentPoints.t1.x).pow(2) + (_pYunloaded - tangentPoints.t1.y).pow(2))
 
         return CalcTrig.getAngleGiven3Sides(ref, springMeanRadius, springMeanRadius)
     }
@@ -375,25 +372,6 @@ import kotlin.math.*
      */
     private fun getForceInVerticalDirection(netForce: Double, springAngle: Double): Double {
         return (netForce * cos(Math.toRadians(springAngle)))
-    }
-
-    /**
-     * Get tangent point where the active spring point to the spring
-     */
-    private fun getTangentPoint(radius : Double, cX : Double, cY : Double, pX : Double, pY : Double) : Point {
-        val dx = pX - cX
-        val dy = pY - cY
-        val dxr = -1.0 * dy
-        val dyr = dx
-        val d = sqrt(dx.pow(2) + dy.pow(2))
-        val rho = radius/d
-        val ad = rho.pow(2)
-        val bd = rho * sqrt(1 - ad)
-
-        val tX = cX + ad * dx + bd * dxr
-        val tY = cY + ad * dy + bd * dyr
-
-        return Point(tX, tY)
     }
 
     /**

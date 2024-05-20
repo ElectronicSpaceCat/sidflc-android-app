@@ -52,9 +52,9 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
     private lateinit var viewModel: CameraOverlayViewModel
-    private lateinit var btnDeviceHeight: BallisticsButton<LengthData>
-    private lateinit var btnTrgtDist: BallisticsButton<LengthData>
-    private lateinit var btnTrgtHeight: BallisticsButton<LengthData>
+    private lateinit var btnPhoneHeight: BallisticsButton<LengthData>
+    private lateinit var btnTargetDistance: BallisticsButton<LengthData>
+    private lateinit var btnTargetHeight: BallisticsButton<LengthData>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,39 +96,39 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Setup the ballistics button for Device Height
          */
-        btnDeviceHeight = object : BallisticsButton<LengthData>("DH", "Device Height",
-            fragmentCameraOverlayBinding.deviceHeight,
-            DataShared.deviceHeight,
+        btnPhoneHeight = object : BallisticsButton<LengthData>("PH", "Phone Height",
+            fragmentCameraOverlayBinding.phoneHeight,
+            DataShared.phoneHeight,
             View.GONE) {
             override fun onButtonClick() {
                 super.onButtonClick()
-                if (btnDeviceHeight.acquisitionMode == Mode.AUTO) {
+                if (btnPhoneHeight.acquisitionMode == Mode.AUTO) {
                     if (viewModel.dataToGet != DataType.DEVICE_HEIGHT) {
-                        btnDeviceHeight.dataStatus = DataStatus.NOT_SET
+                        btnPhoneHeight.dataStatus = DataStatus.NOT_SET
                         viewModel.dataToGet = DataType.DEVICE_HEIGHT
-                        if (btnTrgtDist.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtDist.dataStatus == DataStatus.NOT_SET || btnTrgtDist.lockStatus == LockStatus.UNLOCKED)
+                        if (btnTargetDistance.acquisitionMode == Mode.AUTO &&
+                            (btnTargetDistance.dataStatus == DataStatus.NOT_SET || btnTargetDistance.lockStatus == LockStatus.UNLOCKED)
                         ) {
-                            btnTrgtDist.enable(false)
+                            btnTargetDistance.enable(false)
                         }
-                        if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                        if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                            (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                         ) {
-                            btnTrgtHeight.enable(false)
+                            btnTargetHeight.enable(false)
                         }
                     } else if (!viewModel.isCalculationPaused) {
-                        btnDeviceHeight.dataStatus = DataStatus.SET
-                        if (btnTrgtDist.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtDist.dataStatus == DataStatus.NOT_SET || btnTrgtDist.lockStatus == LockStatus.UNLOCKED)
+                        btnPhoneHeight.dataStatus = DataStatus.SET
+                        if (btnTargetDistance.acquisitionMode == Mode.AUTO &&
+                            (btnTargetDistance.dataStatus == DataStatus.NOT_SET || btnTargetDistance.lockStatus == LockStatus.UNLOCKED)
                         ) {
                             viewModel.dataToGet = DataType.TARGET_DISTANCE
-                            btnTrgtDist.enable(true)
-                        } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                            btnTargetDistance.enable(true)
+                        } else if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                            (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                         ) {
-                            btnTrgtHeight.dataStatus = DataStatus.NOT_SET
+                            btnTargetHeight.dataStatus = DataStatus.NOT_SET
                             viewModel.dataToGet = DataType.TARGET_HEIGHT
-                            btnTrgtHeight.enable(true)
+                            btnTargetHeight.enable(true)
                         } else {
                             viewModel.dataToGet = DataType.NONE
                         }
@@ -138,41 +138,41 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
             override fun onAcquisitionModeClick() {
                 super.onAcquisitionModeClick()
-                if (btnDeviceHeight.acquisitionMode == Mode.AUTO) {
+                if (btnPhoneHeight.acquisitionMode == Mode.AUTO) {
                     viewModel.dataToGet = DataType.DEVICE_HEIGHT
                     if (DataShared.device.connectionState.value?.isReady!!) {
-                        btnDeviceHeight.dataStatus = DataStatus.NOT_SET
+                        btnPhoneHeight.dataStatus = DataStatus.NOT_SET
                     } else {
-                        btnDeviceHeight.enable(false)
+                        btnPhoneHeight.enable(false)
                     }
 
-                    if (btnTrgtDist.acquisitionMode == Mode.AUTO &&
-                        (btnTrgtDist.dataStatus == DataStatus.NOT_SET || btnTrgtDist.lockStatus == LockStatus.UNLOCKED)
+                    if (btnTargetDistance.acquisitionMode == Mode.AUTO &&
+                        (btnTargetDistance.dataStatus == DataStatus.NOT_SET || btnTargetDistance.lockStatus == LockStatus.UNLOCKED)
                     ) {
-                        btnTrgtDist.enable(false)
+                        btnTargetDistance.enable(false)
                     }
-                    if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                        (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                    if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                        (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                     ) {
-                        btnTrgtHeight.enable(false)
+                        btnTargetHeight.enable(false)
                     }
                 } else {
-                    if (btnTrgtDist.acquisitionMode == Mode.AUTO && btnTrgtDist.dataStatus == DataStatus.NOT_SET) {
-                        btnTrgtDist.enable(true)
+                    if (btnTargetDistance.acquisitionMode == Mode.AUTO && btnTargetDistance.dataStatus == DataStatus.NOT_SET) {
+                        btnTargetDistance.enable(true)
                         viewModel.dataToGet = DataType.TARGET_DISTANCE
 
-                        btnTrgtHeight.enable(false)
-                    } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET) {
-                        btnTrgtHeight.enable(true)
+                        btnTargetHeight.enable(false)
+                    } else if (btnTargetHeight.acquisitionMode == Mode.AUTO && btnTargetHeight.dataStatus == DataStatus.NOT_SET) {
+                        btnTargetHeight.enable(true)
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
-                    } else if (btnTrgtDist.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
+                    } else if (btnTargetDistance.dataStatus == DataStatus.SET && btnTargetHeight.dataStatus == DataStatus.SET) {
                         viewModel.dataToGet = DataType.NONE
                     }
                 }
             }
 
             override fun onButtonClickDisabled() {
-                if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET && !DataShared.device.connectionState.value?.isReady!!) {
+                if (btnPhoneHeight.dataStatus == DataStatus.NOT_SET && !DataShared.device.connectionState.value?.isReady!!) {
                     Toast.makeText(requireContext(),
                         "Device connection required",
                         Toast.LENGTH_SHORT).show()
@@ -183,29 +183,29 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Setup the ballistics button for Target Distance
          */
-        btnTrgtDist = object : BallisticsButton<LengthData>("TD", "Target Distance",
+        btnTargetDistance = object : BallisticsButton<LengthData>("TD", "Target Distance",
             fragmentCameraOverlayBinding.targetDistance,
             DataShared.targetDistance,
             View.VISIBLE) {
             override fun onButtonClick() {
                 super.onButtonClick()
-                if (btnTrgtDist.acquisitionMode == Mode.AUTO && btnDeviceHeight.dataStatus == DataStatus.SET) {
+                if (btnTargetDistance.acquisitionMode == Mode.AUTO && btnPhoneHeight.dataStatus == DataStatus.SET) {
                     if (viewModel.dataToGet != DataType.TARGET_DISTANCE) {
                         viewModel.dataToGet = DataType.TARGET_DISTANCE
-                        btnTrgtDist.dataStatus = DataStatus.NOT_SET
+                        btnTargetDistance.dataStatus = DataStatus.NOT_SET
 
-                        if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                        if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                            (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                         ) {
-                            btnTrgtHeight.enable(false)
+                            btnTargetHeight.enable(false)
                         }
                     } else if (!viewModel.isCalculationPaused) {
-                        btnTrgtDist.dataStatus = DataStatus.SET
-                        if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                            (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                        btnTargetDistance.dataStatus = DataStatus.SET
+                        if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                            (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                         ) {
                             viewModel.dataToGet = DataType.TARGET_HEIGHT
-                            btnTrgtHeight.enable(true)
+                            btnTargetHeight.enable(true)
                         } else {
                             viewModel.dataToGet = DataType.NONE
                         }
@@ -215,31 +215,31 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
             override fun onAcquisitionModeClick() {
                 super.onAcquisitionModeClick()
-                if (btnTrgtDist.acquisitionMode == Mode.AUTO) {
-                    if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET) {
-                        btnTrgtDist.enable(false)
+                if (btnTargetDistance.acquisitionMode == Mode.AUTO) {
+                    if (btnPhoneHeight.dataStatus == DataStatus.NOT_SET) {
+                        btnTargetDistance.enable(false)
                     } else {
-                        btnTrgtDist.dataStatus = DataStatus.NOT_SET
+                        btnTargetDistance.dataStatus = DataStatus.NOT_SET
                         viewModel.dataToGet = DataType.TARGET_DISTANCE
                     }
 
-                    if (btnTrgtHeight.acquisitionMode == Mode.AUTO &&
-                        (btnTrgtHeight.dataStatus == DataStatus.NOT_SET || btnTrgtHeight.lockStatus == LockStatus.UNLOCKED)
+                    if (btnTargetHeight.acquisitionMode == Mode.AUTO &&
+                        (btnTargetHeight.dataStatus == DataStatus.NOT_SET || btnTargetHeight.lockStatus == LockStatus.UNLOCKED)
                     ) {
-                        btnTrgtHeight.enable(false)
+                        btnTargetHeight.enable(false)
                     }
-                } else if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnTrgtHeight.dataStatus == DataStatus.NOT_SET
-                    && btnDeviceHeight.dataStatus == DataStatus.SET
+                } else if (btnTargetHeight.acquisitionMode == Mode.AUTO && btnTargetHeight.dataStatus == DataStatus.NOT_SET
+                    && btnPhoneHeight.dataStatus == DataStatus.SET
                 ) {
-                    btnTrgtHeight.enable(true)
+                    btnTargetHeight.enable(true)
                     viewModel.dataToGet = DataType.TARGET_HEIGHT
-                } else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtHeight.dataStatus == DataStatus.SET) {
+                } else if (btnPhoneHeight.dataStatus == DataStatus.SET && btnTargetHeight.dataStatus == DataStatus.SET) {
                     viewModel.dataToGet = DataType.NONE
                 }
             }
 
             override fun onButtonClickDisabled() {
-                if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET) {
+                if (btnPhoneHeight.dataStatus == DataStatus.NOT_SET) {
                     Toast.makeText(requireContext(),
                         "Device height (DH) required",
                         Toast.LENGTH_SHORT).show()
@@ -250,18 +250,18 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Setup the ballistics button for Target Height
          */
-        btnTrgtHeight = object : BallisticsButton<LengthData>("TH", "Target Height",
+        btnTargetHeight = object : BallisticsButton<LengthData>("TH", "Target Height",
             fragmentCameraOverlayBinding.targetHeight,
             DataShared.targetHeight,
             View.VISIBLE) {
             override fun onButtonClick() {
                 super.onButtonClick()
-                if (btnTrgtHeight.acquisitionMode == Mode.AUTO && btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtDist.dataStatus == DataStatus.SET) {
+                if (btnTargetHeight.acquisitionMode == Mode.AUTO && btnPhoneHeight.dataStatus == DataStatus.SET && btnTargetDistance.dataStatus == DataStatus.SET) {
                     if (viewModel.dataToGet != DataType.TARGET_HEIGHT) {
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
-                        btnTrgtHeight.dataStatus = DataStatus.NOT_SET
+                        btnTargetHeight.dataStatus = DataStatus.NOT_SET
                     } else if (!viewModel.isCalculationPaused) {
-                        btnTrgtHeight.dataStatus = DataStatus.SET
+                        btnTargetHeight.dataStatus = DataStatus.SET
                         viewModel.dataToGet = DataType.NONE
                     }
                 }
@@ -269,22 +269,22 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
             override fun onAcquisitionModeClick() {
                 super.onAcquisitionModeClick()
-                if (btnTrgtHeight.acquisitionMode == Mode.AUTO) {
-                    if (btnDeviceHeight.dataStatus == DataStatus.NOT_SET || btnTrgtDist.dataStatus == DataStatus.NOT_SET) {
-                        btnTrgtHeight.enable(false)
+                if (btnTargetHeight.acquisitionMode == Mode.AUTO) {
+                    if (btnPhoneHeight.dataStatus == DataStatus.NOT_SET || btnTargetDistance.dataStatus == DataStatus.NOT_SET) {
+                        btnTargetHeight.enable(false)
                     } else {
-                        btnTrgtHeight.dataStatus = DataStatus.NOT_SET
-                        btnTrgtHeight.enable(true)
+                        btnTargetHeight.dataStatus = DataStatus.NOT_SET
+                        btnTargetHeight.enable(true)
                         viewModel.dataToGet = DataType.TARGET_HEIGHT
                     }
-                } else if (btnDeviceHeight.dataStatus == DataStatus.SET && btnTrgtDist.dataStatus == DataStatus.SET) {
-                    btnTrgtHeight.dataStatus = DataStatus.SET
+                } else if (btnPhoneHeight.dataStatus == DataStatus.SET && btnTargetDistance.dataStatus == DataStatus.SET) {
+                    btnTargetHeight.dataStatus = DataStatus.SET
                     viewModel.dataToGet = DataType.NONE
                 }
             }
 
             override fun onButtonClickDisabled() {
-                if (btnTrgtDist.dataStatus == DataStatus.NOT_SET) {
+                if (btnTargetDistance.dataStatus == DataStatus.NOT_SET) {
                     Toast.makeText(requireContext(),
                         "Target distance (TD) required\nfor target height (TH)",
                         Toast.LENGTH_SHORT).show()
@@ -456,7 +456,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 DataType.DEVICE_HEIGHT -> {
                     fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(1)
                     if (DataShared.device.connectionState.value?.isReady!!
-                        && btnDeviceHeight.acquisitionMode == BallisticsButton.Mode.AUTO
+                        && btnPhoneHeight.acquisitionMode == BallisticsButton.Mode.AUTO
                     ) {
                         DataShared.device.setSensor(DeviceData.Sensor.Id.LONG)
                         DataShared.device.setSensorEnable(true)
@@ -503,13 +503,13 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             // Update the button visuals
             when (viewModel.dataToGet) {
                 DataType.DEVICE_HEIGHT -> {
-                    btnDeviceHeight.dataUpdateEnable = !paused
+                    btnPhoneHeight.dataUpdateEnable = !paused
                 }
                 DataType.TARGET_DISTANCE -> {
-                    btnTrgtDist.dataUpdateEnable = !paused
+                    btnTargetDistance.dataUpdateEnable = !paused
                 }
                 DataType.TARGET_HEIGHT -> {
-                    btnTrgtHeight.dataUpdateEnable = !paused
+                    btnTargetHeight.dataUpdateEnable = !paused
                 }
                 DataType.NONE,
                 DataType.NA, -> {
@@ -551,7 +551,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         /**
          * Observe carriage position sensor and update the shared data for carriage position
          */
-        DataShared.device.sensorCarriagePosition.rangeFiltered.observe(viewLifecycleOwner) {
+        DataShared.device.sensorCarriagePosition.rangeFilteredLive.observe(viewLifecycleOwner) {
             if (viewModel.dataToGet == DataType.NONE
                 // Only update the value when sensor is ready
                 && DataShared.device.connectionState.value!!.isReady
@@ -671,20 +671,20 @@ class CameraOverlayFragment internal constructor() : Fragment() {
      * Reset the ballistic buttons
      */
     private fun resetBallisticButtons() {
-        if (btnDeviceHeight.acquisitionMode == BallisticsButton.Mode.MANUAL) {
-            if (btnTrgtDist.acquisitionMode == BallisticsButton.Mode.AUTO
-                && btnTrgtDist.dataStatus != BallisticsButton.DataStatus.SET) {
+        if (btnPhoneHeight.acquisitionMode == BallisticsButton.Mode.MANUAL) {
+            if (btnTargetDistance.acquisitionMode == BallisticsButton.Mode.AUTO
+                && btnTargetDistance.dataStatus != BallisticsButton.DataStatus.SET) {
 
-                btnTrgtDist.dataStatus = BallisticsButton.DataStatus.NOT_SET
-                btnTrgtDist.enable(true)
-                btnTrgtHeight.enable(false)
+                btnTargetDistance.dataStatus = BallisticsButton.DataStatus.NOT_SET
+                btnTargetDistance.enable(true)
+                btnTargetHeight.enable(false)
                 viewModel.dataToGet = DataType.TARGET_DISTANCE
             }
-            else if (btnTrgtHeight.acquisitionMode == BallisticsButton.Mode.AUTO
-                && btnTrgtHeight.dataStatus != BallisticsButton.DataStatus.SET ) {
+            else if (btnTargetHeight.acquisitionMode == BallisticsButton.Mode.AUTO
+                && btnTargetHeight.dataStatus != BallisticsButton.DataStatus.SET ) {
 
-                btnTrgtHeight.dataStatus = BallisticsButton.DataStatus.NOT_SET
-                btnTrgtHeight.enable(true)
+                btnTargetHeight.dataStatus = BallisticsButton.DataStatus.NOT_SET
+                btnTargetHeight.enable(true)
                 viewModel.dataToGet = DataType.TARGET_HEIGHT
             }
             else if(!viewModel.isPositionAutoMode || DataShared.device.connectionState.value?.isReady!!){
@@ -695,18 +695,18 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             }
         }
         else {
-            btnDeviceHeight.dataStatus = BallisticsButton.DataStatus.NOT_SET
+            btnPhoneHeight.dataStatus = BallisticsButton.DataStatus.NOT_SET
 
             if(DataShared.device.connectionState.value?.isReady!!){
-                btnDeviceHeight.enable(true)
+                btnPhoneHeight.enable(true)
                 viewModel.dataToGet = DataType.DEVICE_HEIGHT
             }
             else{
-                btnDeviceHeight.enable(false)
+                btnPhoneHeight.enable(false)
                 viewModel.dataToGet = DataType.NA
             }
-            btnTrgtDist.enable(false)
-            btnTrgtHeight.enable(false)
+            btnTargetDistance.enable(false)
+            btnTargetHeight.enable(false)
         }
     }
 
@@ -782,7 +782,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     private fun updateEngData(position : Double) {
         // If engineering view is visible then display the data
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.deviceHeightData.text = DataShared.deviceHeight.valueStr()
+            fragmentCameraOverlayBinding.engineerData.phoneHeightData.text = DataShared.phoneHeight.valueStr()
 
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = DataShared.targetDistance.valueStr()
 
@@ -813,11 +813,11 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
         // If engineering view is visible then display the data
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.projectileHeightData.text = String.format(
+            fragmentCameraOverlayBinding.engineerData.launchHeightData.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
                 ConvertLength.convert(Unit.M,
-                    DataShared.deviceHeight.unit,
+                    DataShared.phoneHeight.unit,
                     viewModel.getAdjustedLaunchHeight)
             )
             fragmentCameraOverlayBinding.engineerData.targetDistanceAdjData.text = String.format(
@@ -855,7 +855,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.hitConfidenceValue.text = getString(R.string.value_unknown)
 
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE){
-            fragmentCameraOverlayBinding.engineerData.projectileHeightData.text = getString(R.string.value_unknown)
+            fragmentCameraOverlayBinding.engineerData.launchHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceAdjData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.velocityData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.impactDistanceData.text = getString(R.string.value_unknown)
@@ -866,7 +866,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
     private fun clearEngBallisticsData() {
         if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
-            fragmentCameraOverlayBinding.engineerData.deviceHeightData.text = getString(R.string.value_unknown)
+            fragmentCameraOverlayBinding.engineerData.phoneHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.springAngleData.text = getString(R.string.value_unknown)
@@ -875,8 +875,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     }
 
     private fun initEngViewUnits(){
-        fragmentCameraOverlayBinding.engineerData.deviceHeightUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
-        fragmentCameraOverlayBinding.engineerData.projectileHeightUnit.text = ("(").plus(DataShared.deviceHeight.unitStr() + ")")
+        fragmentCameraOverlayBinding.engineerData.phoneHeightUnit.text = ("(").plus(DataShared.phoneHeight.unitStr() + ")")
+        fragmentCameraOverlayBinding.engineerData.launchHeightUnit.text = ("(").plus(DataShared.phoneHeight.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetDistanceUnit.text = ("(").plus(DataShared.targetDistance.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetDistanceAdjUnit.text = ("(").plus(DataShared.targetDistance.unitStr() + ")")
         fragmentCameraOverlayBinding.engineerData.targetHeightUnit.text = ("(").plus(DataShared.targetHeight.unitStr() + ")")

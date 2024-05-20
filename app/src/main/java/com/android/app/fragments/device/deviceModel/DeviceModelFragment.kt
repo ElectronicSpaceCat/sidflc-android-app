@@ -71,7 +71,7 @@ class DeviceModelFragment : Fragment() {
         /**
          * Observe the carriage position for updating graphics
          */
-        DataShared.device.sensorCarriagePosition.rangeFiltered.observe(viewLifecycleOwner) { position ->
+        DataShared.device.sensorCarriagePosition.rangeFilteredLive.observe(viewLifecycleOwner) { position ->
             if(_lastPosition != position){
                 _lastPosition = position
 

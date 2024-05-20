@@ -33,6 +33,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
     // These preferences require special handling
     private lateinit var editUnits: Preference
     private lateinit var lensOffset: EditTextPreference
+    private lateinit var deviceOffset: EditTextPreference
     private lateinit var deviceSettings: Preference
     private lateinit var editProjectileList: Preference
     private lateinit var sensorCalDevice: Preference
@@ -44,6 +45,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
 
         editUnits = findPreference(getString(R.string.PREFERENCE_FILTER_UNITS_EDIT))!!
         lensOffset = findPreference(getString(R.string.PREFERENCE_FILTER_LENS_OFFSET))!!
+        deviceOffset = findPreference(getString(R.string.PREFERENCE_FILTER_DEVICE_OFFSET))!!
         deviceSettings = findPreference(getString(R.string.PREFERENCE_FILTER_DEVICE_SETTINGS))!!
         editProjectileList = findPreference(getString(R.string.PREFERENCE_FILTER_PROJECTILE_EDIT))!!
         sensorCalDevice = findPreference(getString(R.string.PREFERENCE_FILTER_SENSOR_CAL_DEVICE))!!
@@ -58,7 +60,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
         }
 
         // Create generic text input listener with filters
-        val lensOffsetFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
+        val textInputFilter = EditTextPreference.OnBindEditTextListener { editText: EditText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
             val filters = arrayOf(
                 InputFilter.LengthFilter(7)
@@ -68,7 +70,10 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
         }
 
         // Configure input dialog for the LensOffset
-        lensOffset.setOnBindEditTextListener(lensOffsetFilter)
+        lensOffset.setOnBindEditTextListener(textInputFilter)
+
+        // Configure input dialog for the DeviceOffset
+        deviceOffset.setOnBindEditTextListener(textInputFilter)
 
         // Navigate to the device settings when preference clicked
         deviceSettings.setOnPreferenceClickListener {
@@ -137,6 +142,27 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
                     val value = Utils.convertStrToDouble(newValue)
                     DataShared.lensOffset.setValue(value)
                     DataShared.lensOffset.storeToPrefs(requireContext())
+                    retVal = true
+                }
+                retVal
+            }
+
+        /**
+         * Device Offset
+         */
+        // Set the lensOffset title units appropriately
+        deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffset.unitStr() + ")"
+        deviceOffset.text = DataShared.deviceOffset.valueStr()
+        DataShared.deviceOffset.unitOnChange.observe(viewLifecycleOwner){
+            deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffset.unitStr() + ")"
+        }
+        deviceOffset.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
+                var retVal = false
+                if (deviceOffset.text != newValue as String) {
+                    val value = Utils.convertStrToDouble(newValue)
+                    DataShared.deviceOffset.setValue(value)
+                    DataShared.deviceOffset.storeToPrefs(requireContext())
                     retVal = true
                 }
                 retVal

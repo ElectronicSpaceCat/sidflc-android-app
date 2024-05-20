@@ -15,10 +15,6 @@ open class ModelBallistics(model: ModelData) {
     private var _efficiency = MutableLiveData(DEFAULT_EFFICIENCY_FACTOR)
     private var _frictionCoefficient = MutableLiveData(DEFAULT_FRICTION_COEFFICIENT)
 
-    private var _impactData = CalcBallistics.ImpactData()
-    val impactData : CalcBallistics.ImpactData
-        get() = _impactData
-
     private var _adjustedLaunchHeight = 0.0 // Device height + offset based on projectile position and phone pitch
     val adjustedLaunchHeight: Double
         get() = _adjustedLaunchHeight
@@ -39,10 +35,6 @@ open class ModelBallistics(model: ModelData) {
         }
         get() = _forceOffset.value!!
 
-    fun resetForceOffset() {
-        forceOffset = DEFAULT_FORCE_OFFSET
-    }
-
     val frictionCoefficientOnChange : LiveData<Double>
         get() = _frictionCoefficient
     var frictionCoefficient : Double
@@ -54,10 +46,6 @@ open class ModelBallistics(model: ModelData) {
             }
         }
         get() = _frictionCoefficient.value!!
-
-    fun resetFrictionCoefficient() {
-        frictionCoefficient = DEFAULT_FRICTION_COEFFICIENT
-    }
 
     val efficiencyOnChange : LiveData<Double>
         get() = _efficiency
@@ -71,10 +59,6 @@ open class ModelBallistics(model: ModelData) {
         }
         get() = _efficiency.value!!
 
-    fun resetEfficiency() {
-        efficiency = DEFAULT_EFFICIENCY_FACTOR
-    }
-
     class ProjectileBallistics(
         var netPotentialEnergy: Double = 0.0,
         var velocity: Double = 0.0)
@@ -83,51 +67,41 @@ open class ModelBallistics(model: ModelData) {
 
     val projectileBallistics : ProjectileBallistics
         get() = _projectileBallistics
-
-
+    
+    
     /**
      * Get estimated impact distance and height of a launched projectile.
      * This is a blocking function and should be called on a background task.
      *
      * @param position (mm) Distance between the face of the short range sensor and the back of the carriage
-     * @param lensOffset (mm)
-     * @param deviceHeight (m)
-     * @param targetDistance (m)
-     * @param launchAngle (deg) Pitch of the device
+     * @param phoneHeight (m) Distance from the bottom of the phone to the ground
+     * @param deviceOffset (mm) Distance from bottom of the device to bottom of the phone
+     * @param targetDistance (m) Distance from the phone lens to the target
+     * @param launchAngle (deg) Pitch of the device at projectile launch
      */
     fun calcImpactData(
         position : Double,
-        lensOffset : Double,
-        deviceHeight : Double,
+        phoneHeight : Double,
+        deviceOffset : Double,
         launchAngle : Double,
         targetDistance : Double) : CalcBallistics.ImpactData
     {
-        // Calculate the height of the projectile offset from the height captured by the sensor, angle of the phone affects it.
-        val heightOffsetMM = getProjectileHeightOffsetAtAngle(_model.getMaxCarriagePosition(), launchAngle)
+        // Calculate the adjusted target height
+        val heightOffsetMM = getProjectileHeightOffsetAtAngle(position, launchAngle, deviceOffset)
         val heightOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, heightOffsetMM)
-        _adjustedLaunchHeight = (deviceHeight + heightOffsetM)
+        _adjustedLaunchHeight = (phoneHeight + heightOffsetM)
 
-        // Get the adjusted target distance which is the calculated target distance plus the distance behind the lens
-        // at which the projectile will be launched.
-        val offset = (_model.caseBodyLength + lensOffset - _model.getProjectileCenterOfMassPosition(_model.getMaxCarriagePosition()))
-
-        // Only adjust targetDistance if the offset is greater than the offset of the projectiles center of mass location
-        _adjustedTargetDistance = if(offset > 0.0){
-            // Convert the offset from mm to m
-            val offsetMeters = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, offset)
-            // Return adjusted target distance
-            (targetDistance + CalcTrig.getSideBGivenSideCAngleA(offsetMeters, launchAngle))
-        } else{
-            // Return target distance
-            targetDistance
-        }
+        // Calculate the adjusted target distance
+        val distanceOffsetMM = getProjectileDistanceOffsetAtAngle(position, launchAngle, deviceOffset)
+        val distanceOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, distanceOffsetMM)
+        _adjustedTargetDistance = (targetDistance - distanceOffsetM)
 
         // Get projectile ballistics at carriage position and launch angle
         _model.ballistics.calcProjectileBallistics(position, launchAngle)
 
         // If velocity <= zero then return zero for both impact distance and height
-        _impactData = if(_model.ballistics.projectileBallistics.velocity <= 0.0){
-            CalcBallistics.ImpactData()
+        val impactData = if(_model.ballistics.projectileBallistics.velocity <= 0.0) {
+            CalcBallistics.ImpactData(0.0, 0.0)
         }
         else{
             // Blocking routine
@@ -141,30 +115,28 @@ open class ModelBallistics(model: ModelData) {
             )
         }
 
-        return _impactData
+        return impactData
     }
 
     /**
      * Calculate the hit confidence
      *
-     * @param targetDistance (m)
      * @param targetHeight (m)
      * @param impactData default set to internal value
      */
     fun calcHitConfidence(
-        targetDistance : Double,
         targetHeight : Double,
-        impactData: CalcBallistics.ImpactData = _impactData) : Double {
+        impactData: CalcBallistics.ImpactData) : Double {
 
         // Target distance + target height
-        val totalLengthEst = if(impactData.distance >= targetDistance && targetHeight > 0.0){
-            targetDistance + impactData.height
+        val totalLengthEst = if(impactData.distance >= _adjustedTargetDistance && targetHeight > 0.0){
+            _adjustedTargetDistance + impactData.height
         } else{
             impactData.distance
         }
 
         // Get the totalLengthTarget
-        val totalLengthTarget = (targetDistance + targetHeight)
+        val totalLengthTarget = (_adjustedTargetDistance + targetHeight)
 
         // Calculate the hit confidence percentage based on the total length
         val hitConfidence = (if(totalLengthEst == 0.0 || totalLengthTarget == 0.0){
@@ -186,10 +158,25 @@ open class ModelBallistics(model: ModelData) {
      *
      * @param position (mm)
      * @param launchAngle (deg)
+     * @param launchHeightOffset (mm)
      * @return heightOffset (mm)
      */
-    private fun getProjectileHeightOffsetAtAngle(position: Double, launchAngle: Double) : Double {
-        return CalcTrig.getSideAGivenSideCAngleA(_model.getProjectileCenterOfMassPosition(position), launchAngle)
+    private fun getProjectileHeightOffsetAtAngle(position: Double, launchAngle: Double, launchHeightOffset : Double) : Double {
+        val heightOffset = (launchHeightOffset + _model.getMaxCarriagePosition() + _model.getProjectileCenterOfMassPosition(position))
+        return CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(heightOffset, launchAngle)
+    }
+
+    /**
+     * Get distance offset of the projectile at given launch angle.
+     *
+     * @param position (mm)
+     * @param launchAngle (deg)
+     * @param launchHeightOffset (mm)
+     * @return distanceOffset (mm)
+     */
+    private fun getProjectileDistanceOffsetAtAngle(position: Double, launchAngle: Double, launchHeightOffset : Double) : Double {
+        val heightOffset = (launchHeightOffset + _model.getMaxCarriagePosition() + _model.getProjectileCenterOfMassPosition(position))
+        return CalcTrig.getSideGivenSideHypotenuseAngleAdjacent(heightOffset, launchAngle)
     }
 
     /**
@@ -204,8 +191,10 @@ open class ModelBallistics(model: ModelData) {
         // Cap position to the max allowed
         val pos = min(position, _model.getMaxCarriagePosition())
 
+        // Calculate the travel distance
+        val deltaPos = (_model.getMaxCarriagePosition() - pos)
+
         // Calculate energy loss due to gravity and friction
-        val deltaPos = _model.getMaxCarriagePosition() - pos
         val kineticEnergyLoss = deltaPos * (forceOffset + (0.001 * _model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * sin(Math.toRadians(launchAngle)))
                 + (0.001 * _model.getTotalWeight() * CalcBallistics.ACCELERATION_OF_GRAVITY * cos(Math.toRadians(launchAngle))) * frictionCoefficient)
 

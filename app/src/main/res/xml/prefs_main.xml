@@ -18,7 +18,8 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:title="@string/header_ballistics">
+        app:title="@string/header_orientation">
+
         <EditTextPreference
             app:defaultValue="0.0"
             app:iconSpaceReserved="false"
@@ -26,6 +27,18 @@
             app:persistent="false"
             app:title="@string/pref_title_lens_offset"
             app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_DEVICE_OFFSET"
+            app:persistent="false"
+            app:title="@string/pref_title_device_offset"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/header_ballistics">
         <Preference
             android:id="@+id/preference"
             android:layout_width="wrap_content"

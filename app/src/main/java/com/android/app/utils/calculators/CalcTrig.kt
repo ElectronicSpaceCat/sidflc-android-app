@@ -17,84 +17,140 @@ import kotlin.math.*
  */
 object CalcTrig {
     /**
-     * Get sideC (hypotenuse)
+     * Get sideHypotenuse
      * (This is for right triangle only)
      *
      * c = √(a² + b²)
      *
-     * @param sideA
-     * @param sideB
+     * @param sideOpposite
+     * @param sideAdjacent
      * @return sideC (Hypotenuse)
      */
-    fun getHypotenuse(sideA: Double, sideB: Double): Double {
-        return sqrt(sideA.pow(2.0) + sideB.pow(2.0))
+    fun getHypotenuseGivenSideOppositeSideAdjacent(sideOpposite: Double, sideAdjacent: Double): Double {
+        return sqrt(sideOpposite.pow(2.0) + sideAdjacent.pow(2.0))
     }
 
     /**
-     * Get sideA or sideB from from right triangle given
-     * angle opposite of that side and the adjacent side
+     * Get sideHypotenuse
+     * (This is for right triangle only)
+     *
+     * c = a / sin(ά)
+     *
+     * c = b / sin(β)
+     *
+     * @param sideOpposite
+     * @param angleOpposite
+     * @return sideHypotenuse
+     */
+    fun getHypotenuseGivenSideOppositeAngleOpposite(sideOpposite: Double, angleOpposite: Double): Double {
+        return (sideOpposite / sin(Math.toRadians(angleOpposite)))
+    }
+
+    /**
+     * Get side from right triangle given angle opposite
+     * of that side and the adjacent side
      * (This is for right triangle only)
      *
      * a = b * tan(ά)
      *
-     * @param sideB
-     * @param angleA
-     * @return sideA
+     * b = a * tan(β)
+     *
+     * @param sideOpposite
+     * @param angleAdjacent
+     * @return side
      */
-    fun getSideGiven1Side1Angle(sideB: Double, angleA: Double): Double {
-        return (sideB * tan(Math.toRadians((angleA))))
+    fun getSideGivenSideOppositeAngleAdjacent(sideOpposite: Double, angleAdjacent: Double): Double {
+        return (sideOpposite * tan(Math.toRadians((angleAdjacent))))
     }
 
-
     /**
-     * Find angle ά given side A and side C (Hypotenuse) of right triangle
+     * Get angleOpposite given sideHypotenuse and sideOpposite
      *
      * ά = asin(a/c)
      *
-     * @param sideA
-     * @param sideC
+     * β = asin(b/c)
+     *
+     * @param sideHypotenuse
+     * @param sideOpposite
+     * @return angleOpposite
      */
-    fun getAngleAGivenSideASideC(sideA: Double, sideC: Double): Double {
-        return Math.toDegrees(asin(sideA / sideC))
+    fun getAngleBetweenSideHypotenuseSideOpposite(sideHypotenuse: Double, sideOpposite: Double): Double {
+        return Math.toDegrees(asin(sideOpposite / sideHypotenuse))
     }
 
     /**
-     * Get sideA from right triangle given sideC and angleA
+     * Get angleOpposite given sideHypotenuse and sideAdjacent
+     *
+     * ά = acos(b/c)
+     *
+     * β = acos(a/c)
+     *
+     * @param sideHypotenuse
+     * @param sideAdjacent
+     * @return angleOpposite
+     */
+    fun getAngleBetweenSideHypotenuseSideAdjacent(sideHypotenuse: Double, sideAdjacent: Double): Double {
+        return Math.toDegrees(acos(sideAdjacent / sideHypotenuse))
+    }
+
+    /**
+     * Get angleOpposite given sideOpposite and sideAdjacent
+     *
+     * β = atan(b/a)
+     *
+     * α = atan(a/b)
+     *
+     * @param sideOpposite
+     * @param sideAdjacent
+     * @return angleOpposite
+     */
+    fun getAngleBetweenSideOppositeSideAdjacent(sideAdjacent: Double, sideOpposite: Double) : Double{
+        return Math.toDegrees(atan(sideOpposite / sideAdjacent))
+    }
+
+    /**
+     * Get sideOpposite given sideHypotenuse and angleOpposite
      *
      * a = c * sin(ά)
      *
-     * @param sideC
-     * @param angleA
-     * @return sideA
+     * b = c × sin(β)
+     *
+     * @param sideHypotenuse
+     * @param angleOpposite
+     * @return sideOpposite
      */
-    fun getSideAGivenSideCAngleA(sideC: Double, angleA: Double): Double {
-        return (sideC * sin(Math.toRadians((angleA))))
+    fun getSideOppositeGivenSideHypotenuseAngleOpposite(sideHypotenuse: Double, angleOpposite: Double): Double {
+        return (sideHypotenuse * sin(Math.toRadians((angleOpposite))))
     }
 
     /**
-     * Get sideB from right triangle given sideC and angleA
+     * Get side given sideHypotenuse and angleAdjacent
      *
-     * a = c * cos(ά)
+     * a = c × cos(β)
      *
-     * @param sideC
-     * @param angleA
-     * @return sideA
+     * b = c × cos(α)
+     *
+     * @param sideHypotenuse
+     * @param angleAdjacent
+     * @return sideAdjacent
      */
-    fun getSideBGivenSideCAngleA(sideC: Double, angleA: Double): Double {
-        return (sideC * cos(Math.toRadians((angleA))))
+    fun getSideGivenSideHypotenuseAngleAdjacent(sideHypotenuse: Double, angleAdjacent: Double): Double {
+        return (sideHypotenuse * cos(Math.toRadians((angleAdjacent))))
     }
 
     /**
-     * Get sideA from right triangle given sideC and angleB
+     * Get sideOpposite given sideHypotenuse and angleOpposite
      *
-     * a = c * cos(β)
+     * a = c × sin(α)
      *
-     * @param sideC
-     * @param angleB
-     * @return sideA
+     * b = c × sin(β)
+     *
+     * @param sideHypotenuse
+     * @param angleOpposite
+     * @return sideOpposite
      */
-    fun getSideAGivenSideCAngleB(sideC: Double, angleB: Double): Double {
-        return (sideC * cos(Math.toRadians((angleB))))
+    fun getSideGivenSideHypotenuseAngleOpposite(sideHypotenuse: Double, angleOpposite: Double): Double {
+        return (sideHypotenuse * cos(Math.toRadians((angleOpposite))))
     }
 
     /**
@@ -106,7 +162,7 @@ object CalcTrig {
      * @param sideC
      * @return sideA (Hypotenuse)
      */
-    fun getSideGivenHypotenuse(sideB: Double, sideC: Double): Double {
+    fun getSideGivenSideHypotenuseSideAny(sideB: Double, sideC: Double): Double {
         return sqrt(sideC.pow(2.0) - sideB.pow(2.0))
     }
 
@@ -166,18 +222,5 @@ object CalcTrig {
      */
     fun getAngleGiven3Sides(sideA: Double, sideB: Double, sideC: Double): Double {
         return Math.toDegrees(acos((sideB.pow(2) + sideC.pow(2) - sideA.pow(2)) / (2 * sideB * sideC)))
-    }
-
-    /**
-     * Find angle given sideA and sideB
-     *
-     * β = atan(b / a)
-     *
-     * @param sideA
-     * @param sideB
-     * @return angle (β) (Degrees)
-     */
-    fun getAngleBGivenSideASideB(sideA: Double, sideB: Double) : Double{
-        return Math.toDegrees(atan(sideB / sideA))
     }
 }

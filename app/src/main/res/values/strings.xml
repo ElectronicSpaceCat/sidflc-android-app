@@ -38,6 +38,7 @@
     <string name="PREFERENCE_FILTER_PROJECTILE_SELECTED_BALLISTICS">projectile_selected_ballistic</string>
     <string name="PREFERENCE_FILTER_SPRING_SELECTED">spring_selected</string>
     <string name="PREFERENCE_FILTER_LENS_OFFSET">lens_offset</string>
+    <string name="PREFERENCE_FILTER_DEVICE_OFFSET">device_offset</string>
     <string name="PREFERENCE_FILTER_FORCE_OFFSET">force_offset</string>
     <string name="PREFERENCE_FILTER_EFFICIENCY">efficiency</string>
     <string name="PREFERENCE_FILTER_FRICTION_COEFFICIENT">friction_coefficient</string>
@@ -56,6 +57,7 @@
     <string name="deviceInfo">…</string>
     <string name="value_unknown">…</string>
     <string name="value">value</string>
+    <string name="loading_configs">Loading Configurations…</string>
 
     <string name="device_info_desc_name">Name: </string>
     <string name="device_info_desc_address">Address: </string>
@@ -139,6 +141,7 @@
     <string name="pref_title_device">Device</string>
     <string name="pref_title_spring_edit">Spring</string>
     <string name="pref_title_lens_offset">Lens Offset</string>
+    <string name="pref_title_device_offset">Device Offset</string>
     <string name="pref_title_force_offset">Force Offset (N)</string>
     <string name="pref_title_efficiency">Efficiency Factor</string>
     <string name="pref_title_friction_coefficient">Friction Coefficient</string>
@@ -184,7 +187,8 @@
 
     <!-- Stored Preference Keys -->
     <string name="key_lens_offset">lens_offset</string>
-    <string name="key_device_height">device_height</string>
+    <string name="key_device_offset">device_offset</string>
+    <string name="key_phone_height">phone_height</string>
     <string name="key_target_height">target_height</string>
     <string name="key_target_distance">target_distance</string>
     <string name="key_sensor_short_offset">sensor_short_offset</string>
@@ -198,7 +202,8 @@
 
     <!-- Data Units -->
     <string name="item_lens_offset">Lens Offset</string>
-    <string name="item_device_height">Device Height (DH)</string>
+    <string name="item_device_offset">Device Offset</string>
+    <string name="item_phone_height">Phone Height (PH)</string>
     <string name="item_target_distance">Target Distance (TD)</string>
     <string name="item_target_height">Target Height (TH)</string>
     <string name="item_carriage_position">Carriage Position</string>

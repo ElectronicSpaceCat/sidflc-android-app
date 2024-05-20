@@ -235,7 +235,10 @@
                 android:id="@+id/data_points"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_impact_distance" />
+                tools:listitem="@layout/item_impact_distance" >
+
+            </androidx.recyclerview.widget.RecyclerView>
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

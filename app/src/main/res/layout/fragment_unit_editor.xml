@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="25dp"
-                android:contentDescription="@string/item_device_height"
+                android:contentDescription="@string/item_phone_height"
                 android:text="@string/header_description"
                 android:textColor="@color/textprimary"
                 android:textSize="16sp"
@@ -92,6 +92,36 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_device_offset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/activity_horizontal_margin"
+            android:paddingEnd="@dimen/activity_horizontal_margin">
+
+            <TextView
+                android:id="@+id/device_offset_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="25dp"
+                android:contentDescription="@string/item_device_offset"
+                android:text="@string/item_device_offset"
+                android:textColor="@color/text_primary_color_selector"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/device_offset_unit_selector"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/value_unknown"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="TouchTargetSizeCheck" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/item_carriage_position"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -133,8 +163,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="25dp"
-                android:contentDescription="@string/item_device_height"
-                android:text="@string/item_device_height"
+                android:contentDescription="@string/item_phone_height"
+                android:text="@string/item_phone_height"
                 android:textColor="@color/text_primary_color_selector"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

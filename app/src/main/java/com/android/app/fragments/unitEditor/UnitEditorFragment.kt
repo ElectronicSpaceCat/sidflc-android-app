@@ -66,11 +66,15 @@ class UnitEditorFragment : Fragment() {
         fragmentUnitEditorBinding.lensOffsetUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.lensOffsetUnitSelector.setSelection(0.coerceAtLeast(idx))
 
+        idx = unitLengthsReduced.indexOf(DataShared.deviceOffset.unitStr())
+        fragmentUnitEditorBinding.deviceOffsetUnitSelector.adapter = adapterLengthsShort
+        fragmentUnitEditorBinding.deviceOffsetUnitSelector.setSelection(0.coerceAtLeast(idx))
+
         idx = unitLengthsReduced.indexOf(DataShared.carriagePosition.unitStr())
         fragmentUnitEditorBinding.carriagePositionUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.carriagePositionUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsDefault.indexOf(DataShared.deviceHeight.unitStr())
+        idx = unitLengthsDefault.indexOf(DataShared.phoneHeight.unitStr())
         fragmentUnitEditorBinding.deviceHeightUnitSelector.adapter = adapterLengthsLong
         fragmentUnitEditorBinding.deviceHeightUnitSelector.setSelection(0.coerceAtLeast(idx))
 
@@ -95,6 +99,19 @@ class UnitEditorFragment : Fragment() {
                 }
             }
         }
+        // Setup listener for DeviceOffset
+        fragmentUnitEditorBinding.deviceOffsetUnitSelector.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+
+            }
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
+                if(selectedUnit != DataShared.deviceOffset.unit){
+                    DataShared.deviceOffset.setUnit(selectedUnit)
+                    DataShared.deviceOffset.storeToPrefs(requireContext())
+                }
+            }
+        }
         // Setup listener for CarrierPosition
         fragmentUnitEditorBinding.carriagePositionUnitSelector.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -115,9 +132,9 @@ class UnitEditorFragment : Fragment() {
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsDefault[p2].uppercase())
-                if(selectedUnit != DataShared.deviceHeight.unit){
-                    DataShared.deviceHeight.setUnit(selectedUnit)
-                    DataShared.deviceHeight.storeToPrefs(requireContext())
+                if(selectedUnit != DataShared.phoneHeight.unit){
+                    DataShared.phoneHeight.setUnit(selectedUnit)
+                    DataShared.phoneHeight.storeToPrefs(requireContext())
                 }
             }
         }

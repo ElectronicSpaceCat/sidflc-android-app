@@ -27,7 +27,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withCreated
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,9 +43,6 @@ import com.android.app.utils.misc.Utils
 import com.android.app.utils.plotter.CanvasPlotter
 import com.android.app.utils.plotter.DataPoint
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import kotlin.math.roundToInt
 
@@ -65,10 +61,7 @@ class DeviceBallisticsFragment : Fragment() {
 
     private var _projectileSelectedPrev : ProjectileData ?= null
 
-    @Serializable
-    private class RecData(var height : Double, var heightUnit : ConvertLength.Unit, var pitch : Double, val recDist : Array<Double>)
-
-    private var _recData = RecData(0.0, DataShared.deviceHeight.unit, 0.0, Array(_numDataPoints) {0.0})
+    private var _recData = ProjectilePrefUtils.RecData(0.0, DataShared.phoneHeight.unit, 0.0, Array(_numDataPoints) {0.0})
 
     private inner class PlotData {
         var xMin : Float = 0f
@@ -206,7 +199,7 @@ class DeviceBallisticsFragment : Fragment() {
                 DataShared.device.model.projectileOnChange.observe(viewLifecycleOwner) {
                     // If projectile changed, store the recorded test data
                     if(_projectileSelectedPrev != it) {
-                        storeRecordedDataToPrefs(_projectileSelectedPrev)
+                        ProjectilePrefUtils.setProjectileRecData(requireContext(), _projectileSelectedPrev?.name, _recData)
                         _projectileSelectedPrev = it
                     }
                     loadRecordedDataFromPrefs(it)
@@ -412,26 +405,21 @@ class DeviceBallisticsFragment : Fragment() {
         }
     }
 
-    private fun storeRecordedDataToPrefs(projectile: ProjectileData?) {
-        projectile?.let {
-            val json = Json.encodeToString(_recData)
-            val editor = PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-            editor.putString(it.name + REC_DATA_PREF_TAG, json).apply()
-        }
-    }
-
     private fun loadRecordedDataFromPrefs(projectile: ProjectileData?) {
-        try{
-            val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val str = prefs.getString(projectile?.name + REC_DATA_PREF_TAG, "")
-            val data = Json.decodeFromString<RecData>(str!!)
+        // Get recorded data from prefs
+        val data = ProjectilePrefUtils.getProjectileRecData(requireContext(), projectile?.name)
+        if(null != data) {
             _recData = data
         }
-        catch (e : Exception) {
+        else {
             _recData.height = 0.0
+            _recData.heightUnit = DataShared.phoneHeight.unit
             _recData.pitch = 0.0
             _recData.recDist.fill(0.0)
         }
+
+        // Make sure to convert the height based on the device height unit
+        _recData.height = ConvertLength.convert(_recData.heightUnit, DataShared.phoneHeight.unit, _recData.height)
 
         // Set the preferences when recorded data loaded
         try {
@@ -457,8 +445,10 @@ class DeviceBallisticsFragment : Fragment() {
     override fun onDestroyView() {
         _plotters.clear()
 
-        storeRecordedDataToPrefs(DataShared.device.model.projectile)
-
+        // Store projectile recorded data if not null
+        DataShared.device.model.projectile?.let {
+            ProjectilePrefUtils.setProjectileRecData(requireContext(), it.name, _recData)
+        }
         // Set the projectile back to the selected
         val projectile = ProjectilePrefUtils.getProjectileSelected(requireContext())
         DataShared.device.model.setProjectile(projectile)
@@ -475,6 +465,5 @@ class DeviceBallisticsFragment : Fragment() {
 
     companion object {
         const val POS_INCREMENTS = 5
-        const val REC_DATA_PREF_TAG = "_rec_data"
     }
 }

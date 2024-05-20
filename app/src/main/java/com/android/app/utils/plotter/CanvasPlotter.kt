@@ -7,12 +7,15 @@ import android.graphics.Paint
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
-import com.android.app.dataShared.DataShared
-import com.android.app.utils.calculators.CalcMisc
-import com.android.app.utils.converters.ConvertLength
+import com.android.app.utils.calculators.CalcLinear
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
+
+data class DataPoint(
+    val xVal: Float,
+    val yVal: Float,
+)
 
 class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -271,19 +274,15 @@ class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context
     }
 
     private fun getXatYIntercept(dataPointA: DataPoint, dataPointB: DataPoint) : Float {
-        val m = getSlope(dataPointA, dataPointB)
+        val m = CalcLinear.getSlope(dataPointA.xVal, dataPointA.yVal, dataPointB.xVal, dataPointB.yVal)
         val b = (dataPointA.yVal - m * dataPointA.xVal)
         return ((yMin - b) / m)
     }
 
     private fun getYatXIntercept(dataPointA: DataPoint, dataPointB: DataPoint) : Float {
-        val m = getSlope(dataPointA, dataPointB)
+        val m = CalcLinear.getSlope(dataPointA.xVal, dataPointA.yVal, dataPointB.xVal, dataPointB.yVal)
         val b = (dataPointA.yVal - m * dataPointA.xVal)
         return (m * xMin + b)
-    }
-
-    private fun getSlope(dataPointA: DataPoint, dataPointB: DataPoint) : Float {
-        return (dataPointB.yVal - dataPointA.yVal) / (dataPointB.xVal - dataPointA.xVal)
     }
 
     private fun updateInterpolationData() {
@@ -299,8 +298,3 @@ class CanvasPlotter(context: Context, attributeSet: AttributeSet) : View(context
     private fun Float.toRealX() = ((toFloat() - xMin) * _xM + yAxisWidth)
     private fun Float.toRealY() = (_rangeY - ((toFloat() - yMin) * _yM))
 }
-
-data class DataPoint(
-    val xVal: Float,
-    val yVal: Float,
-)

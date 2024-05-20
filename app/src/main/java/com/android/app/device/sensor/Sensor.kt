@@ -46,8 +46,11 @@ class Sensor(
     val sampleSize: Int
         get() = _sampleSize
 
-    val rangeFiltered: LiveData<Double>
+    val rangeFilteredLive: LiveData<Double>
         get() = _rangeFiltered
+
+    val rangeFiltered: Double
+        get() = _rangeFiltered.value!!
 
     val isEnabled : Boolean
         get() = _isEnabled
@@ -120,18 +123,17 @@ class Sensor(
      * Call this to start the process of loading in configuration data
      */
     fun loadConfigs(){
-        if(_isInitialized) return
+        if(isInitialized) return
         sendConfigCommand(DeviceData.Config.Command.GET, _configIdx, Int.MAX_VALUE)
     }
 
     /**
      * Grab the configurations for the sensor when it comes online
      *
-     * This should be kicked off by sending a GET command for index 0
-     * somewhere else in code.
+     * This should be kicked off by sending a GET config command somewhere else in code.
      */
     private fun getConfigs(config : Int){
-        if(_isInitialized) return
+        if(isInitialized) return
 
         // Is config index within range?
         if(_configIdx < _sensor.configs.lastIndex){
@@ -156,45 +158,6 @@ class Sensor(
                 _sensor.configs[id].value = value
             }
         }
-    }
-
-    /**
-     * Get a cached configuration index by name.
-     * @param name String
-     */
-    fun getConfigIdxByName(name : String) : Int {
-        for (idx in 0.._sensor.configs.lastIndex) {
-            if(_sensor.configs[idx].name == name){
-                return idx
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Get a cached configuration by index.
-     * @param idx Int
-     */
-    fun getConfigByIdx(idx : Int) : ISensor.Config {
-        return if(idx < _sensor.configs.size){
-            _sensor.configs[idx]
-        }
-        else {
-            ISensor.Config("NA", Int.MAX_VALUE)
-        }
-    }
-
-    /**
-     * Get a cached configuration by name.
-     * @param name String
-     */
-    fun getConfigByName(name : String) : ISensor.Config {
-        for (idx in 0.._sensor.configs.lastIndex) {
-            if(_sensor.configs[idx].name == name){
-                return _sensor.configs[idx]
-            }
-        }
-        return ISensor.Config("NA", Int.MAX_VALUE)
     }
 
     /**

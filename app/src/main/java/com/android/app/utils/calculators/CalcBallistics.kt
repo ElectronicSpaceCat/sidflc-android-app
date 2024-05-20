@@ -4,42 +4,117 @@ import kotlin.math.*
 
 object CalcBallistics {
     const val ACCELERATION_OF_GRAVITY = 9.80665
+
     /**
-     * Get target distance from device height and pitch
+     * Get phone height
      *
-     * @param height (m)
-     * @param pitch (deg)
-     * @return targetDistance (m)
+     * @param sensorDistance value (mm)
+     * @param deviceOffset (mm)
+     * @return phoneHeight (mm)
      */
-    fun getTargetDistance(height: Double, pitch: Double): Double {
-        return CalcTrig.getSideGiven1Side1Angle(height, pitch)
+    fun getPhoneHeight(sensorDistance: Double, deviceOffset : Double): Double {
+        return (sensorDistance - deviceOffset)
     }
 
     /**
-     * Get target height from launch height, target angle @ target distance, pitch
+     * Get target distance
      *
-     * @param height (m)
-     * @param trgtDistAngle (deg)
      * @param pitch (deg)
+     * @param phoneHeight (m)
+     * @param lensOffset (m)
+     * @return targetDistance (m)
+     */
+    fun getTargetDistance(pitch: Double, phoneHeight : Double, lensOffset: Double): Double {
+        val lensHeight = (phoneHeight + CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(lensOffset, pitch))
+        val distance1 = CalcTrig.getSideGivenSideHypotenuseAngleAdjacent(lensOffset, (90.0 - pitch))
+        val distance2 = CalcTrig.getSideGivenSideOppositeAngleAdjacent(lensHeight, pitch)
+        return (distance1 + distance2)
+    }
+
+    /**
+     * Get the pitch angle that the target distance was calculated
+     *
+     * The equation is: y = d*cos(x) - k * sin²(x) - p * sin(x)
+     * where d = targetDistance, k = lensOffset, p = phoneHeight
+     *
+     * Since solving for the angle is a hard af, just approximated it numerically
+     * and then interpolate between the points where y crossed zero.
+     *
+     * @param phoneHeight (m)
+     * @param lensOffset (m)
+     * @param targetDistance (deg)
      * @return targetHeight (m)
      */
-    fun getTargetHeight(height: Double, trgtDistAngle: Double, pitch: Double): Double {
-        val angleC1 = (90.0) // Right triangle
-        val angleB2 = (pitch - trgtDistAngle)
-        val angleA1 = CalcTrig.getAngleGiven2Angles(angleC1, trgtDistAngle)
-        val angleA2 = (angleC1 - angleA1)
-        val angleC2 = CalcTrig.getAngleGiven2Angles(angleA2, angleB2)
-        val sideC = CalcTrig.getSideGiven1Side2Angles(height, angleC1, angleA1)
-        return CalcTrig.getSideGiven1Side2Angles(sideC, angleB2, angleC2)
+    fun getPitchAtTargetDistance(phoneHeight : Double, lensOffset: Double, targetDistance: Double) : Double {
+        val circleCenter = Point(0.0, phoneHeight)
+        val point = Point(targetDistance, 0.0)
+        val tangents = CalcGeometry.getTangentPointsOfLine(circleCenter, lensOffset, point)!!
+        return CalcTrig.getAngleBetweenSideHypotenuseSideAdjacent(lensOffset, tangents.t1.x)
+    }
+
+    /**
+     * Get target height when rotated about the wrist
+     *
+     * @param pitch (deg)
+     * @param pitchAtTargetDistance (deg)
+     * @param phoneHeight (m)
+     * @param lensOffset (m)
+     * @param targetDistance (m)
+     * @return targetHeight (m)
+     */
+    fun getTargetHeightRotatedAboutWrist(pitch: Double, pitchAtTargetDistance : Double, phoneHeight: Double, lensOffset: Double, targetDistance: Double): Double {
+        // Set a center point
+        val cX = 0.0
+        val cY = phoneHeight
+        // Point where the line is tangential to the circle
+        val tX : Double
+        val tY : Double
+        if(pitch > 90.0) {
+            val pitchAdj = (180.0 - pitch)
+            tX = CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(lensOffset, (pitchAdj - 90.0))
+            tY = CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(lensOffset, pitchAdj) + cY
+        }
+        else {
+            tX = CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(lensOffset, (90.0 - pitch))
+            tY = CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(lensOffset, pitch) + cY
+        }
+        // Slope of the radial line
+        val rSlope = CalcLinear.getSlope(cX, cY, tX, tY)
+        // Slope of the tangential line (reciprocal of rSlope)
+        val tSlope = -(1/rSlope)
+        val tInterceptY = CalcLinear.getInterceptY(tX, tY, tSlope)
+        // y = mx + b )
+        return ((tSlope * targetDistance) + tInterceptY)
+    }
+
+    /**
+     * Get target height when rotated about the lens
+     *
+     * @param pitch (deg)
+     * @param pitchAtTargetDistance (deg)
+     * @param phoneHeight (m)
+     * @param lensOffset (m)
+     * @param targetDistance (m)
+     * @return targetHeight (m)
+     */
+    fun getTargetHeightRotatedAboutLens(pitch: Double, pitchAtTargetDistance: Double, phoneHeight: Double, lensOffset: Double, targetDistance: Double): Double {
+        // Point where the line is tangential to the circle
+        val tX = lensOffset * sin(Math.toRadians(pitch - 90.0))
+        val tY = (lensOffset * sin(Math.toRadians(pitch))) + phoneHeight
+        // Point at target base
+        val pX = targetDistance
+        val pY = 0.0
+        // Get the length from point t to p
+        val length = CalcLinear.getDistanceBetweenPoints(tX, tY, pX, pY)
+        // Return the height
+        return CalcTrig.getSideGiven1Side2Angles(length, pitch, (180.0-pitch-pitchAtTargetDistance))
     }
 
     /**
      * Get velocity
      *
      * Formula: KE = 0.5 * m * v²
-     *
      * rearranged to..
-     *
      * v = √(2 * KE / m)
      *
      * @param mass (kg)
@@ -63,7 +138,7 @@ object CalcBallistics {
      * @return work (N-m or J)
      */
     fun getWorkRequiredUpIncline(weight: Double, pitch: Double, distanceTraveled: Double, coefficientOfFriction: Double): Double {
-        return ((weight * ACCELERATION_OF_GRAVITY * distanceTraveled) * (sin(pitch) + cos(pitch) * coefficientOfFriction))
+        return ((weight * ACCELERATION_OF_GRAVITY * distanceTraveled) * (sin(Math.toRadians(pitch)) + cos(Math.toRadians(pitch)) * coefficientOfFriction))
     }
 
     /**
@@ -95,7 +170,7 @@ object CalcBallistics {
      * @param launchAngle (deg)
      * @return impactDistance (m)
      */
-    fun getImpactDistance(velocity: Double, launchHeight: Double, launchAngle: Double): Double {
+    fun getImpactDistanceIdeal(velocity: Double, launchHeight: Double, launchAngle: Double): Double {
         return (((velocity * cos(Math.toRadians(launchAngle))) / ACCELERATION_OF_GRAVITY) *
                 (velocity * sin(Math.toRadians(launchAngle)) +
                         sqrt(velocity.pow(2) * sin(Math.toRadians(launchAngle)).pow(2) +
@@ -113,7 +188,7 @@ object CalcBallistics {
      * @param travelTime (s)
      * @return impactHeight (m)
      */
-    fun getImpactHeight(launchHeight: Double, launchAngle: Double, velocity: Double, travelTime: Double): Double {
+    fun getImpactHeightIdeal(launchHeight: Double, launchAngle: Double, velocity: Double, travelTime: Double): Double {
         val velocityY = getVelocityDirectionY(velocity, launchAngle)
         return (launchHeight + (velocityY * travelTime - (0.5 * ACCELERATION_OF_GRAVITY * travelTime.pow(2))))
     }
@@ -203,7 +278,7 @@ object CalcBallistics {
             if(!gotImpactHeight && x >= targetDistance){
                 gotImpactHeight = true
 
-                impactData.height = CalcMisc.interpolate(targetDistance, x, xPrev, y, yPrev)
+                impactData.height = CalcLinear.interpolate(targetDistance, x, xPrev, y, yPrev)
             }
         } while (y > 0.0)
 
@@ -213,7 +288,7 @@ object CalcBallistics {
         }
 
         // Get the distance in the x-direction
-        impactData.distance = CalcMisc.interpolate(0.0, y, yPrev, x, xPrev)
+        impactData.distance = CalcLinear.interpolate(0.0, y, yPrev, x, xPrev)
 
         return impactData
     }

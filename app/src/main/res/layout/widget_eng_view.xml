@@ -17,15 +17,15 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView0"
+                android:id="@+id/phone_height_header"
                 android:layout_width="25dp"
                 android:layout_height="wrap_content"
-                android:text="DH"
+                android:text="PH"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="9sp" />
 
             <TextView
-                android:id="@+id/device_height_unit"
+                android:id="@+id/phone_height_unit"
                 android:layout_width="35dp"
                 android:layout_height="wrap_content"
                 android:text="@string/value_unknown"
@@ -33,7 +33,7 @@
                 android:textSize="9sp" />
 
             <TextView
-                android:id="@+id/device_height_data"
+                android:id="@+id/phone_height_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/value_unknown"
@@ -46,7 +46,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/launch_height_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="LH"
@@ -54,7 +54,7 @@
                 android:textSize="9sp" />
 
             <TextView
-                android:id="@+id/projectile_height_unit"
+                android:id="@+id/launch_height_unit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/value_unknown"
@@ -62,7 +62,7 @@
                 android:textSize="9sp" />
 
             <TextView
-                android:id="@+id/projectile_height_data"
+                android:id="@+id/launch_height_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/value_unknown"
@@ -75,7 +75,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/target_distance_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TD"
@@ -104,7 +104,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/target_distance_adj_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TD.A"
@@ -133,7 +133,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/target_height_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TH"
@@ -162,7 +162,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView18"
+                android:id="@+id/spring_angle_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SA"
@@ -191,7 +191,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView12"
+                android:id="@+id/potential_energy_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PE"
@@ -220,7 +220,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView13"
+                android:id="@+id/net_potential_energy_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PE.A"
@@ -249,7 +249,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/velocity_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="V"
@@ -278,7 +278,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView10"
+                android:id="@+id/impact_distance_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ID"
@@ -307,7 +307,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView14"
+                android:id="@+id/impact_height_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="IH"

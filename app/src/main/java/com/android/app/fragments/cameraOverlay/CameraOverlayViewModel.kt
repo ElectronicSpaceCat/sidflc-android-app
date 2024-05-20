@@ -27,7 +27,6 @@ import androidx.lifecycle.*
 import com.android.app.dataShared.DataShared
 import com.android.app.utils.converters.ConvertLength.Unit
 import com.android.app.utils.calculators.CalcBallistics
-import com.android.app.utils.calculators.CalcTrig
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.sensors.SensorGyro
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +49,11 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     private var _isEngViewActive = MutableLiveData(false)
     private val _hitConfidence = MutableLiveData(0.0)
 
+    private var _isPitchAtTargetDistanceCalculated = true
+    private var _pitchAtTargetDistance = 0.0
+
+    private var _impactData = CalcBallistics.ImpactData()
+
     val gyro = SensorGyro()
 
     val hitConfidence : LiveData<Double>
@@ -60,10 +64,10 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         get() = DataShared.device.ballistics.adjustedTargetDistance
     val impactDistance : Double
         get() = ConvertLength.convert(
-            ConvertLength.Unit.M, DataShared.targetDistance.unit, DataShared.device.ballistics.impactData.distance)
+            ConvertLength.Unit.M, DataShared.targetDistance.unit, _impactData.distance)
     val impactHeight : Double
         get() = ConvertLength.convert(
-            ConvertLength.Unit.M, DataShared.targetHeight.unit, DataShared.device.ballistics.impactData.height)
+            ConvertLength.Unit.M, DataShared.targetHeight.unit, _impactData.height)
     val velocity : Double
         get() = DataShared.device.ballistics.projectileBallistics.velocity
     val netPotentialEnergy : Double
@@ -100,9 +104,14 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         set(value) {
             if(_dataToGet.value != value ){
                 _dataToGet.value = value
-                // Note: Need to force update the calc flag in the event the
-                //  isCalculationPaused is the same for the next dataToGet
+                // Note: Force update the calc flag in the event the
+                //       isCalculationPaused flag is the same for the next dataToGet
                 _isCalculationPaused.value = !isCalculationPaused
+                // Reset the flag for calculating the angle the target distance
+                // was captured at.
+                if(_dataToGet.value == DataType.TARGET_HEIGHT) {
+                    _isPitchAtTargetDistanceCalculated = true
+                }
             }
         }
 
@@ -120,7 +129,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     val isCalculationPausedLive: LiveData<Boolean>
         get() = _isCalculationPaused
 
-    private fun calcDeviceHeight(pitch: Double, roll: Double){
+    private fun calcPhoneHeight(pitch: Double, roll: Double){
         isRollInRange = roll in -1.5..1.5
         isPitchInRange = (90.0 - pitch) in -1.5..1.5
 
@@ -131,7 +140,9 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         }
 
         if(!isCalculationPaused) {
-            DataShared.deviceHeight.setValue(Unit.MM, DataShared.device.sensorDeviceHeight.rangeFiltered.value!!)
+            val deviceOffset = DataShared.deviceOffset.getConverted(Unit.MM)
+            val sensorDistance = DataShared.device.sensorDeviceHeight.rangeFiltered
+            DataShared.phoneHeight.setValue(Unit.MM, CalcBallistics.getPhoneHeight(sensorDistance, deviceOffset))
         }
     }
 
@@ -141,35 +152,29 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         isCalculationPaused = !(isRollInRange && isPitchInRange)
 
         if(!isCalculationPaused) {
-            // Convert to common unit
-            val deviceHeight = DataShared.deviceHeight.getConverted(Unit.M)
+            val phoneHeight = DataShared.phoneHeight.getConverted(Unit.M)
             val lensOffset = DataShared.lensOffset.getConverted(Unit.M)
-            val caseBodyLength = ConvertLength.convert(Unit.MM, Unit.M, DataShared.device.model.caseBodyLength)
-            // Get total lens height which is offset by the phone's pitch
-            val lensHeight = (deviceHeight + CalcTrig.getSideAGivenSideCAngleA(caseBodyLength + lensOffset, pitch))
             // Calculate target distance
-            DataShared.targetDistance.setValue(Unit.M, CalcBallistics.getTargetDistance(lensHeight, pitch))
+            DataShared.targetDistance.setValue(Unit.M, CalcBallistics.getTargetDistance(pitch, phoneHeight, lensOffset))
         }
     }
 
     private fun calcTargetHeight(pitch: Double, roll: Double){
-        // Convert to common unit
-        val deviceHeight = DataShared.deviceHeight.getConverted(Unit.M)
+        val phoneHeight = DataShared.phoneHeight.getConverted(Unit.M)
         val lensOffset = DataShared.lensOffset.getConverted(Unit.M)
-        val caseBodyLength = ConvertLength.convert(Unit.MM, Unit.M, DataShared.device.model.caseBodyLength)
-        // Get total lens height
-        val lensHeight = (deviceHeight + CalcTrig.getSideAGivenSideCAngleA(caseBodyLength + lensOffset, pitch))
-        // Calculate target angle
         val targetDistance = DataShared.targetDistance.getConverted(Unit.M)
-        val angleAtTrgtDist = CalcTrig.getAngleBGivenSideASideB(lensHeight, targetDistance)
+
+        if(_isPitchAtTargetDistanceCalculated) {
+            _isPitchAtTargetDistanceCalculated = false
+            _pitchAtTargetDistance = CalcBallistics.getPitchAtTargetDistance(phoneHeight, lensOffset, targetDistance)
+        }
 
         isRollInRange = roll in -1.0..1.0
-        isPitchInRange = pitch in angleAtTrgtDist..180.0
+        isPitchInRange = pitch in _pitchAtTargetDistance..180.0
         isCalculationPaused = !(isRollInRange && isPitchInRange)
 
         if(!isCalculationPaused){
-            // Get angle from target distance and lens height
-            DataShared.targetHeight.setValue(Unit.M, CalcBallistics.getTargetHeight(lensHeight, angleAtTrgtDist, pitch))
+            DataShared.targetHeight.setValue(Unit.M, CalcBallistics.getTargetHeightRotatedAboutWrist(pitch, _pitchAtTargetDistance, phoneHeight, lensOffset, targetDistance))
         }
     }
 
@@ -185,7 +190,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
     private fun calcData(pitch: Double, roll: Double) {
         when(dataToGet){
             DataType.DEVICE_HEIGHT -> {
-                calcDeviceHeight(pitch, roll)
+                calcPhoneHeight(pitch, roll)
             }
             DataType.TARGET_DISTANCE -> {
                 calcTargetDistance(pitch, roll)
@@ -211,23 +216,23 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
      */
     private fun calcBallistics(position : Double) {
         // Convert data to the necessary units for ballistic calculations
-        val lensOffset = DataShared.lensOffset.getConverted(ConvertLength.Unit.MM)
-        val height = DataShared.deviceHeight.getConverted(ConvertLength.Unit.M)
+        val phoneHeight = DataShared.phoneHeight.getConverted(ConvertLength.Unit.MM)
+        val deviceOffset = DataShared.deviceOffset.getConverted(ConvertLength.Unit.M)
         val targetDistance = DataShared.targetDistance.getConverted(ConvertLength.Unit.M)
         val targetHeight = DataShared.targetHeight.getConverted(ConvertLength.Unit.M)
 
         // Calculate the projectile impact data
-        DataShared.device.ballistics.calcImpactData(
+        _impactData = DataShared.device.ballistics.calcImpactData(
             position,
-            lensOffset,
-            height,
+            phoneHeight,
+            deviceOffset,
             gyro.pitch,
             targetDistance
         )
 
         // Update the hit confidence
         _hitConfidence.postValue(
-            DataShared.device.ballistics.calcHitConfidence(targetDistance, targetHeight)
+            DataShared.device.ballistics.calcHitConfidence(targetHeight, _impactData)
         )
     }
 
