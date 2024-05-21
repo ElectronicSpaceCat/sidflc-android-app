@@ -254,6 +254,9 @@ object CalcBallistics {
         var xPrev: Double
         var yPrev: Double
 
+        // Height where x crosses the targetDistance
+        var impactHeight = 0.0
+
         // Flag indicating the height at impact was found
         var gotImpactHeight = false
 
@@ -277,17 +280,13 @@ object CalcBallistics {
             // Get impact height when x crosses the target distance
             if(!gotImpactHeight && x >= targetDistance){
                 gotImpactHeight = true
-
-                impactData.height = CalcLinear.interpolate(targetDistance, x, xPrev, y, yPrev)
+                impactHeight = max(0.0, CalcLinear.interpolate(targetDistance, x, xPrev, y, yPrev))
             }
         } while (y > 0.0)
 
-        // Set height to zero if it was not found
-        if(!gotImpactHeight){
-            impactData.height = 0.0
-        }
-
-        // Get the distance in the x-direction
+        // Set the impact height
+        impactData.height = impactHeight
+        // Approximate the impact distance where y crosses zero
         impactData.distance = CalcLinear.interpolate(0.0, y, yPrev, x, xPrev)
 
         return impactData

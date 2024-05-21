@@ -74,15 +74,15 @@ open class ModelBallistics(model: ModelData) {
      * This is a blocking function and should be called on a background task.
      *
      * @param position (mm) Distance between the face of the short range sensor and the back of the carriage
-     * @param phoneHeight (m) Distance from the bottom of the phone to the ground
      * @param deviceOffset (mm) Distance from bottom of the device to bottom of the phone
+     * @param phoneHeight (m) Distance from the bottom of the phone to the ground
      * @param targetDistance (m) Distance from the phone lens to the target
      * @param launchAngle (deg) Pitch of the device at projectile launch
      */
     fun calcImpactData(
         position : Double,
-        phoneHeight : Double,
         deviceOffset : Double,
+        phoneHeight : Double,
         launchAngle : Double,
         targetDistance : Double) : CalcBallistics.ImpactData
     {
@@ -94,7 +94,12 @@ open class ModelBallistics(model: ModelData) {
         // Calculate the adjusted target distance
         val distanceOffsetMM = getProjectileDistanceOffsetAtAngle(position, launchAngle, deviceOffset)
         val distanceOffsetM = ConvertLength.convert(ConvertLength.Unit.MM, ConvertLength.Unit.M, distanceOffsetMM)
-        _adjustedTargetDistance = (targetDistance - distanceOffsetM)
+        _adjustedTargetDistance = if(targetDistance > distanceOffsetM) {
+            (targetDistance - distanceOffsetM)
+        }
+        else {
+            targetDistance
+        }
 
         // Get projectile ballistics at carriage position and launch angle
         _model.ballistics.calcProjectileBallistics(position, launchAngle)

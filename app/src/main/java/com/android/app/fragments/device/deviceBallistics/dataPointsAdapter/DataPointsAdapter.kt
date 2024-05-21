@@ -3,8 +3,6 @@ package com.android.app.fragments.device.deviceBallistics.dataPointsAdapter
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.android.app.R
 import com.android.app.databinding.ItemImpactDistanceBinding
@@ -18,11 +16,7 @@ class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapte
     data class DataPoint(var pos : Double, var cal : Double, var rec : Double)
 
     private var _dataPoints = mutableListOf<DataPoint>()
-
-    private val _onRecDataChanged = MutableLiveData(false)
-
-    val onRecDataChanged : LiveData<Boolean>
-        get() = _onRecDataChanged
+    private var _onRecDataChanged : OnRecDataChanged ?= null
 
     inner class ViewHolder(val dataPointBinding: ItemImpactDistanceBinding) :
         RecyclerView.ViewHolder(dataPointBinding.root) {
@@ -33,8 +27,12 @@ class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapte
         }
     }
 
-    private fun notifyRecDataChanged() {
-        _onRecDataChanged.value = true
+    interface OnRecDataChanged {
+        fun onRecDataChanged(position: Int, value: Double) { }
+    }
+
+    fun setOnRecDataChangedListener(listener : OnRecDataChanged) {
+        _onRecDataChanged = listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -115,7 +113,7 @@ class DataPointsAdapter(fragment: DeviceBallisticsFragment): RecyclerView.Adapte
                 override fun onDialogPositiveClick(value: Number) {
                     _dataPoints[position].rec = value as Double
                     notifyItemChanged(position)
-                    notifyRecDataChanged()
+                    _onRecDataChanged?.onRecDataChanged(position, value)
                 }
                 override fun onDialogNegativeClick(value: Number) {
                     // Do nothing..

@@ -216,16 +216,16 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
      */
     private fun calcBallistics(position : Double) {
         // Convert data to the necessary units for ballistic calculations
-        val phoneHeight = DataShared.phoneHeight.getConverted(ConvertLength.Unit.MM)
-        val deviceOffset = DataShared.deviceOffset.getConverted(ConvertLength.Unit.M)
+        val deviceOffset = DataShared.deviceOffset.getConverted(ConvertLength.Unit.MM)
+        val phoneHeight = DataShared.phoneHeight.getConverted(ConvertLength.Unit.M)
         val targetDistance = DataShared.targetDistance.getConverted(ConvertLength.Unit.M)
         val targetHeight = DataShared.targetHeight.getConverted(ConvertLength.Unit.M)
 
         // Calculate the projectile impact data
         _impactData = DataShared.device.ballistics.calcImpactData(
             position,
-            phoneHeight,
             deviceOffset,
+            phoneHeight,
             gyro.pitch,
             targetDistance
         )

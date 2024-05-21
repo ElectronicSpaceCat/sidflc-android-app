@@ -51,6 +51,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
+    private var _shouldClearEngData = true
+
     private lateinit var viewModel: CameraOverlayViewModel
     private lateinit var btnPhoneHeight: BallisticsButton<LengthData>
     private lateinit var btnTargetDistance: BallisticsButton<LengthData>
@@ -516,8 +518,9 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 }
             }
 
-            // Clear the ballistics visual data
+            // Clear the engineer data
             clearEngData()
+            clearEngBallisticsData()
         }
 
         /**
@@ -586,6 +589,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * Observe if ballisticsDataReady to update the visual data
          */
         viewModel.hitConfidence.observe(viewLifecycleOwner) {
+            if(viewModel.isCalculationPaused) return@observe
             updateEngBallisticsData()
         }
 

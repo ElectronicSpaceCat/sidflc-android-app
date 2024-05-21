@@ -3,7 +3,7 @@ package com.android.app.utils.textFilters
 import android.text.InputFilter
 import android.text.Spanned
 
-object TextInputFilter {
+object CustomInputFilter {
     class MinMax(minValue: Number, maxValue: Number) : InputFilter {
         private var intMin: Number = 0
         private var intMax: Number = 0
