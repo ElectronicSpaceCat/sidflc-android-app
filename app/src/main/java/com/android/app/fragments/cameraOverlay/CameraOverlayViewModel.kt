@@ -174,7 +174,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         isCalculationPaused = !(isRollInRange && isPitchInRange)
 
         if(!isCalculationPaused){
-            DataShared.targetHeight.setValue(Unit.M, CalcBallistics.getTargetHeightRotatedAboutWrist(pitch, _pitchAtTargetDistance, phoneHeight, lensOffset, targetDistance))
+            DataShared.targetHeight.setValue(Unit.M, CalcBallistics.getTargetHeightRotatedAboutWrist(pitch, phoneHeight, lensOffset, targetDistance))
         }
     }
 

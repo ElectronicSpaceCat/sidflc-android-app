@@ -316,7 +316,8 @@ class DeviceBallisticsFragment : Fragment() {
         // Create the data set to plot
         var rowId = 0
         val data = mutableListOf<DataPoint>()
-        for(idx in DataShared.device.model.getMinCarriagePosition().toInt().. DataShared.device.model.getMaxCarriagePosition().toInt()) {
+        val posRange = (DataShared.device.model.getMinCarriagePosition().toInt().. DataShared.device.model.getMaxCarriagePosition().toInt())
+        for(idx in posRange) {
             val impactDistance = DataShared.device.model.ballistics.calcImpactData(
                 idx.toDouble(),
                 lensOffset,
@@ -401,13 +402,10 @@ class DeviceBallisticsFragment : Fragment() {
         )
 
         // Create zeroed list in the adapter if the size does not match
-        val dataPoints = _adapter.getData()
-        if(dataPoints.lastIndex != _numDataPoints){
-            val newData = (0.._numDataPoints).map { idx ->
-                DataPointsAdapter.DataPoint((DataShared.device.model.getMinCarriagePosition() + idx * POS_INCREMENTS).toDouble(), 0.0, 0.0)
-            }
-            _adapter.setDataList(newData)
+        val newData = (0..< _recData.recDist.size).map { idx ->
+            DataPointsAdapter.DataPoint((DataShared.device.model.getMinCarriagePosition() + idx * POS_INCREMENTS), 0.0, 0.0)
         }
+        _adapter.setDataList(newData)
     }
 
     private fun loadRecordedDataFromPrefs(projectile: ProjectileData?) {

@@ -56,13 +56,12 @@ object CalcBallistics {
      * Get target height when rotated about the wrist
      *
      * @param pitch (deg)
-     * @param pitchAtTargetDistance (deg)
      * @param phoneHeight (m)
      * @param lensOffset (m)
      * @param targetDistance (m)
      * @return targetHeight (m)
      */
-    fun getTargetHeightRotatedAboutWrist(pitch: Double, pitchAtTargetDistance : Double, phoneHeight: Double, lensOffset: Double, targetDistance: Double): Double {
+    fun getTargetHeightRotatedAboutWrist(pitch: Double, phoneHeight: Double, lensOffset: Double, targetDistance: Double): Double {
         // Set a center point
         val cX = 0.0
         val cY = phoneHeight

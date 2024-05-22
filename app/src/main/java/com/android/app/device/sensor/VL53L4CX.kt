@@ -145,16 +145,13 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
-                                when(sensor.id){
-                                    DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.targetReference)
-                                        setCalMessage(Config.CAL_OFFSET_VCSEL.ordinal)
-                                    }
-                                    DeviceData.Sensor.Id.LONG -> {
-                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
-                                        setCalMessage(Config.CAL_OFFSET_ZERO.ordinal)
-                                    }
-                                    else -> {}
+                                if(0 == sensor.targetReference) {
+                                    sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_ZERO.ordinal, 0)
+                                    setCalMessage(Config.CAL_OFFSET_ZERO.ordinal)
+                                }
+                                else {
+                                    sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.CAL_OFFSET_VCSEL.ordinal, sensor.targetReference)
+                                    setCalMessage(Config.CAL_OFFSET_VCSEL.ordinal)
                                 }
                                 state = State.WAIT_FOR_RESPONSE
                             }
@@ -243,7 +240,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
     companion object {
         const val STORE_DATA_CONFIG_ID = 0xFF
         const val OFFSET_CORRECTION_MODE_STANDARD = 1
-        const val OFFSET_CORRECTION_MODE_PERVCSEL = 3
+        const val OFFSET_CORRECTION_MODE_PERVCSEL = 3 // Gives more accurate calibration
         const val POWER_LEVEL_LOW = 30 // Carriage sensor seems better at this level
         const val POWER_LEVEL_DEFAULT = 60
         const val PHS_CAL_PCH_PWR = 2 // Supposedly helps

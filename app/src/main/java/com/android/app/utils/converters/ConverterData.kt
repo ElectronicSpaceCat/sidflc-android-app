@@ -19,7 +19,7 @@ class ConverterData<T: IConvert<E>, E : Enum<E>>(
     private val converter: T,
     unit: E,
     dataInit: Double = 0.0,
-    var precision: Int = 2) {
+    var displayPrecision: Int = 2) {
 
     private val _data: MutableLiveData<Double> = MutableLiveData(dataInit)
     private val _unit: MutableLiveData<E> = MutableLiveData(unit)
@@ -119,7 +119,7 @@ class ConverterData<T: IConvert<E>, E : Enum<E>>(
      * @return value as string
      */
     fun valueStr(): String{
-        return String.format(Locale.getDefault(), "%.${precision}f", value)
+        return String.format(Locale.getDefault(), "%.${displayPrecision}f", value)
     }
 
     /**
@@ -148,7 +148,7 @@ class ConverterData<T: IConvert<E>, E : Enum<E>>(
      */
     fun storeValueToPrefs(context: Context, value: Double) {
         val prefsEdit = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        prefsEdit.putString(keyData + "_value", String.format(Locale.getDefault(), "%.${precision}f", value)).apply()
+        prefsEdit.putString(keyData + "_value", String.format(Locale.getDefault(), "%.${displayPrecision}f", value)).apply()
     }
 
     /**
@@ -161,7 +161,7 @@ class ConverterData<T: IConvert<E>, E : Enum<E>>(
     fun storeValueToPrefs(context: Context, unitFrom: E, value: Double) {
         val prefsEdit = PreferenceManager.getDefaultSharedPreferences(context).edit()
         val newValue = converter.convert(unitFrom, unit, value)
-        prefsEdit.putString(keyData + "_value", String.format(Locale.getDefault(), "%.${precision}f", newValue)).apply()
+        prefsEdit.putString(keyData + "_value", String.format(Locale.getDefault(), "%.${displayPrecision}f", newValue)).apply()
     }
 
     /**

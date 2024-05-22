@@ -26,6 +26,7 @@ import androidx.preference.*
 import com.android.app.dataShared.DataShared
 import com.android.app.utils.misc.Utils
 import com.android.app.R
+import com.android.app.utils.converters.ConvertLength
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsMainFragment : PreferenceFragmentCompat() {

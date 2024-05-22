@@ -12,12 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
 import com.android.app.R
 import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceMonitorBinding
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
+import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.misc.Utils
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
@@ -26,7 +25,6 @@ import no.nordicsemi.android.ble.observer.ConnectionObserver
 class DeviceMonitorFragment : Fragment() {
     private var _fragmentDeviceMonitorBinding: FragmentDeviceMonitorBinding? = null
     private val fragmentDeviceMonitorBinding get() = _fragmentDeviceMonitorBinding!!
-
     private var _sensorEnablePrev = false
 
     /**
@@ -77,6 +75,7 @@ class DeviceMonitorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /** Setup the button to acknowledge the device shutdown prompt */
         fragmentDeviceMonitorBinding.deviceShutdownPrompt.btnNoticeOk.setOnClickListener {
             fragmentDeviceMonitorBinding.deviceShutdownPrompt.root.visibility = View.GONE
         }
@@ -97,20 +96,25 @@ class DeviceMonitorFragment : Fragment() {
         }
 
         /**
+         * Observe the device offset for setting the device height sensor target reference
+         * which is used for calibration
+         */
+        DataShared.deviceOffset.valueOnChange.observe(viewLifecycleOwner) {
+            DataShared.device.sensorDeviceHeight.targetReference = DataShared.deviceOffset.getConverted(ConvertLength.Unit.MM).toInt()
+        }
+
+        /**
          * Observe the device connections state
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-      //      val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
-
             when (state.state) {
                 ConnectionState.State.READY -> {}
                 ConnectionState.State.CONNECTING -> {}
                 ConnectionState.State.DISCONNECTED -> {
                     val connState = DataShared.device.connectionState.value!!
-                    // Get disconnect reason if any
+                    // Get disconnect reason
                     if (connState is ConnectionState.Disconnected) {
                         val stateWithReason: ConnectionState.Disconnected = connState
-                        // Determine disconnection reason
                         val reasonStr = when (stateWithReason.reason) {
                             ConnectionObserver.REASON_SUCCESS -> { "Success" }
                             ConnectionObserver.REASON_NOT_SUPPORTED -> { "Not Supported"}
@@ -122,7 +126,7 @@ class DeviceMonitorFragment : Fragment() {
                             ConnectionObserver.REASON_UNKNOWN -> { "Unknown" }
                             else -> { "NA" }
                         }
-                        // Only show reason if known
+                        // Only display reason if known
                         if(stateWithReason.reason != ConnectionObserver.REASON_UNKNOWN) {
                             Toast.makeText(
                                 context,
@@ -131,20 +135,6 @@ class DeviceMonitorFragment : Fragment() {
                             ).show()
                         }
                     }
-
-//                    // Navigate back to scanner page
-//                    // Note: deviceDfuFragment handles disconnects differently
-//                    if(navController.currentDestination?.id == R.id.deviceConnectedFragment
-//                            || navController.currentDestination?.id == R.id.deviceCalibrateFragment
-//                            || navController.currentDestination?.id == R.id.deviceSensorTunerFragment
-//                            || navController.currentDestination?.id == R.id.deviceBallisticsFragment) {
-//
-//                        val options = NavOptions.Builder()
-//                            .setPopUpTo(R.id.homeFragment, false)
-//                            .setLaunchSingleTop(true)
-//                            .build()
-//                        navController.navigate(R.id.deviceScannerFragment, null, options)
-//                    }
                 }
                 else -> { }
             }

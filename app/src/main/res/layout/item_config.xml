@@ -27,7 +27,7 @@
 
     <TextView
         android:id="@+id/config_name"
-        android:layout_width="105dp"
+        android:layout_width="107dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/config_id"
         android:text="Config"
@@ -35,7 +35,7 @@
 
     <TextView
         android:id="@+id/config_value"
-        android:layout_width="72dp"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/config_name"
         android:text="Value"

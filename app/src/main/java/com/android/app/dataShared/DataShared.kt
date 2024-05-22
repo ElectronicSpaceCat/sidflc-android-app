@@ -13,16 +13,11 @@ import com.android.app.R
 class DataShared(context: Context) {
     companion object{
         lateinit var device : Device
-        // Device location
         lateinit var phoneHeight : LengthData
-        // Device offset from phone bottom
         lateinit var deviceOffset : LengthData
-        // Lens offset from phone bottom
         lateinit var lensOffset : LengthData
-        // Target location
         lateinit var targetDistance : LengthData
         lateinit var targetHeight : LengthData
-        // Device carriage position, used for display
         lateinit var carriagePosition : LengthData
         lateinit var carriagePositionOverride : LengthData
     }
@@ -30,20 +25,17 @@ class DataShared(context: Context) {
     init {
         device = Device(context)
 
-        phoneHeight = ConverterData(context.getString(R.string.key_phone_height), ConvertLength, ConvertLength.Unit.FT)
-        targetDistance = ConverterData(context.getString(R.string.key_target_distance), ConvertLength, ConvertLength.Unit.FT)
-        targetHeight = ConverterData(context.getString(R.string.key_target_height), ConvertLength, ConvertLength.Unit.FT)
-
+        phoneHeight = ConverterData(context.getString(R.string.key_phone_height), ConvertLength, ConvertLength.Unit.FT, displayPrecision = 1)
+        targetDistance = ConverterData(context.getString(R.string.key_target_distance), ConvertLength, ConvertLength.Unit.FT, displayPrecision = 1)
+        targetHeight = ConverterData(context.getString(R.string.key_target_height), ConvertLength, ConvertLength.Unit.FT, displayPrecision = 1)
         lensOffset = ConverterData(context.getString(R.string.key_lens_offset), ConvertLength, ConvertLength.Unit.IN)
-        lensOffset.loadFromPrefs(context)
-
         deviceOffset = ConverterData(context.getString(R.string.key_device_offset), ConvertLength, ConvertLength.Unit.IN)
-        deviceOffset.loadFromPrefs(context)
-
-        carriagePosition = ConverterData(context.getString(R.string.key_carriage_position), ConvertLength, ConvertLength.Unit.MM, 0.0, 0)
-        carriagePosition.loadUnitFromPrefs(context)
-
+        carriagePosition = ConverterData(context.getString(R.string.key_carriage_position), ConvertLength, ConvertLength.Unit.MM, displayPrecision = 0)
         carriagePositionOverride = ConverterData( context.getString(R.string.key_carriage_positionOverride), ConvertLength, ConvertLength.Unit.MM, device.model.getMaxCarriagePosition(), 0)
+
+        lensOffset.loadFromPrefs(context)
+        deviceOffset.loadFromPrefs(context)
+        carriagePosition.loadUnitFromPrefs(context)
         carriagePositionOverride.loadUnitFromPrefs(context)
     }
 }

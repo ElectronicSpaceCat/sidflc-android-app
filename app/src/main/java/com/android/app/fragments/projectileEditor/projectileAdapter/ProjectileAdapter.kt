@@ -22,6 +22,7 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
     private var _projectileSelected = ProjectilePrefUtils.getProjectileSelected(context)?.name
     private lateinit var _onItemClickListener: OnItemClickListener
     private var _bindingLast : ItemProjectileBinding ?= null
+    private var _shouldSaveToPrefs = false
 
     init {
         setHasStableIds(true)
@@ -166,7 +167,6 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
                             "Projectile name already exists in list",
                             Toast.LENGTH_SHORT
                         ).show()
-
                         return
                     }
 
@@ -207,6 +207,12 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
     private fun addProjectileToList(projectile: ProjectileData){
         _projectiles.add(projectile)
         notifyItemInserted(_projectiles.lastIndex)
+        _shouldSaveToPrefs = true
+    }
+
+    private fun updateProjectileInList(position: Int){
+        notifyItemChanged(position)
+        _shouldSaveToPrefs = true
     }
 
     private fun removeProjectileFromList(position: Int){
@@ -218,13 +224,10 @@ class ProjectileAdapter(context: Context): RecyclerView.Adapter<ProjectileAdapte
         notifyItemRemoved(position)
     }
 
-    private fun updateProjectileInList(position: Int){
-        notifyItemChanged(position)
-    }
-
     fun onDestroy(context: Context){
-        // Make sure to update the projectile data in preferences when exiting
-        updateProjectilePrefList(context)
+        if(_shouldSaveToPrefs) {
+            updateProjectilePrefList(context)
+        }
         _bindingLast = null
     }
 

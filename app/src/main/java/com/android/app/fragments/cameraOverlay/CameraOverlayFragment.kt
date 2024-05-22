@@ -51,8 +51,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
     private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
-    private var _shouldClearEngData = true
-
     private lateinit var viewModel: CameraOverlayViewModel
     private lateinit var btnPhoneHeight: BallisticsButton<LengthData>
     private lateinit var btnTargetDistance: BallisticsButton<LengthData>
@@ -361,20 +359,20 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             // Set data precision
             when (unit) {
                 Unit.MM -> {
-                    DataShared.carriagePosition.precision = 0
+                    DataShared.carriagePosition.displayPrecision = 0
                 }
                 Unit.CM -> {
-                    DataShared.carriagePosition.precision = 1
+                    DataShared.carriagePosition.displayPrecision = 1
                 }
                 Unit.IN -> {
-                    DataShared.carriagePosition.precision = 2
+                    DataShared.carriagePosition.displayPrecision = 2
                 }
                 else -> {}
             }
 
             // Copy the unit type from carriagePosition
             DataShared.carriagePositionOverride.setUnit(unit)
-            DataShared.carriagePositionOverride.precision = DataShared.carriagePosition.precision
+            DataShared.carriagePositionOverride.displayPrecision = DataShared.carriagePosition.displayPrecision
         }
 
         /**
@@ -390,7 +388,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
             val str = String.format(
                 Locale.getDefault(),
-                "%.${DataShared.carriagePosition.precision}f",
+                "%.${DataShared.carriagePosition.displayPrecision}f",
                 maxPos
             )
 

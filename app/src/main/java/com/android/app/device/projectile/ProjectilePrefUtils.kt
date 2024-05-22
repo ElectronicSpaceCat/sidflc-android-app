@@ -57,10 +57,18 @@ object ProjectilePrefUtils {
         var diameters: MutableList<String> ?= mutableListOf()
         var drags: MutableList<String> ?= mutableListOf()
 
-        // Remove projectile recorded data if projectile not in the new list
-        getProjectileList(context).forEach {
-            if(!list.contains(it)){
-                PrefUtils.removeStringArrayFromPrefs(context, it.name + REC_DATA_PREF_TAG)
+        // Compare previous projectile list with new and remove recorded data if
+        // the projectile does not exist
+        getProjectileList(context).forEach { prev ->
+            var shouldRemoveOld = true
+            for(idx in 0..list.size) {
+                if(list[idx].name == prev.name) {
+                    shouldRemoveOld = false
+                    break
+                }
+            }
+            if(shouldRemoveOld) {
+                PrefUtils.removeStringArrayFromPrefs(context, prev.name + REC_DATA_PREF_TAG)
             }
         }
         // Add projectile data
@@ -163,9 +171,9 @@ object ProjectilePrefUtils {
         return projectileData
     }
 
-    fun setProjectileRecData(context: Context, selected: String?, recData: RecData) {
+    fun setProjectileRecData(context: Context, projectileSelected: String?, recData: RecData) {
         getProjectileList(context).forEach {
-            if(it.name == selected) {
+            if(it.name == projectileSelected) {
                 val json = Json.encodeToString(recData)
                 val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
                 editor.putString(it.name + REC_DATA_PREF_TAG, json).apply()
@@ -173,10 +181,10 @@ object ProjectilePrefUtils {
         }
     }
 
-    fun getProjectileRecData(context: Context, selected: String?) : RecData? {
+    fun getProjectileRecData(context: Context, projectileSelected: String?) : RecData? {
         return try{
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val str = prefs.getString(selected + REC_DATA_PREF_TAG, "")
+            val str = prefs.getString(projectileSelected + REC_DATA_PREF_TAG, "")
             val data = Json.decodeFromString<RecData>(str!!)
             data
         }
@@ -186,55 +194,13 @@ object ProjectilePrefUtils {
     }
 
     fun setDefaultProjectiles(context: Context) : MutableList<ProjectileData> {
-        // Init data lists
-        val names: MutableList<String> = mutableListOf()
-        val weights: MutableList<String> = mutableListOf()
-        val diameters: MutableList<String> = mutableListOf()
-        val drags: MutableList<String> = mutableListOf()
-
         // Create the default list
         val projectiles: MutableList<ProjectileData> = mutableListOf()
         Projectile.Name.entries.forEach {
             projectiles.add(Projectile.getData(it.name)!!)
         }
-
-        // Build the string arrays
-        projectiles.forEach { projectile ->
-            names.add(projectile.name)
-            weights.add(projectile.weight.toString())
-            diameters.add(projectile.diameter.toString())
-            drags.add(projectile.drag.toString())
-        }
-
-        // Override the names list in preferences
-        PrefUtils.addStringArrayToPrefs(
-            context,
-            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_NAMES),
-            names,
-            ";"
-        )
-        // Override the weights list in preferences
-        PrefUtils.addStringArrayToPrefs(
-            context,
-            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_WEIGHTS),
-            weights,
-            ";"
-        )
-        // Override the diameters list in preferences
-        PrefUtils.addStringArrayToPrefs(
-            context,
-            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DIAMETERS),
-            diameters,
-            ";"
-        )
-        // Override the diameters list in preferences
-        PrefUtils.addStringArrayToPrefs(
-            context,
-            context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_DRAGS),
-            drags,
-            ";"
-        )
-
+        // Set the projectile list
+        setProjectileList(context, projectiles)
         // Set the selected projectile to the first element
         setProjectileSelected(context, Projectile.Name.Quarter.name)
 

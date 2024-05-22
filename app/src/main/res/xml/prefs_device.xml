@@ -6,6 +6,7 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
+        app:summary="@string/header_hardware_summary"
         app:title="@string/header_hardware">
         <Preference
             android:layout_width="wrap_content"
@@ -28,8 +29,33 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/header_orientation"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_TEST_HEIGHT"
+            app:persistent="true"
+            app:title="@string/pref_title_height"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:defaultValue="0.0"
+            app:iconSpaceReserved="false"
+            app:key="@string/PREFERENCE_FILTER_TEST_PITCH"
+            app:persistent="true"
+            app:title="@string/pref_title_pitch"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:allowDividerBelow="false"
         app:iconSpaceReserved="false"
+        app:summary="@string/header_ballistics_summary"
         app:title="@string/header_ballistics">
         <EditTextPreference
             android:layout_width="wrap_content"
@@ -67,30 +93,6 @@
             app:title="@string/pref_title_friction_coefficient"
             app:useSimpleSummaryProvider="true"
             app:widgetLayout="@layout/widget_reset_data" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/header_orientation"
-        app:iconSpaceReserved="false">
-
-        <EditTextPreference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:defaultValue="0.0"
-            app:iconSpaceReserved="false"
-            app:key="@string/PREFERENCE_FILTER_TEST_HEIGHT"
-            app:persistent="true"
-            app:title="@string/pref_title_height"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:defaultValue="0.0"
-            app:iconSpaceReserved="false"
-            app:key="@string/PREFERENCE_FILTER_TEST_PITCH"
-            app:persistent="true"
-            app:title="@string/pref_title_pitch"
-            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

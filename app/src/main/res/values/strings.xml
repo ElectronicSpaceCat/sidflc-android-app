@@ -133,18 +133,22 @@
     <string name="header_calibrations">Calibrations</string>
     <string name="header_orientation">Orientation</string>
 
+    <!-- Preference Header Summaries -->
+    <string name="header_hardware_summary">*Stored in device</string>
+    <string name="header_ballistics_summary">*Stored in device</string>
+
     <!-- Preferences -->
     <string name="pref_title_edit_units">Units</string>
     <string name="pref_title_projectile_edit">Projectile</string>
     <string name="pref_title_projectiles_edit">Projectiles</string>
     <string name="pref_title_projectile_selected_drag">Projectile Drag</string>
     <string name="pref_title_device">Device</string>
-    <string name="pref_title_spring_edit">Spring</string>
+    <string name="pref_title_spring_edit">*Spring</string>
     <string name="pref_title_lens_offset">Lens Offset</string>
     <string name="pref_title_device_offset">Device Offset</string>
-    <string name="pref_title_force_offset">Force Offset (N)</string>
-    <string name="pref_title_efficiency">Efficiency Factor</string>
-    <string name="pref_title_friction_coefficient">Friction Coefficient</string>
+    <string name="pref_title_force_offset">*Force Offset (N)</string>
+    <string name="pref_title_efficiency">*Efficiency Factor</string>
+    <string name="pref_title_friction_coefficient">*Friction Coefficient</string>
     <string name="pref_title_calibrate_gyro">Gyro</string>
     <string name="pref_title_calibrate_sensors">Device</string>
     <string name="pref_title_advanced">Device Configurations</string>
@@ -209,11 +213,11 @@
     <string name="item_carriage_position">Carriage Position</string>
 
     <!-- About -->
-    <string name="about_app">This app assists in calculating a probability of hitting a target with a projectile.
+    <string name="about_app">This app calculates the probability of hitting a target with a projectile.
     </string>
 
     <!-- Privacy -->
-    <string name="privacy_policy">This app does not record or use any personal information.</string>
+    <string name="privacy_policy">Personal information is not used or recorded.</string>
 
     <!-- Gyro Calibration Screen -->
     <string name="gyro_cal_instructions">Place phone on a flat <b>level</b> surface.
