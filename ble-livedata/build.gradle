@@ -35,7 +35,7 @@ dependencies {
     api project(':ble')
 
     // https://developer.android.com/jetpack/androidx/releases/lifecycle
-    api 'androidx.lifecycle:lifecycle-livedata:2.7.0'
+    api 'androidx.lifecycle:lifecycle-livedata:2.6.2'
 }
 
 // === Maven Central configuration ===
@@ -50,6 +50,6 @@ if (rootProject.file('gradle/publish-module.gradle').exists()) {
     apply from: rootProject.file('gradle/publish-module.gradle')
 }
 
-//afterEvaluate {
-//    generateMetadataFileForReleasePublication.dependsOn androidSourcesJar
-//}
+afterEvaluate {
+    generateMetadataFileForReleasePublication.dependsOn androidSourcesJar
+}

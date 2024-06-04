@@ -326,7 +326,7 @@ class Device(context: Context) {
             when (it) {
                 DeviceData.Status.READY -> {
                     if(_isInitialized) return@observe
-                    // Send command to get a stored configuration which will trigger getting the rest
+                    // Send command to get a stored user configuration which will trigger getting the rest
                     sendConfigCommand(DeviceData.Config.Target.USER, DeviceData.Config.Command.GET, _configIdx)
                 }
                 else -> {}
@@ -358,7 +358,6 @@ class Device(context: Context) {
                 }
                 else -> {}
             }
-
             // Run config init
             getUserConfigurations(it.id)
         }

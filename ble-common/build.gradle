@@ -49,6 +49,6 @@ if (rootProject.file('gradle/publish-module.gradle').exists()) {
     apply from: rootProject.file('gradle/publish-module.gradle')
 }
 
-//afterEvaluate {
-//    generateMetadataFileForReleasePublication.dependsOn androidSourcesJar
-//}
+afterEvaluate {
+    generateMetadataFileForReleasePublication.dependsOn androidSourcesJar
+}

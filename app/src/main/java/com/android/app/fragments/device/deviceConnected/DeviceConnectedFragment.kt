@@ -64,6 +64,7 @@ class DeviceConnectedFragment : Fragment() {
         if(DataShared.device.isBackupBootloader){
             fragmentDeviceConnectedBinding.btnCalibrate.visibility = View.GONE
             fragmentDeviceConnectedBinding.btnSensorTurner.visibility = View.GONE
+            fragmentDeviceConnectedBinding.btnBallistics.visibility = View.GONE
         }
 
         // Set up button onClickListeners

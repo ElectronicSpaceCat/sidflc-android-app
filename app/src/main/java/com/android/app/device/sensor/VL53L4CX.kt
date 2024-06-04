@@ -33,6 +33,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
     override fun startCalibration() {
         sensor.resetFactory()
         state = State.INIT
+        stateMsg = "Sensor: " + sensor.id.toString()
         sensor.sendConfigCommand(DeviceData.Config.Command.GET, Int.MAX_VALUE, Int.MAX_VALUE)
     }
 
@@ -165,15 +166,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                         setCalResponseMessage(config)
                         when(config.status) {
                             DeviceData.Config.Status.OK -> {
-                                when(sensor.id){
-                                    DeviceData.Sensor.Id.SHORT -> {
-                                        sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_SHORT_TIME_BUDGET)
-                                    }
-                                    DeviceData.Sensor.Id.LONG -> {
-                                        sensor.sendConfigCommand(DeviceData.Config.Command.GET, Config.TIME_BUDGET.ordinal, Int.MAX_VALUE)
-                                    }
-                                    else -> {}
-                                }
+                                sensor.sendConfigCommand(DeviceData.Config.Command.SET, Config.TIME_BUDGET.ordinal, SENSOR_TIME_BUDGET)
                                 setCalMessage(Config.TIME_BUDGET.ordinal)
                                 state = State.WAIT_FOR_RESPONSE
                             }
@@ -245,7 +238,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
         const val POWER_LEVEL_DEFAULT = 60
         const val PHS_CAL_PCH_PWR = 2 // Supposedly helps
 
-        const val SENSOR_SHORT_TIME_BUDGET = 55000 // Gives reasonable response speed
+        const val SENSOR_TIME_BUDGET = 55000 // Gives reasonable response speed
         const val SENSOR_SHORT_ROI = 101255430 // This sets a 4x4 (minimum allowed) out of 15x15 SPAD array
     }
 }
