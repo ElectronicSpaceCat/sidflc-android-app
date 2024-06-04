@@ -230,7 +230,7 @@ class Device(context: Context) {
     fun connect(context: Context, target: BluetoothDevice, autoConnect: Boolean) {
         if (_bleDevice == null) {
             _bleDevice = target
-            val logSession = Logger.newSession(context, null, target.address, target.name)
+            val logSession = Logger.newSession(context, target.address, target.name)
             _bleDeviceManager.setLogger(logSession)
         }
 
@@ -245,12 +245,7 @@ class Device(context: Context) {
      */
     fun disconnect() {
         _bleDevice = null
-        if (_bleDeviceManager.isReady) {
-            _bleDeviceManager.disconnect().enqueue()
-        }
-        else {
-            _bleDeviceManager.close()
-        }
+        _bleDeviceManager.disconnect().enqueue()
     }
 
     private fun getUserConfigurations(config : Int){
@@ -357,8 +352,7 @@ class Device(context: Context) {
                             this.model.ballistics.frictionCoefficient = intBitsToFloat(it.value).toDouble()
                         }
                         USERDATA.SPRING_ID.ordinal -> {
-                            val spring = Spring.getData(it.value)
-                            this.model.setSpring(spring)
+                            this.model.spring = Spring.getData(it.value)
                         }
                     }
                 }

@@ -26,8 +26,6 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.content.Context.BLUETOOTH_SERVICE
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -78,6 +76,8 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
     private var scanState: ScanState = ScanState.SCAN_NO_BLUETOOTH
 
     private var deviceSelected : DiscoveredBluetoothDevice?= null
+
+    private var bondRequestSent = false
 
     private var kickTimer = false
 
@@ -306,6 +306,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                 }
                 else -> {
                     scanState = ScanState.SCAN_DEVICES_NOT_FOUND
+                    bondRequestSent = false
                 }
             }
         }
@@ -343,18 +344,21 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                 fragmentDeviceScannerBinding.noLocationPermission.root.visibility = View.GONE
             }
             ScanState.SCAN_DEVICE_CONNECTED -> {
-                // If not the bootloader service and not bonded then ensure a bond
-                if(deviceSelected != null){
-                    if(!deviceSelected?.isBootloader!! && deviceSelected?.device?.bondState == BluetoothDevice.BOND_NONE){
+                deviceSelected?.let {
+                    if(!it.isBootloader && it.device.bondState == BluetoothDevice.BOND_NONE && !bondRequestSent){
+                        bondRequestSent = true
                         DataShared.device.ensureBond()
+                        return // Do a single shot request TODO - Recheck this...seems required on first time bond when device has no stored peers in whitelist
+                    }
+
+                    if(it.device.bondState != BluetoothDevice.BOND_BONDED) {
+                        return // Stay here until bonded // TODO - Could get stuck here...
                     }
                 }
-                // Go to deviceConnected fragment
+
                 Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
                     R.id.action_deviceScannerFragment_to_deviceConnectedFragment
                 )
-
-                viewModel.stopScan()
             }
             ScanState.SCAN_DEVICES_NOT_FOUND -> {
                 viewModel.startScan()

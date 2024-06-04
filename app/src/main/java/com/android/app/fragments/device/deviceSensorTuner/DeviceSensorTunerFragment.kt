@@ -103,11 +103,23 @@ class DeviceSensorTunerFragment : Fragment() {
         DataShared.device.setSensorEnable(true)
 
         /**
+         * Observe configuration and if all are initialized
+         */
+        DataShared.device.sensorConfig.observe(viewLifecycleOwner) {
+            if(DataShared.device.activeSensor.isInitialized) {
+                fragmentDeviceSensorTunerBinding.loadingConfigs.visibility = View.GONE
+            }
+            else {
+                fragmentDeviceSensorTunerBinding.loadingConfigs.visibility = View.VISIBLE
+            }
+        }
+
+        /**
          * Observe connection state navigate back to scanner page on disconnect
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
             val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
-            if (state.state == ConnectionState.State.DISCONNECTED) {
+            if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)
                     .setLaunchSingleTop(true)

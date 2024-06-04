@@ -12,7 +12,7 @@ object Projectile {
         getName(Name.Penny) to ProjectileData(getName(Name.Penny),
             2.5,
             19.05,
-            0.065),
+            0.06),
 
         getName(Name.Nickel) to ProjectileData(getName(Name.Nickel),
             5.0,

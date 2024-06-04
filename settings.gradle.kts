@@ -16,7 +16,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "My Application"
 include(":app")
+
+// Uncomment if using local copies of libraries
 //include(":dfu")
-//include(":ble")
+include(":ble")
 //include(":ble-common")
 //include(":ble-livedata")

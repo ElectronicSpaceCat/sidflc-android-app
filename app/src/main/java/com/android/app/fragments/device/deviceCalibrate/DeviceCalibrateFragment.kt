@@ -56,7 +56,7 @@ class DeviceCalibrateFragment : Fragment() {
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
             val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
-            if (state.state == ConnectionState.State.DISCONNECTED) {
+            if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)
                     .setLaunchSingleTop(true)

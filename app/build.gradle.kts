@@ -55,10 +55,10 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
 
     // App compat and UI things
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.1")
 
     // Navigation library
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
@@ -74,7 +74,7 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.3")
 
     //WindowManager
-    implementation("androidx.window:window:1.2.0")
+    implementation("androidx.window:window:1.3.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
@@ -88,12 +88,13 @@ dependencies {
     // Then add the library in the settings.gradle.kts file.
     implementation("no.nordicsemi.android:log:2.3.0")
     implementation("no.nordicsemi.android.support.v18:scanner:1.6.0")
-    implementation("no.nordicsemi.android:dfu:2.4.2")
-    implementation("no.nordicsemi.android:ble:2.7.5")
+    implementation("no.nordicsemi.android:dfu:2.5.0")
+//    implementation("no.nordicsemi.android:ble:2.7.5")
     implementation("no.nordicsemi.android:ble-common:2.7.5")
     implementation("no.nordicsemi.android:ble-livedata:2.7.5")
+
 //    implementation(project(":dfu"))          // https://github.com/NordicSemiconductor/Android-DFU-Library
-//    implementation(project(":ble"))          // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble
+    implementation(project(":ble"))          // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble
 //    implementation(project(":ble-common"))   // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble-common
 //    implementation(project(":ble-livedata")) // https://github.com/NordicSemiconductor/Android-BLE-Library/tree/main/ble-livedata
 

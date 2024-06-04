@@ -18,6 +18,11 @@ import com.android.app.databinding.FragmentDeviceMonitorBinding
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.misc.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
@@ -117,11 +122,11 @@ class DeviceMonitorFragment : Fragment() {
                         val stateWithReason: ConnectionState.Disconnected = connState
                         val reasonStr = when (stateWithReason.reason) {
                             ConnectionObserver.REASON_SUCCESS -> { "Success" }
-                            ConnectionObserver.REASON_NOT_SUPPORTED -> { "Not Supported"}
+                            ConnectionObserver.REASON_NOT_SUPPORTED -> { "Not Supported" }
                             ConnectionObserver.REASON_CANCELLED -> { "Cancelled" }
                             ConnectionObserver.REASON_TERMINATE_PEER_USER -> { "Remote Device" }
                             ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> { "Local Device" }
-                            ConnectionObserver.REASON_LINK_LOSS -> { " Link Loss" }
+                            ConnectionObserver.REASON_LINK_LOSS -> { "Link Loss" }
                             ConnectionObserver.REASON_TIMEOUT -> { "Timeout" }
                             ConnectionObserver.REASON_UNKNOWN -> { "Unknown" }
                             else -> { "NA" }
@@ -133,6 +138,10 @@ class DeviceMonitorFragment : Fragment() {
                                 "Disconnected: ".plus(reasonStr),
                                 Toast.LENGTH_LONG
                             ).show()
+                        }
+                        // Close auto connect on Link Loss reason TODO - Test this with bootloader
+                        if(stateWithReason.reason == ConnectionObserver.REASON_LINK_LOSS) {
+                            DataShared.device.disconnect()
                         }
                     }
                 }

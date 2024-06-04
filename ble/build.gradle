@@ -7,7 +7,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        minSdk 18
+        minSdk 19
         targetSdk 34
     }
 
@@ -32,7 +32,7 @@ android {
 }
 
 dependencies {
-    api 'androidx.annotation:annotation:1.7.1'
+    api 'androidx.annotation:annotation:1.8.0'
 
     testImplementation 'junit:junit:4.13.2'
 }

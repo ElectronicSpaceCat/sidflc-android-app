@@ -21,50 +21,55 @@
  */
 package com.android.app.device.bluetooth
 
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SERVICE
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RANGE_CHAR
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SELECT_CHAR
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_CONFIG_CHAR
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RESET_CHAR
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_STATUS_CHAR
-import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SAMPLE_ENABLE_CHAR
-import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SERVICE
-import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SOURCE_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_DEVICE_INFORMATION_SERVICE
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_SOFTWARE_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_FIRMWARE_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_HARDWARE_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_SERIAL_NUMBER_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_MANUFACTURER_CHAR
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_MODEL_ID_CHAR
-import no.nordicsemi.android.ble.livedata.ObservableBleManager
-import android.bluetooth.BluetoothGattCharacteristic
-import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData
-import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
-import com.android.app.device.bluetooth.device.DeviceData
-import no.nordicsemi.android.log.LogSession
-import no.nordicsemi.android.log.LogContract
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
-import no.nordicsemi.android.ble.callback.DataReceivedCallback
-import com.android.app.device.bluetooth.pwrmonitor.callbacks.PwrInputSourceDataCallback
-import com.android.app.device.bluetooth.pwrmonitor.callbacks.PwrBattStatusDataCallback
+import com.android.app.device.bluetooth.device.DeviceData
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_CONFIG_CHAR
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RANGE_CHAR
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_RESET_CHAR
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SAMPLE_ENABLE_CHAR
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SELECT_CHAR
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_SERVICE
+import com.android.app.device.bluetooth.device.DeviceData.Companion.LBS_UUID_TOF_STATUS_CHAR
+import com.android.app.device.bluetooth.device.callbacks.ConfigDataCmdCallback
+import com.android.app.device.bluetooth.device.callbacks.ResetDataCmdCallback
+import com.android.app.device.bluetooth.device.callbacks.SensorRangeDataCallback
+import com.android.app.device.bluetooth.device.callbacks.SensorRangeEnableDataCallback
+import com.android.app.device.bluetooth.device.callbacks.SensorSelectDataCallback
+import com.android.app.device.bluetooth.device.callbacks.SensorStatusDataCallback
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_DEVICE_INFORMATION_SERVICE
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_MANUFACTURER_CHAR
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_MODEL_ID_CHAR
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_SERIAL_NUMBER_CHAR
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_FIRMWARE_CHAR
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_HARDWARE_CHAR
+import com.android.app.device.bluetooth.deviceinfo.DeviceInfoData.Companion.LBS_UUID_VERSION_SOFTWARE_CHAR
 import com.android.app.device.bluetooth.deviceinfo.callbacks.FirmwareVersionDataCallback
-import com.android.app.device.bluetooth.deviceinfo.callbacks.SoftwareVersionDataCallback
 import com.android.app.device.bluetooth.deviceinfo.callbacks.HardwareVersionDataCallback
+import com.android.app.device.bluetooth.deviceinfo.callbacks.ManufacturerDataCallback
 import com.android.app.device.bluetooth.deviceinfo.callbacks.ModelDataCallback
 import com.android.app.device.bluetooth.deviceinfo.callbacks.SerialNumberDataCallback
-import com.android.app.device.bluetooth.deviceinfo.callbacks.ManufacturerDataCallback
+import com.android.app.device.bluetooth.deviceinfo.callbacks.SoftwareVersionDataCallback
 import com.android.app.device.bluetooth.dfu.DfuData.Companion.LBS_UUID_DFU_SERVICE
+import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_BATT_LEVEL_CHAR
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_BATT_STATUS_CHAR
+import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SERVICE
+import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData.Companion.LBS_UUID_PWR_SOURCE_CHAR
+import com.android.app.device.bluetooth.pwrmonitor.callbacks.PwrBattStatusDataCallback
 import com.android.app.device.bluetooth.pwrmonitor.callbacks.PwrBatteryLevelDataCallback
-import com.android.app.device.bluetooth.device.callbacks.*
+import com.android.app.device.bluetooth.pwrmonitor.callbacks.PwrInputSourceDataCallback
 import com.android.app.utils.misc.Utils
 import no.nordicsemi.android.ble.Request
+import no.nordicsemi.android.ble.callback.DataReceivedCallback
 import no.nordicsemi.android.ble.data.Data
+import no.nordicsemi.android.ble.livedata.ObservableBleManager
+import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.Logger
 
 class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
@@ -138,323 +143,255 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
         return (!_supported || _isBackupBootloader)
     }
 
-    override fun getGattCallback(): BleManagerGattCallback {
-        return DeviceBleManagerGattCallback()
+    /**
+     * Overrides initialize
+     */
+    override fun initialize() {
+        if (!isConnected) {
+            log(Log.WARN, "ToF Device not connected")
+            return
+        }
+
+        // NOTE: This is necessary to prevent backup
+        //       bootloader connection from hanging.
+        //       Basically bypasses discovering non-existing services..
+        if(_isBackupBootloader){
+            return
+        }
+
+        /**************************
+         * ToF
+         */
+        // ToF Select
+        readCharacteristic(tofSelectCharacteristic)
+            .with(sensorSelectCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "ToF Select characteristic not found")
+            }
+            .enqueue()
+        setIndicationCallback(tofSelectCharacteristic).with(sensorSelectCallback)
+        enableIndications(tofSelectCharacteristic, true, "ToF Select")
+
+        // ToF Status
+        readCharacteristic(tofStatusCharacteristic)
+            .with(sensorStatusCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "ToF status characteristic not found")
+            }
+            .enqueue()
+        setIndicationCallback(tofStatusCharacteristic).with(sensorStatusCallback)
+        enableIndications(tofStatusCharacteristic, true, "ToF Status")
+
+        // ToF Config
+        setIndicationCallback(tofConfigCharacteristic).with(sensorConfigCallback)
+        enableIndications(tofConfigCharacteristic, true, "ToF Config")
+
+        // ToF Ranging Enable
+        readCharacteristic(tofSampleEnableCharacteristic)
+            .with(sensorSampleEnableCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "ToF Enable characteristic not found")
+            }
+            .enqueue()
+        setIndicationCallback(tofSampleEnableCharacteristic).with(sensorSampleEnableCallback)
+        enableIndications(tofSampleEnableCharacteristic, true, "ToF Enable")
+
+        // ToF Range Data
+        setNotificationCallback(tofRangeCharacteristic).with(rangeCallback)
+        enableNotification(tofRangeCharacteristic, true, "ToF Range Data")
+
+        // ToF Reset
+        readCharacteristic(tofResetCharacteristic)
+            .with(sensorResetCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "ToF Reset characteristic not found")
+            }
+            .enqueue()
+        setIndicationCallback(tofResetCharacteristic).with(sensorResetCallback)
+        enableIndications(tofResetCharacteristic, true, "ToF Reset")
+
+        /**************************
+         * Power Monitor
+         */
+        // Power source characteristics setup
+        readCharacteristic(tofPowerSourceCharacteristic)
+            .with(pwrInputSourceCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Power source characteristic not found")
+            }
+            .enqueue()
+        setNotificationCallback(tofPowerSourceCharacteristic).with(pwrInputSourceCallback)
+        enableNotification(tofPowerSourceCharacteristic, true, "Power source")
+
+        // Battery status characteristics setup
+        readCharacteristic(tofBatteryStatusCharacteristic)
+            .with(pwrBattStatusCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Battery status characteristic not found")
+            }
+            .enqueue()
+        setNotificationCallback(tofBatteryStatusCharacteristic).with(pwrBattStatusCallback)
+        enableNotification(tofBatteryStatusCharacteristic, true, "Battery status")
+
+        // Battery level characteristics setup
+        readCharacteristic(tofBatteryLevelCharacteristic)
+            .with(pwrBatteryLevelCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Battery level characteristic not found")
+            }
+            .enqueue()
+        setNotificationCallback(tofBatteryLevelCharacteristic).with(pwrBatteryLevelCallback)
+        enableNotification(tofBatteryLevelCharacteristic, false, "Battery Level")
+
+        /**************************
+         * Device Information
+         */
+        readCharacteristic(softwareVersionCharacteristic)
+            .with(softwareVersionCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Software version characteristic not found")
+            }
+            .enqueue()
+        readCharacteristic(firmwareVersionCharacteristic)
+            .with(firmwareVersionCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Firmware version characteristic not found")
+            }
+            .enqueue()
+        readCharacteristic(hardwareVersionCharacteristic)
+            .with(hardwareVersionCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Hardware version characteristic not found")
+            }
+            .enqueue()
+        readCharacteristic(serialNumberCharacteristic)
+            .with(serialNumberCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Serial Number characteristic not found")
+            }
+            .enqueue()
+        readCharacteristic(manufacturerCharacteristic)
+            .with(manufacturerCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Manufacturer characteristic not found")
+            }
+            .enqueue()
+        readCharacteristic(modelCharacteristic)
+            .with(modelCallback)
+            .fail { _: BluetoothDevice?, _: Int ->
+                log(Log.WARN, "Model characteristic not found")
+            }
+            .enqueue()
     }
 
-    /**
-     * BluetoothGatt callbacks object.
-     */
-    private inner class DeviceBleManagerGattCallback : BleManagerGattCallback() {
-
-        override fun initialize() {
-            if (!isConnected) {
-                log(Log.WARN, "ToF Device not connected")
-                return
-            }
-
-            // NOTE: This is necessary to prevent backup
-            //       bootloader connection from hanging.
-            //       Basically bypasses discovering non-existing services..
-            if(_isBackupBootloader){
-                return
-            }
-
-            /**************************
-             * ToF
-             */
-            // ToF Select
-            readCharacteristic(tofSelectCharacteristic)
-                .with(sensorSelectCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Select characteristic not found")
-                }
-                .enqueue()
-            // If the ToF Select characteristic is null, the request will be ignored
-            setIndicationCallback(tofSelectCharacteristic).with(sensorSelectCallback)
-            enableIndications(tofSelectCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF Select indication enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Select characteristic not found")
-                }
-                .enqueue()
-            // ToF Status
-            readCharacteristic(tofStatusCharacteristic)
-                .with(sensorStatusCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF status characteristic not found")
-                }
-                .enqueue()
-            // If the ToF Status characteristic is null, the request will be ignored
-            setIndicationCallback(tofStatusCharacteristic).with(sensorStatusCallback)
-            enableIndications(tofStatusCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF status indication enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF status characteristic not found")
-                }
-                .enqueue()
-            // ToF Config
-            setIndicationCallback(tofConfigCharacteristic).with(sensorConfigCallback)
-            enableIndications(tofConfigCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF config indication enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF config characteristic not found")
-                }
-                .enqueue()
-            // ToF Ranging Enable
-            readCharacteristic(tofSampleEnableCharacteristic)
-                .with(sensorSampleEnableCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Enable characteristic not found")
-                }
-                .enqueue()
-            // If the ToF Enable characteristic is null, the request will be ignored
-            setIndicationCallback(tofSampleEnableCharacteristic).with(sensorSampleEnableCallback)
-            enableIndications(tofSampleEnableCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF Enable Level indication enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Enable Level characteristic not found")
-                }
-                .enqueue()
-            // ToF Range characteristics setup
-            setNotificationCallback(tofRangeCharacteristic).with(rangeCallback)
-            enableNotifications(tofRangeCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF Range Level notification enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Range Level characteristic not found")
-                }
-                .enqueue()
-            // ToF Reset
-            readCharacteristic(tofResetCharacteristic)
-                .with(sensorResetCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Reset characteristic not found")
-                }
-                .enqueue()
-            // If the ToF Reset characteristic is null, the request will be ignored
-            setIndicationCallback(tofResetCharacteristic).with(sensorResetCallback)
-            enableIndications(tofResetCharacteristic)
-                .done {
-                    log(Log.INFO, "ToF Reset indication enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "ToF Reset Level characteristic not found")
-                }
-                .enqueue()
-
-            /**************************
-             * Power Monitor
-             */
-            // Battery status characteristics setup
-            readCharacteristic(tofBatteryStatusCharacteristic)
-                .with(pwrBattStatusCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Battery status characteristic not found")
-                }
-                .enqueue()
-            // If the Battery status characteristic is null, the request will be ignored
-            setNotificationCallback(tofBatteryStatusCharacteristic).with(pwrBattStatusCallback)
-            enableNotifications(tofBatteryStatusCharacteristic)
-                .done {
-                    log(Log.INFO, "Battery status notification enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Battery status  characteristic not found")
-                }
-                .enqueue()
-
-            // Power source characteristics setup
-            readCharacteristic(tofPowerSourceCharacteristic)
-                .with(pwrInputSourceCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Power source characteristic not found")
-                }
-                .enqueue()
-            // If the Power Input characteristic is null, the request will be ignored
-            setNotificationCallback(tofPowerSourceCharacteristic).with(pwrInputSourceCallback)
-            enableNotifications(tofPowerSourceCharacteristic)
-                .done {
-                    log(Log.INFO, "Power source notification enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Power source characteristic not found")
-                }
-                .enqueue()
-
-            // Battery level characteristics setup
-            readCharacteristic(tofBatteryLevelCharacteristic)
-                .with(pwrBatteryLevelCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Battery level characteristic not found")
-                }
-                .enqueue()
-            // If the Battery level characteristic is null, the request will be ignored
-            setNotificationCallback(tofBatteryLevelCharacteristic).with(pwrBatteryLevelCallback)
-            // Note: the enable/disable notifications is set as a function call
-//            enableNotifications(tofBatteryLevelCharacteristic)
-//                .done {
-//                    log(Log.INFO, "Battery level notifications enabled")
-//                }
-//                .fail { _: BluetoothDevice?, _: Int ->
-//                    log(Log.WARN, "Battery level characteristic not found")
-//                }
-//                .enqueue()
-
-            /**************************
-             * Device Information
-             */
-            readCharacteristic(softwareVersionCharacteristic)
-                .with(softwareVersionCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Software version characteristic not found")
-                }
-                .enqueue()
-            readCharacteristic(firmwareVersionCharacteristic)
-                .with(firmwareVersionCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Firmware version characteristic not found")
-                }
-                .enqueue()
-            readCharacteristic(hardwareVersionCharacteristic)
-                .with(hardwareVersionCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Hardware version characteristic not found")
-                }
-                .enqueue()
-            readCharacteristic(serialNumberCharacteristic)
-                .with(serialNumberCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Serial Number characteristic not found")
-                }
-                .enqueue()
-            readCharacteristic(manufacturerCharacteristic)
-                .with(manufacturerCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Manufacturer characteristic not found")
-                }
-                .enqueue()
-            readCharacteristic(modelCharacteristic)
-                .with(modelCallback)
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Model characteristic not found")
-                }
-                .enqueue()
+    override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
+        // Check if in bootloader, there should only be 3 services:
+        // 1) Generic Access    (standard)
+        // 2) Generic Attribute (standard)
+        // 3) DFU
+        _isBackupBootloader = gatt.services.size == 3 && null != gatt.getService(LBS_UUID_DFU_SERVICE)
+        if(_isBackupBootloader) {
+            return true
         }
 
-        public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            // ToF Service
-            var service = gatt.getService(LBS_UUID_TOF_SERVICE)
-            if (service != null) {
-                // Characteristics - ToF
-                tofRangeCharacteristic = service.getCharacteristic(LBS_UUID_TOF_RANGE_CHAR)
-                tofSelectCharacteristic = service.getCharacteristic(LBS_UUID_TOF_SELECT_CHAR)
-                tofConfigCharacteristic = service.getCharacteristic(LBS_UUID_TOF_CONFIG_CHAR)
-                tofStatusCharacteristic = service.getCharacteristic(LBS_UUID_TOF_STATUS_CHAR)
-                tofSampleEnableCharacteristic = service.getCharacteristic(LBS_UUID_TOF_SAMPLE_ENABLE_CHAR)
-                tofResetCharacteristic = service.getCharacteristic(LBS_UUID_TOF_RESET_CHAR)
-            }
+        // ToF Service
+        var service = gatt.getService(LBS_UUID_TOF_SERVICE)
+        if (service != null) {
+            // Characteristics - ToF
+            tofRangeCharacteristic = service.getCharacteristic(LBS_UUID_TOF_RANGE_CHAR)
+            tofSelectCharacteristic = service.getCharacteristic(LBS_UUID_TOF_SELECT_CHAR)
+            tofConfigCharacteristic = service.getCharacteristic(LBS_UUID_TOF_CONFIG_CHAR)
+            tofStatusCharacteristic = service.getCharacteristic(LBS_UUID_TOF_STATUS_CHAR)
+            tofSampleEnableCharacteristic = service.getCharacteristic(LBS_UUID_TOF_SAMPLE_ENABLE_CHAR)
+            tofResetCharacteristic = service.getCharacteristic(LBS_UUID_TOF_RESET_CHAR)
+        }
 
-            // Pwr Service
-            service = gatt.getService(LBS_UUID_PWR_SERVICE)
-            if (service != null) {
-                // Characteristics - Pwr Monitor
-                tofPowerSourceCharacteristic = service.getCharacteristic(LBS_UUID_PWR_SOURCE_CHAR)
-                tofBatteryStatusCharacteristic = service.getCharacteristic(LBS_UUID_PWR_BATT_STATUS_CHAR)
-                tofBatteryLevelCharacteristic = service.getCharacteristic(LBS_UUID_PWR_BATT_LEVEL_CHAR)
-            }
+        // Pwr Service
+        service = gatt.getService(LBS_UUID_PWR_SERVICE)
+        if (service != null) {
+            // Characteristics - Pwr Monitor
+            tofPowerSourceCharacteristic = service.getCharacteristic(LBS_UUID_PWR_SOURCE_CHAR)
+            tofBatteryStatusCharacteristic = service.getCharacteristic(LBS_UUID_PWR_BATT_STATUS_CHAR)
+            tofBatteryLevelCharacteristic = service.getCharacteristic(LBS_UUID_PWR_BATT_LEVEL_CHAR)
+        }
 
-            // Check if characteristics exists
-            _supported =
-                tofRangeCharacteristic != null &&
-                tofSelectCharacteristic != null &&
-                tofConfigCharacteristic != null &&
-                tofStatusCharacteristic != null &&
-                tofSampleEnableCharacteristic != null &&
-                tofResetCharacteristic != null &&
-                tofPowerSourceCharacteristic != null &&
-                tofBatteryStatusCharacteristic != null &&
-                tofBatteryLevelCharacteristic != null
+        // Check if characteristics exists
+        _supported =
+          //  serviceChanged != null &&
+            tofRangeCharacteristic != null &&
+            tofSelectCharacteristic != null &&
+            tofConfigCharacteristic != null &&
+            tofStatusCharacteristic != null &&
+            tofSampleEnableCharacteristic != null &&
+            tofResetCharacteristic != null &&
+            tofPowerSourceCharacteristic != null &&
+            tofBatteryStatusCharacteristic != null &&
+            tofBatteryLevelCharacteristic != null
 
-            // Good so far?
-            var writeRequest = false
-            if (_supported) {
-                // Yes - Check write permissions of each writable characteristic
-                var rxProperties = tofSelectCharacteristic!!.properties
+        // Good so far?
+        var writeRequest = false
+        if (_supported) {
+            // Yes - Check write permissions of each writable characteristic
+            var rxProperties = tofSelectCharacteristic!!.properties
+            writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
+            if (writeRequest) {
+                rxProperties = tofConfigCharacteristic!!.properties
                 writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                if (writeRequest) {
-                    rxProperties = tofConfigCharacteristic!!.properties
-                    writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                }
-                if (writeRequest) {
-                    rxProperties = tofSampleEnableCharacteristic!!.properties
-                    writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                }
-                if (writeRequest) {
-                    rxProperties = tofResetCharacteristic!!.properties
-                    writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                }
             }
-
-            // Check if in bootloader, there should only be 3 services:
-            // 1) Generic Access    (standard)
-            // 2) Generic Attribute (standard)
-            // 3) DFU
-            _isBackupBootloader = gatt.services.size == 3 && null != gatt.getService(LBS_UUID_DFU_SERVICE)
-
-            // Return True if device has supported services for the app OR is in the bootloader
-            // The _supported flag is use to determine if the cached services should be cleared on disconnect
-            // which it should if connected to the bootloader or app services are not supported.
-            return ((_supported && writeRequest) || _isBackupBootloader)
-        }
-
-        override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(LBS_UUID_DEVICE_INFORMATION_SERVICE)
-            if (service != null) {
-                // Characteristics - Device Information
-                softwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_SOFTWARE_CHAR)
-                firmwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_FIRMWARE_CHAR)
-                hardwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_HARDWARE_CHAR)
-                serialNumberCharacteristic = service.getCharacteristic(LBS_UUID_SERIAL_NUMBER_CHAR)
-                manufacturerCharacteristic = service.getCharacteristic(LBS_UUID_MANUFACTURER_CHAR)
-                modelCharacteristic = service.getCharacteristic(LBS_UUID_MODEL_ID_CHAR)
+            if (writeRequest) {
+                rxProperties = tofSampleEnableCharacteristic!!.properties
+                writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
             }
-            return softwareVersionCharacteristic != null
-                    && firmwareVersionCharacteristic != null
-                    && hardwareVersionCharacteristic != null
-                    && serialNumberCharacteristic != null
-                    && manufacturerCharacteristic != null
-                    && modelCharacteristic != null
+            if (writeRequest) {
+                rxProperties = tofResetCharacteristic!!.properties
+                writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
+            }
         }
 
-        override fun onServicesInvalidated() {
-            // Nullify characteristics - ToF
-            tofRangeCharacteristic = null
-            tofSelectCharacteristic = null
-            tofConfigCharacteristic = null
-            tofStatusCharacteristic = null
-            tofSampleEnableCharacteristic = null
-            // Nullify characteristics - Device Information
-            softwareVersionCharacteristic = null
-            firmwareVersionCharacteristic = null
-            hardwareVersionCharacteristic = null
-            serialNumberCharacteristic = null
-            manufacturerCharacteristic = null
-            modelCharacteristic = null
-            // Characteristics - ToF Power Monitor
-            tofPowerSourceCharacteristic = null
-            tofBatteryStatusCharacteristic = null
-            tofBatteryLevelCharacteristic = null
+        // Return True if device has supported services for the app OR is in the bootloader
+        // The _supported flag is use to determine if the cached services should be cleared on disconnect
+        // which it should if connected to the bootloader or app services are not supported.
+        return (_supported && writeRequest)
+    }
+
+    override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
+        val service = gatt.getService(LBS_UUID_DEVICE_INFORMATION_SERVICE)
+        if (service != null) {
+            // Characteristics - Device Information
+            softwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_SOFTWARE_CHAR)
+            firmwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_FIRMWARE_CHAR)
+            hardwareVersionCharacteristic = service.getCharacteristic(LBS_UUID_VERSION_HARDWARE_CHAR)
+            serialNumberCharacteristic = service.getCharacteristic(LBS_UUID_SERIAL_NUMBER_CHAR)
+            manufacturerCharacteristic = service.getCharacteristic(LBS_UUID_MANUFACTURER_CHAR)
+            modelCharacteristic = service.getCharacteristic(LBS_UUID_MODEL_ID_CHAR)
         }
+        return softwareVersionCharacteristic != null
+                && firmwareVersionCharacteristic != null
+                && hardwareVersionCharacteristic != null
+                && serialNumberCharacteristic != null
+                && manufacturerCharacteristic != null
+                && modelCharacteristic != null
+    }
+
+    override fun onServicesInvalidated() {
+        // Nullify characteristics - ToF
+        tofRangeCharacteristic = null
+        tofSelectCharacteristic = null
+        tofConfigCharacteristic = null
+        tofStatusCharacteristic = null
+        tofSampleEnableCharacteristic = null
+        tofResetCharacteristic = null
+        // Nullify characteristics - Device Information
+        softwareVersionCharacteristic = null
+        firmwareVersionCharacteristic = null
+        hardwareVersionCharacteristic = null
+        serialNumberCharacteristic = null
+        manufacturerCharacteristic = null
+        modelCharacteristic = null
+        // Characteristics - ToF Power Monitor
+        tofPowerSourceCharacteristic = null
+        tofBatteryStatusCharacteristic = null
+        tofBatteryLevelCharacteristic = null
     }
 
     /**
@@ -722,6 +659,66 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
         }
 
     /**
+     * Enable/Disable characteristic notifications
+     */
+    private fun enableNotification(characteristic: BluetoothGattCharacteristic?, enable : Boolean, name: String? = null) {
+        var charName = name
+        if(charName == null && characteristic != null) {
+            charName = characteristic.uuid.toString()
+        }
+        if(enable){
+            enableNotifications(characteristic)
+                .done {
+                    log(Log.INFO, "$charName : notifications enabled")
+                }
+                .fail { _: BluetoothDevice?, _: Int ->
+                    log(Log.WARN, "$characteristic not found")
+                }
+                .enqueue()
+        }
+        else{
+            disableNotifications(characteristic)
+                .done {
+                    log(Log.INFO, "$charName : notifications disabled")
+                }
+                .fail { _: BluetoothDevice?, _: Int ->
+                    log(Log.WARN, "$characteristic not found")
+                }
+                .enqueue()
+        }
+    }
+
+    /**
+     * Enable/Disable characteristic indications
+     */
+    private fun enableIndications(characteristic: BluetoothGattCharacteristic?, enable : Boolean, name: String? = null) {
+        var charName = name
+        if(charName == null && characteristic != null) {
+            charName = characteristic.uuid.toString()
+        }
+        if(enable){
+            enableIndications(characteristic)
+                .done {
+                    log(Log.INFO, "$charName : indications enabled")
+                }
+                .fail { _: BluetoothDevice?, _: Int ->
+                    log(Log.WARN, "$characteristic not found")
+                }
+                .enqueue()
+        }
+        else{
+            disableIndications(characteristic)
+                .done {
+                    log(Log.INFO, "$charName : indications disabled")
+                }
+                .fail { _: BluetoothDevice?, _: Int ->
+                    log(Log.WARN, "$characteristic not found")
+                }
+                .enqueue()
+        }
+    }
+
+    /**
      * Select a sensor.
      *
      * @param id of the sensor
@@ -790,8 +787,6 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
             data,
             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).enqueue()
-        // NOTE: This was causing double calls when notify callback was set too
-        //  ').with(sensorResetCallback).enqueue()'
     }
 
     /**
@@ -817,26 +812,7 @@ class DeviceBluetoothManager(context: Context) : ObservableBleManager(context) {
      * Enable/Disable the Battery Level characteristic notifications
      */
     fun enableBatteryLevelNotifications(enable : Boolean) {
-        if(enable){
-            enableNotifications(tofBatteryLevelCharacteristic)
-                .done {
-                    log(Log.INFO, "Battery level notifications enabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Battery level characteristic not found")
-                }
-                .enqueue()
-        }
-        else{
-            disableNotifications(tofBatteryLevelCharacteristic)
-                .done {
-                log(Log.INFO, "Battery level notifications disabled")
-                }
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(Log.WARN, "Battery level characteristic not found")
-                }
-                .enqueue()
-        }
+        enableNotification(tofBatteryLevelCharacteristic, enable, "Batter Level")
     }
 
     /**

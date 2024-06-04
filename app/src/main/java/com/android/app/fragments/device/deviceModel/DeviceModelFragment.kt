@@ -23,10 +23,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigation
+import com.android.app.R
 import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceModelBinding
 import com.android.app.utils.converters.ConvertDispUnits
 import com.android.app.utils.misc.Utils
+import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
 import java.util.*

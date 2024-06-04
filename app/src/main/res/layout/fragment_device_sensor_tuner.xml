@@ -44,6 +44,21 @@
 
         </com.android.app.utils.plotter.CanvasPlotter>
 
+        <TextView
+            android:id="@+id/loading_configs"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/textShadow2"
+            android:gravity="center"
+            android:text="@string/loading_configs"
+            android:textAlignment="center"
+            android:textColor="@color/text_primary_color_selector"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView

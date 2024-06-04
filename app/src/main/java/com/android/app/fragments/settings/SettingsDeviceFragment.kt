@@ -297,7 +297,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
                 val projectiles = ProjectilePrefUtils.getProjectileList(requireContext())
                 projectiles.forEach {
                     if(it.name == newValue){
-                        DataShared.device.model.setProjectile(it)
+                        DataShared.device.model.projectile = it
                         retVal = true
                     }
                 }
@@ -350,7 +350,7 @@ open class SettingsDeviceFragment : PreferenceFragmentCompat() {
                                 it.setDrag(newValue.toDouble())
                                 // Store to prefs
                                 ProjectilePrefUtils.setProjectileList(requireContext(), projectiles.toList())
-                                DataShared.device.model.setProjectile(it)
+                                DataShared.device.model.projectile = it
                                 retVal = true
                             }
                         }

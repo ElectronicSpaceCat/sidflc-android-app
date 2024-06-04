@@ -762,7 +762,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             /** Preference - Selected Projectile */
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED) -> {
                 val projectile = ProjectilePrefUtils.getProjectileSelected(context)
-                DataShared.device.model.setProjectile(projectile)
+                DataShared.device.model.projectile = projectile
                 if(projectile != null){
                     fragmentCameraOverlayBinding.projectileSelectedName.text = projectile.name
                 }

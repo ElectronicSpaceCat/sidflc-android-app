@@ -173,6 +173,7 @@ abstract class BleManagerHandler extends RequestHandler {
 	 * The current MTU (Maximum Transfer Unit). The maximum number of bytes that can be sent in
 	 * a single packet is MTU-3.
 	 */
+	@IntRange(from = 23, to = 515)
 	private int mtu = 23;
 	/**
 	 * Current connection parameters. Those values are only available starting from Android Oreo.
@@ -339,8 +340,9 @@ abstract class BleManagerHandler extends RequestHandler {
 						if (request != null){
 							// NOTE: AG - Added check for ENSURE_BOND too
 							if(request.type == Request.Type.CREATE_BOND || request.type == Request.Type.ENSURE_BOND) {
-								request.notifyFail(device, FailCallback.REASON_REQUEST_FAILED);
+								request.notifySuccess(device);
 								request = null;
+								break;
 							}
 						}
 						// If the device started to pair just after the connection was
@@ -746,6 +748,7 @@ abstract class BleManagerHandler extends RequestHandler {
 		ready = false;
 
 		final BleServerManager serverManager = this.serverManager;
+		final BluetoothDevice bluetoothDevice = this.bluetoothDevice;
 		if (serverManager != null && bluetoothDevice != null) {
 			log(Log.VERBOSE, () -> "Cancelling server connection...");
 			log(Log.DEBUG, () -> "server.cancelConnection(device)");
@@ -939,22 +942,32 @@ abstract class BleManagerHandler extends RequestHandler {
 		final BluetoothGattDescriptor descriptor = getCccd(characteristic, BluetoothGattCharacteristic.PROPERTY_NOTIFY);
 		if (descriptor != null) {
 			log(Log.DEBUG, () -> "gatt.setCharacteristicNotification(" + characteristic.getUuid() + ", true)");
-			gatt.setCharacteristicNotification(characteristic, true);
+			try {
+				gatt.setCharacteristicNotification(characteristic, true);
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
+			}
 
 			log(Log.VERBOSE, () -> "Enabling notifications for " + characteristic.getUuid());
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-				log(Log.DEBUG, () ->
-						"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x01-00)");
-				return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
-			} else {
-				log(Log.DEBUG, () -> "descriptor.setValue(0x01-00)");
-				descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-				log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-					return gatt.writeDescriptor(descriptor);
+			try {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					log(Log.DEBUG, () ->
+							"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x01-00)");
+					return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
 				} else {
-					return internalWriteDescriptorWorkaround(descriptor);
+					log(Log.DEBUG, () -> "descriptor.setValue(0x01-00)");
+					descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+					log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						return gatt.writeDescriptor(descriptor);
+					} else {
+						return internalWriteDescriptorWorkaround(descriptor);
+					}
 				}
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
 			}
 		}
 		return false;
@@ -969,22 +982,32 @@ abstract class BleManagerHandler extends RequestHandler {
 				BluetoothGattCharacteristic.PROPERTY_NOTIFY | BluetoothGattCharacteristic.PROPERTY_INDICATE);
 		if (descriptor != null) {
 			log(Log.DEBUG, () -> "gatt.setCharacteristicNotification(" + characteristic.getUuid() + ", false)");
-			gatt.setCharacteristicNotification(characteristic, false);
+			try {
+				gatt.setCharacteristicNotification(characteristic, false);
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
+			}
 
 			log(Log.VERBOSE, () -> "Disabling notifications and indications for " + characteristic.getUuid());
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-				log(Log.DEBUG, () ->
-						"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x00-00)");
-				return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
-			} else {
-				log(Log.DEBUG, () -> "descriptor.setValue(0x00-00)");
-				descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-				log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-					return gatt.writeDescriptor(descriptor);
+			try {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					log(Log.DEBUG, () ->
+							"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x00-00)");
+					return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
 				} else {
-					return internalWriteDescriptorWorkaround(descriptor);
+					log(Log.DEBUG, () -> "descriptor.setValue(0x00-00)");
+					descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+					log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						return gatt.writeDescriptor(descriptor);
+					} else {
+						return internalWriteDescriptorWorkaround(descriptor);
+					}
 				}
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
 			}
 		}
 		return false;
@@ -998,22 +1021,32 @@ abstract class BleManagerHandler extends RequestHandler {
 		final BluetoothGattDescriptor descriptor = getCccd(characteristic, BluetoothGattCharacteristic.PROPERTY_INDICATE);
 		if (descriptor != null) {
 			log(Log.DEBUG, () -> "gatt.setCharacteristicNotification(" + characteristic.getUuid() + ", true)");
-			gatt.setCharacteristicNotification(characteristic, true);
+			try {
+				gatt.setCharacteristicNotification(characteristic, true);
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
+			}
 
 			log(Log.VERBOSE, () -> "Enabling indications for " + characteristic.getUuid());
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-				log(Log.DEBUG, () ->
-						"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x02-00)");
-				return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_INDICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
-			} else {
-				log(Log.DEBUG, () -> "descriptor.setValue(0x02-00)");
-				descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-				log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-					return gatt.writeDescriptor(descriptor);
+			try {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					log(Log.DEBUG, () ->
+							"gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb, value=0x02-00)");
+					return gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_INDICATION_VALUE) == BluetoothStatusCodes.SUCCESS;
 				} else {
-					return internalWriteDescriptorWorkaround(descriptor);
+					log(Log.DEBUG, () -> "descriptor.setValue(0x02-00)");
+					descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+					log(Log.DEBUG, () -> "gatt.writeDescriptor(00002902-0000-1000-8000-00805f9b34fb)");
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						return gatt.writeDescriptor(descriptor);
+					} else {
+						return internalWriteDescriptorWorkaround(descriptor);
+					}
 				}
+			} catch (final SecurityException e) {
+				log(Log.ERROR, e::getLocalizedMessage);
+				return false;
 			}
 		}
 		return false;
@@ -1231,7 +1264,12 @@ abstract class BleManagerHandler extends RequestHandler {
 
 		log(Log.VERBOSE, () -> "Beginning reliable write...");
 		log(Log.DEBUG, () -> "gatt.beginReliableWrite()");
-		return reliableWriteInProgress = gatt.beginReliableWrite();
+		try {
+			return reliableWriteInProgress = gatt.beginReliableWrite();
+		} catch (final SecurityException e) {
+			log(Log.ERROR, e::getLocalizedMessage);
+			return false;
+		}
 	}
 
 	private boolean internalExecuteReliableWrite() {
@@ -1244,7 +1282,12 @@ abstract class BleManagerHandler extends RequestHandler {
 
 		log(Log.VERBOSE, () -> "Executing reliable write...");
 		log(Log.DEBUG, () -> "gatt.executeReliableWrite()");
-		return gatt.executeReliableWrite();
+		try {
+			return gatt.executeReliableWrite();
+		} catch (final SecurityException e) {
+			log(Log.ERROR, e::getLocalizedMessage);
+			return false;
+		}
 	}
 
 	private boolean internalAbortReliableWrite() {
@@ -1255,15 +1298,20 @@ abstract class BleManagerHandler extends RequestHandler {
 		if (!reliableWriteInProgress)
 			return false;
 
-		log(Log.VERBOSE, () -> "Aborting reliable write...");
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			log(Log.DEBUG, () -> "gatt.abortReliableWrite()");
-			gatt.abortReliableWrite();
-		} else {
-			log(Log.DEBUG, () -> "gatt.abortReliableWrite(device)");
-			gatt.abortReliableWrite(gatt.getDevice());
+		try {
+			log(Log.VERBOSE, () -> "Aborting reliable write...");
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				log(Log.DEBUG, () -> "gatt.abortReliableWrite()");
+				gatt.abortReliableWrite();
+			} else {
+				log(Log.DEBUG, () -> "gatt.abortReliableWrite(device)");
+				gatt.abortReliableWrite(gatt.getDevice());
+			}
+			return true;
+		} catch (final SecurityException e) {
+			log(Log.ERROR, e::getLocalizedMessage);
+			return false;
 		}
-		return true;
 	}
 
 	@Deprecated
@@ -1737,13 +1785,14 @@ abstract class BleManagerHandler extends RequestHandler {
 	/**
 	 * Returns the current MTU (Maximum Transfer Unit).
 	 */
+	@IntRange(from = 23, to = 515)
 	final int getMtu() {
 		return mtu;
 	}
 
 	final void overrideMtu(@IntRange(from = 23, to = 517) final int mtu) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			this.mtu = mtu;
+			this.mtu = Math.min(515, mtu);
 		}
 	}
 
@@ -2048,7 +2097,7 @@ abstract class BleManagerHandler extends RequestHandler {
 	 */
 	@Deprecated
 	protected void onMtuChanged(@NonNull final BluetoothGatt gatt,
-								@IntRange(from = 23, to = 517) final int mtu) {
+								@IntRange(from = 23, to = 515) final int mtu) {
 		// do nothing
 	}
 
@@ -2175,7 +2224,15 @@ abstract class BleManagerHandler extends RequestHandler {
 
 					if (cr != null && cr.shouldAutoConnect() && initialConnection
 							&& gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED) {
-						log(Log.DEBUG, () -> "autoConnect = false called failed; retrying with autoConnect = true");
+						log(Log.DEBUG, () -> "autoConnect = false called failed; retrying with autoConnect = true" + (connected ? "; reset connected to false" : ""));
+
+						// fix：https://github.com/NordicSemiconductor/Android-BLE-Library/issues/497
+						// if DISCONNECTED is received between connect and initialize, need to reset connected to make internalConnect work
+						if (connected) {
+							connected = false;
+							connectionState = BluetoothGatt.STATE_DISCONNECTED;
+						}
+
 						post(() -> internalConnect(gatt.getDevice(), cr));
 						return;
 					}
@@ -2701,10 +2758,10 @@ abstract class BleManagerHandler extends RequestHandler {
 								 final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				log(Log.INFO, () -> "MTU changed to: " + mtu);
-				BleManagerHandler.this.mtu = mtu;
-				BleManagerHandler.this.onMtuChanged(gatt, mtu);
+				BleManagerHandler.this.mtu = Math.min(515, mtu);
+				BleManagerHandler.this.onMtuChanged(gatt, BleManagerHandler.this.mtu);
 				if (request instanceof MtuRequest) {
-					((MtuRequest) request).notifyMtuChanged(gatt.getDevice(), mtu);
+					((MtuRequest) request).notifyMtuChanged(gatt.getDevice(), BleManagerHandler.this.mtu);
 					request.notifySuccess(gatt.getDevice());
 				}
 			} else {
@@ -3189,7 +3246,7 @@ abstract class BleManagerHandler extends RequestHandler {
 							@NonNull final BluetoothDevice device,
 							final int mtu) {
 		log(Log.INFO, () -> "[Server] MTU changed to: " + mtu);
-		BleManagerHandler.this.mtu = mtu;
+		BleManagerHandler.this.mtu = Math.min(515, mtu);
 		nextRequest(checkCondition());
 	}
 

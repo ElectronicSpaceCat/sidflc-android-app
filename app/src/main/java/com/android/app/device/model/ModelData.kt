@@ -102,107 +102,108 @@ import kotlin.math.*
      */
     val springOnChange : LiveData<SpringData?>
         get() = _spring
-    val spring : SpringData?
+    var spring : SpringData?
         get() = _spring.value
+        set(value) {
+            // If no valid data, set to default
+            val lspring : SpringData = value ?: Spring.getData(_defaultSpring)!!
 
-    fun setSpring(spring : SpringData?) {
-        // Reset data if spring is null or both unload ref values are not valid
-        if(spring == null) {
-            _unloadedSpringAngle = 0.0
-            _carriageBackFaceToSpringPointAdj = 0.0
-            _lookUpTable.clear()
-            _spring.value = null
-            return
+    //        // Reset data if spring is null or both unload ref values are not valid
+    //        if(spring == null) {
+    //            _unloadedSpringAngle = 0.0
+    //            _carriageBackFaceToSpringPointAdj = 0.0
+    //            _lookUpTable.clear()
+    //            _spring.value = null
+    //            return
+    //        }
+
+            // Get adjusted distance from carriage back face to the estimated center of the spring leg where
+            // it touches the point of the carriage
+            _carriageBackFaceToSpringPointAdj = _carriageBackFaceToSpringPoint - (lspring.wireDiameter / 2.0)
+
+            // Case dimension reference data
+            val r1 = _springStudRadius
+            val r2 = lspring.meanDiameter / 2.0
+            val d1 = lspring.wireDiameter / 2.0
+            val d2 = r1 + d1
+            val d3 = r2 - d2
+
+            // Hourglass 1
+            val h1angleA = CalcTrig.getAngleBetweenSideHypotenuseSideOpposite(_studCenterToSpringSupportCenter, (_springStudRadius + _springSupportRadius + lspring.wireDiameter))
+            val h1angleB = 90.0 - h1angleA
+            val h1angleC = CalcTrig.getAngleGiven2Angles(_springSupportAngleFromHorizontal, h1angleB)
+
+            _unloadedSpringAngle = h1angleC
+
+            // Hourglass 2
+            val h2a1a2 = r2
+            val h2b1 = d3
+            val h2angleC = 90.0
+            val h2angleB = h1angleC
+            val h2angleA = CalcTrig.getAngleGiven2Angles(h2angleC, h2angleB)
+            val h2a1 = CalcTrig.getSideGiven1Side2Angles(h2b1, h2angleA, h2angleB)
+            val h2a2 = h2a1a2 - h2a1
+            val h2b2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleB, h2angleC)
+            val h2c1 = CalcTrig.getSideGiven1Side2Angles(h2a1, h2angleC, h2angleA)
+            val h2c2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleA, h2angleC)
+            val h2c1c2 = h2c1 + h2c2
+
+            // Offsets from spring stud center to spring coil center
+            _yOffset = CalcTrig.getSideGiven1Side2Angles(d3, h1angleC, 90.0)
+            _xOffset = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, 90.0)
+
+            // Point of spring vertex to vertical center when spring is unloaded
+            _xMax = _studCenterToVerticalCenterLine + h2b2
+
+            // Hourglass 3
+            val h3c1 = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, h1angleC)
+            val h3c2 = r2 - h3c1
+    //        val h3c1c2 = h3c1 + h3c2
+    //        val h3b1 = CalcTrig.getSideGiven1Side2Angles(h2b1, 90.0, h1angleC)
+            val h3b2 = CalcTrig.getSideGiven1Side2Angles(h3c2, h2angleA, 90.0)
+    //        val h3a1 = d3
+            val h3a2 = CalcTrig.getSideGiven1Side2Angles(h3b2, h1angleC, h2angleA)
+
+            // Unloaded spring point
+            _cX = h3a2 + _xOffset
+            _cY = 0.0
+            _pXunloaded = 0.0
+            _pYunloaded = h2c1c2 - _yOffset
+            val slopeRadius = (_pYunloaded-_cY)/(_pXunloaded-_cX)
+            val slopeTangentLine = -1.0/slopeRadius
+
+            // Height of spring vertex point to point where spring leg crosses vertical line when unloaded
+            _yMax = (slopeTangentLine * (_xMax-_pXunloaded)) + _pYunloaded
+
+            // Regenerate potential energy table
+            generatePotentialEnergyTable(lspring)
+
+            // Set spring data
+            _spring.value = lspring
         }
-
-        // Get adjusted distance from carriage back face to the estimated center of the spring leg where
-        // it touches the point of the carriage
-        _carriageBackFaceToSpringPointAdj = _carriageBackFaceToSpringPoint - (spring.wireDiameter / 2.0)
-
-        // Case dimension reference data
-        val r1 = _springStudRadius
-        val r2 = spring.meanDiameter / 2.0
-        val d1 = spring.wireDiameter / 2.0
-        val d2 = r1 + d1
-        val d3 = r2 - d2
-
-        // Hourglass 1
-        val h1angleA = CalcTrig.getAngleBetweenSideHypotenuseSideOpposite(_studCenterToSpringSupportCenter, (_springStudRadius + _springSupportRadius + spring.wireDiameter))
-        val h1angleB = 90.0 - h1angleA
-        val h1angleC = CalcTrig.getAngleGiven2Angles(_springSupportAngleFromHorizontal, h1angleB)
-
-        _unloadedSpringAngle = h1angleC
-
-        // Hourglass 2
-        val h2a1a2 = r2
-        val h2b1 = d3
-        val h2angleC = 90.0
-        val h2angleB = h1angleC
-        val h2angleA = CalcTrig.getAngleGiven2Angles(h2angleC, h2angleB)
-        val h2a1 = CalcTrig.getSideGiven1Side2Angles(h2b1, h2angleA, h2angleB)
-        val h2a2 = h2a1a2 - h2a1
-        val h2b2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleB, h2angleC)
-        val h2c1 = CalcTrig.getSideGiven1Side2Angles(h2a1, h2angleC, h2angleA)
-        val h2c2 = CalcTrig.getSideGiven1Side2Angles(h2a2, h2angleA, h2angleC)
-        val h2c1c2 = h2c1 + h2c2
-
-        // Offsets from spring stud center to spring coil center
-        _yOffset = CalcTrig.getSideGiven1Side2Angles(d3, h1angleC, 90.0)
-        _xOffset = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, 90.0)
-
-        // Point of spring vertex to vertical center when spring is unloaded
-        _xMax = _studCenterToVerticalCenterLine + h2b2
-
-        // Hourglass 3
-        val h3c1 = CalcTrig.getSideGiven1Side2Angles(d3, h2angleA, h1angleC)
-        val h3c2 = r2 - h3c1
-//        val h3c1c2 = h3c1 + h3c2
-//        val h3b1 = CalcTrig.getSideGiven1Side2Angles(h2b1, 90.0, h1angleC)
-        val h3b2 = CalcTrig.getSideGiven1Side2Angles(h3c2, h2angleA, 90.0)
-//        val h3a1 = d3
-        val h3a2 = CalcTrig.getSideGiven1Side2Angles(h3b2, h1angleC, h2angleA)
-
-        // Unloaded spring point
-        _cX = h3a2 + _xOffset
-        _cY = 0.0
-        _pXunloaded = 0.0
-        _pYunloaded = h2c1c2 - _yOffset
-        val slopeRadius = (_pYunloaded-_cY)/(_pXunloaded-_cX)
-        val slopeTangentLine = -1.0/slopeRadius
-
-        // Height of spring vertex point to point where spring leg crosses vertical line when unloaded
-        _yMax = (slopeTangentLine * (_xMax-_pXunloaded)) + _pYunloaded
-
-        // Regenerate potential energy table
-        generatePotentialEnergyTable(spring)
-
-        // Set spring data
-        _spring.value = spring
-    }
 
     /**
      * Projectile getter/setter
      */
     val projectileOnChange : LiveData<ProjectileData?>
         get() = _projectile
-    val projectile : ProjectileData?
+    var projectile : ProjectileData?
         get() = _projectile.value
+        set(value) {
+            if(null == value){
+                _totalWeight = _carriageWeight
+                _projectileOffset = 0.0
+                _projectile.value = null
+                return
+            }
 
-    fun setProjectile(projectile: ProjectileData?){
-        if(projectile == null){
-            _totalWeight = _carriageWeight
-            _projectileOffset = 0.0
-            _projectile.value = null
-            return
+            // Set the total weight
+            _totalWeight = (value.weight + _carriageWeight)
+            // Set the total height offset
+            _projectileOffset = calcProjectileOffset(value.diameter)
+            // Set the projectile data
+            _projectile.value = value
         }
-
-        // Set the total weight
-        _totalWeight = (projectile.weight + _carriageWeight)
-        // Set the total height offset
-        _projectileOffset = calcProjectileOffset(projectile.diameter)
-        // Set the projectile data
-        _projectile.value = projectile
-    }
 
     /**
      * Get min carriage position

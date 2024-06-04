@@ -53,14 +53,10 @@ import kotlin.math.roundToInt
 class DeviceBallisticsFragment : Fragment() {
     private var _fragmentDeviceBallisticsBinding: FragmentDeviceBallisticsBinding? = null
     private val fragmentDeviceBallisticsBinding get() = _fragmentDeviceBallisticsBinding!!
-
     private var _settingsDeviceFragment : SettingsDeviceFragment ?= null
     private val settingsDeviceFragment get() = _settingsDeviceFragment!!
-
     private val _numDataPoints = ((DataShared.device.model.getMaxCarriagePosition().toInt() - DataShared.device.model.getMinCarriagePosition().toInt()) / POS_INCREMENTS) + 1
-
-    private var _recData = ProjectilePrefUtils.RecData(0.0, DataShared.phoneHeight.unit, 0.0, Array(_numDataPoints) {0.0})
-
+    private var _recData = ProjectilePrefUtils.RecData(0.0, DataShared.phoneHeight.unit, 0.0, DataShared.targetDistance.unit, Array(_numDataPoints) { 0.0 })
     private var _projectileSelectedPrev : ProjectileData ?= null
 
     private inner class PlotData {
@@ -121,7 +117,7 @@ class DeviceBallisticsFragment : Fragment() {
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
             val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
-            if (state.state == ConnectionState.State.DISCONNECTED) {
+            if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)
                     .setLaunchSingleTop(true)
@@ -193,8 +189,8 @@ class DeviceBallisticsFragment : Fragment() {
         }
 
         /**
-         * NOTE: Set observers with references to SettingsDeviceFragment
-         *       after it has been created, otherwise will get errors.
+         * NOTE: Set observers with references to SettingsDeviceFragment after it
+         *       has been created by this fragment, otherwise there will be errors.
          */
         lifecycleScope.launch {
             settingsDeviceFragment.lifecycle.withCreated {
@@ -204,7 +200,7 @@ class DeviceBallisticsFragment : Fragment() {
                 DataShared.device.model.projectileOnChange.observe(viewLifecycleOwner) {
                     // If projectile changed, store the recorded test data
                     if(_projectileSelectedPrev != it) {
-                        ProjectilePrefUtils.setProjectileRecData(requireContext(), _projectileSelectedPrev?.name, _recData)
+                        storeRecordedDataFromPrefs(_projectileSelectedPrev)
                         _projectileSelectedPrev = it
                     }
                     loadRecordedDataFromPrefs(it)
@@ -411,12 +407,16 @@ class DeviceBallisticsFragment : Fragment() {
     private fun loadRecordedDataFromPrefs(projectile: ProjectileData?) {
         // Get recorded data from prefs
         val data = ProjectilePrefUtils.getProjectileRecData(requireContext(), projectile?.name)
+        // Update units to match the current in settings
+        _recData.heightUnit = DataShared.phoneHeight.unit
+        _recData.recDistUnit = DataShared.targetDistance.unit
+        // Set data
         if(null != data) {
-            _recData.height = data.height
             _recData.pitch = data.pitch
+            _recData.height = ConvertLength.convert(data.heightUnit, _recData.heightUnit, data.height)
             _recData.recDist.forEachIndexed { idx, _ ->
                 if(idx < data.recDist.size){
-                    _recData.recDist[idx] = data.recDist[idx]
+                    _recData.recDist[idx] = ConvertLength.convert(data.recDistUnit, _recData.recDistUnit, data.recDist[idx])
                 }
                 else {
                     _recData.recDist[idx] = 0.0
@@ -424,15 +424,10 @@ class DeviceBallisticsFragment : Fragment() {
             }
         }
         else {
-            _recData.height = 0.0
             _recData.pitch = 0.0
+            _recData.height = 0.0
             _recData.recDist.fill(0.0)
         }
-
-        // Make sure to convert the height based on the phone height unit
-        _recData.heightUnit = DataShared.phoneHeight.unit
-        _recData.height = ConvertLength.convert(_recData.heightUnit, DataShared.phoneHeight.unit, _recData.height)
-
         // Set the preferences when recorded data loaded
         try {
             settingsDeviceFragment.prefTestPitch.text = _recData.pitch.toString()
@@ -455,7 +450,6 @@ class DeviceBallisticsFragment : Fragment() {
     }
 
     private fun storeRecordedDataFromPrefs(projectile: ProjectileData?) {
-        // Store projectile recorded data if not null
         projectile?.let {
             ProjectilePrefUtils.setProjectileRecData(requireContext(), it.name, _recData)
         }
@@ -469,7 +463,7 @@ class DeviceBallisticsFragment : Fragment() {
 
         // Set the projectile back to the selected
         val projectile = ProjectilePrefUtils.getProjectileSelected(requireContext())
-        DataShared.device.model.setProjectile(projectile)
+        DataShared.device.model.projectile = projectile
 
         val fragMan: FragmentManager = parentFragmentManager
         val fragTransaction: FragmentTransaction = fragMan.beginTransaction()

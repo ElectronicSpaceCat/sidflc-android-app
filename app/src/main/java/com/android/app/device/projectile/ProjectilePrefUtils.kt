@@ -16,7 +16,7 @@ object ProjectilePrefUtils {
     private const val REC_DATA_PREF_TAG = "_rec_data"
 
     @Serializable
-    class RecData(var height : Double, var heightUnit : ConvertLength.Unit, var pitch : Double, val recDist : Array<Double>)
+    class RecData(var pitch : Double, var heightUnit : ConvertLength.Unit, var height : Double,  var recDistUnit : ConvertLength.Unit, val recDist : Array<Double>)
 
     /**
      * Get the current list of projectiles from preferences
