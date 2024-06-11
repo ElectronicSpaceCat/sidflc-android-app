@@ -44,20 +44,6 @@ class DeviceInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /**
-         * Observe connection state navigate back to scanner page on disconnect
-         */
-        DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
-            if (state.state != ConnectionState.State.READY) {
-                val options = NavOptions.Builder()
-                    .setPopUpTo(R.id.homeFragment, false)
-                    .setLaunchSingleTop(true)
-                    .build()
-                navController.navigate(R.id.deviceScannerFragment, null, options)
-            }
-        }
-
         // Device name and MAC address should already be loaded by the time this screen is loaded
         fragmentDeviceInfoBinding.deviceConnectedInfo.bleDeviceName.text = DataShared.device.name
         fragmentDeviceInfoBinding.deviceConnectedInfo.bleDeviceAddress.text = DataShared.device.address

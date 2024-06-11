@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 import com.android.app.R
 import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceMonitorBinding
@@ -31,6 +32,7 @@ class DeviceMonitorFragment : Fragment() {
     private var _fragmentDeviceMonitorBinding: FragmentDeviceMonitorBinding? = null
     private val fragmentDeviceMonitorBinding get() = _fragmentDeviceMonitorBinding!!
     private var _sensorEnablePrev = false
+    private var _disconnectCount = 0
 
     /**
      * Checks the bluetooth state and try to auto connect the
@@ -96,7 +98,7 @@ class DeviceMonitorFragment : Fragment() {
          */
         DataShared.device.bondingState.observe(viewLifecycleOwner) { bond ->
             if(bond.state != BondState.State.NOT_BONDED) {
-                Toast.makeText(context, "Device: ".plus(bond.state.name), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Device: ${bond.state.name}", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -113,8 +115,10 @@ class DeviceMonitorFragment : Fragment() {
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
             when (state.state) {
-                ConnectionState.State.READY -> {}
-                ConnectionState.State.CONNECTING -> {}
+                ConnectionState.State.READY,
+                ConnectionState.State.CONNECTING -> {
+                    _disconnectCount = 0
+                }
                 ConnectionState.State.DISCONNECTED -> {
                     val connState = DataShared.device.connectionState.value!!
                     // Get disconnect reason
@@ -131,17 +135,26 @@ class DeviceMonitorFragment : Fragment() {
                             ConnectionObserver.REASON_UNKNOWN -> { "Unknown" }
                             else -> { "NA" }
                         }
-                        // Only display reason if known
-                        if(stateWithReason.reason != ConnectionObserver.REASON_UNKNOWN) {
-                            Toast.makeText(
-                                context,
-                                "Disconnected: ".plus(reasonStr),
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        // Close auto connect on Link Loss reason TODO - Test this with bootloader
+
+                        // Handle Link Loss
                         if(stateWithReason.reason == ConnectionObserver.REASON_LINK_LOSS) {
-                            DataShared.device.disconnect()
+                            // Ignore while in the DeviceInfo fragment (where the DFU logic resides, and will handle disconnects)
+                            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+                            if(navController.currentDestination?.id == R.id.deviceInfoFragment) {
+                                return@observe
+                            }
+                            // Try a few connection attempts before clearing bonds on the phone
+                            //  and closing the autoConnection.
+                            if(++_disconnectCount >= MAX_CONNECTION_ATTEMPTS) {
+                                DataShared.device.removeBond()
+                                DataShared.device.disconnect()
+                            }
+
+                            Toast.makeText(context, "Disconnected: $reasonStr\nReconnect attempt: $_disconnectCount/$MAX_CONNECTION_ATTEMPTS", Toast.LENGTH_LONG).show()
+                        }
+                        // Handle all other disconnection reasons.
+                        else if(stateWithReason.reason != ConnectionObserver.REASON_UNKNOWN) {
+                            Toast.makeText(context, "Disconnected: $reasonStr", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -209,5 +222,9 @@ class DeviceMonitorFragment : Fragment() {
         DataShared.device.disconnect()
         _fragmentDeviceMonitorBinding = null
         requireContext().unregisterReceiver(mReceiver)
+    }
+
+    companion object {
+        const val MAX_CONNECTION_ATTEMPTS = 3
     }
 }

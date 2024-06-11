@@ -65,18 +65,11 @@ class DeviceDfuFragment : Fragment() {
          * Observe the network status
          */
         viewModel.networkStatus.observe(viewLifecycleOwner) { hasNetwork ->
-            CoroutineScope(Dispatchers.IO).launch {
-                delay(1000)
-                try {
-                    if (hasNetwork) {
-                        viewModel.checkFirmwareVersion(requireContext())
-                    } else {
-                        viewModel.updateStatus = UpdateStatus.NO_NETWORK
-                    }
-                }
-                catch (e : Exception){
-                    // Do nothing..
-                }
+            if(!this.isResumed) return@observe
+            if (hasNetwork) {
+                viewModel.checkFirmwareVersion(requireContext())
+            } else {
+                viewModel.updateStatus = UpdateStatus.NO_NETWORK
             }
         }
 
@@ -86,7 +79,7 @@ class DeviceDfuFragment : Fragment() {
          */
         viewModel.deviceConnectionState.observe(viewLifecycleOwner) { state: ConnectionState ->
             // Return if update in progress
-            if (viewModel.updateStatus == UpdateStatus.UPDATING && !DataShared.device.isBackupBootloader) {
+            if (viewModel.updateStatus == UpdateStatus.UPDATING) {
                 return@observe
             }
 
@@ -98,7 +91,8 @@ class DeviceDfuFragment : Fragment() {
                         .setPopUpTo(R.id.homeFragment, false)
                         .setLaunchSingleTop(true)
                         .build()
-                    Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(R.id.deviceScannerFragment, null, options)
+                    Navigation.findNavController(requireActivity(), R.id.container_nav)
+                        .navigate(R.id.deviceScannerFragment, null, options)
                 }
                 ConnectionState.State.READY -> {
                     viewModel.checkFirmwareVersion(requireContext())
@@ -125,7 +119,7 @@ class DeviceDfuFragment : Fragment() {
                     fragmentDfuBinding.dfuButton.visibility = View.INVISIBLE
                 }
                 UpdateStatus.ON_LATEST_FIRMWARE -> {
-                    fragmentDfuBinding.dfuProgress.text = "Firmware is on latest"
+                    fragmentDfuBinding.dfuProgress.text = "Firmware up to date"
                     fragmentDfuBinding.dfuProgressBar.visibility = View.INVISIBLE
                     fragmentDfuBinding.dfuButton.text = "Check"
                     fragmentDfuBinding.dfuButton.visibility = View.VISIBLE

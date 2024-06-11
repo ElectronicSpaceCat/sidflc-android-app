@@ -345,19 +345,21 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
             }
             ScanState.SCAN_DEVICE_CONNECTED -> {
                 deviceSelected?.let {
-                    if(!it.isBootloader && it.device.bondState == BluetoothDevice.BOND_NONE && !bondRequestSent){
+                    if(it.isBootloader) return@let
+
+                    if(it.device.bondState == BluetoothDevice.BOND_NONE && !bondRequestSent){
                         bondRequestSent = true
                         DataShared.device.ensureBond()
-                        return // Do a single shot request TODO - Recheck this...seems required on first time bond when device has no stored peers in whitelist
+                        return // Do a single shot request
                     }
 
                     if(it.device.bondState != BluetoothDevice.BOND_BONDED) {
-                        return // Stay here until bonded // TODO - Could get stuck here...
+                        return // Stay here until bonded // TODO - Could get stuck here...maybe add a timeout to cancel connection
                     }
                 }
 
                 Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
-                    R.id.action_deviceScannerFragment_to_deviceConnectedFragment
+                    R.id.action_deviceScannerFragment_to_deviceConnectedFragment // TODO - This sometimes errors with invalid reference...why???
                 )
             }
             ScanState.SCAN_DEVICES_NOT_FOUND -> {

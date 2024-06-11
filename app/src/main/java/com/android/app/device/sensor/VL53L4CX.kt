@@ -184,7 +184,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
                                 stateMsg = "Sensor: " + sensor.id.toString() + "\nStoring data..."
                                 state = State.WAIT_FOR_RESPONSE
                             }
-                            DeviceData.Config.Status.UPDATED-> {
+                            DeviceData.Config.Status.UPDATED-> { // When tied to another parameter
                                 return
                             }
                             else -> {
