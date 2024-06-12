@@ -149,11 +149,10 @@ class DeviceMonitorFragment : Fragment() {
                                 DataShared.device.removeBond()
                                 DataShared.device.disconnect()
                             }
-
-                            Toast.makeText(context, "Disconnected: $reasonStr\nReconnect attempt: $_disconnectCount/$MAX_CONNECTION_ATTEMPTS", Toast.LENGTH_LONG).show()
                         }
+
                         // Handle all other disconnection reasons.
-                        else if(stateWithReason.reason != ConnectionObserver.REASON_UNKNOWN) {
+                        if(stateWithReason.reason != ConnectionObserver.REASON_UNKNOWN) {
                             Toast.makeText(context, "Disconnected: $reasonStr", Toast.LENGTH_LONG).show()
                         }
                     }
@@ -225,6 +224,6 @@ class DeviceMonitorFragment : Fragment() {
     }
 
     companion object {
-        const val MAX_CONNECTION_ATTEMPTS = 3
+        const val MAX_CONNECTION_ATTEMPTS = 2
     }
 }

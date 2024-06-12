@@ -235,7 +235,7 @@ class Device(context: Context) {
         }
 
         _bleDeviceManager.connect(_bleDevice!!)
-            .retry(3, 100)
+            .retry(3, 250)
             .useAutoConnect(autoConnect)
             .enqueue()
     }

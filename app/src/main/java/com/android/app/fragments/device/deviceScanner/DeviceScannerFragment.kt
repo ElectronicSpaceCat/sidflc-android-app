@@ -104,11 +104,6 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
         viewModel.filterByUuid(true)
         viewModel.filterByDistance(false)
 
-        // Create view model containing utility methods for scanning
-        viewModel.deviceScannerState.observe(viewLifecycleOwner) { state: DeviceScannerStateLiveData ->
-            startScan(state)
-        }
-
         // Configure the recycler view
         fragmentDeviceScannerBinding.recyclerViewBleDevices.layoutManager = LinearLayoutManager(requireActivity())
         fragmentDeviceScannerBinding.recyclerViewBleDevices.addItemDecoration(
@@ -136,7 +131,14 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
         // Set observer to watch the device connection state
         DataShared.device.connectionState.observe(viewLifecycleOwner) {
+            if(!this.isResumed) return@observe
             viewModel.refresh()
+        }
+
+        // Create view model containing utility methods for scanning
+        viewModel.deviceScannerState.observe(viewLifecycleOwner) { state: DeviceScannerStateLiveData ->
+            if(!this.isResumed) return@observe
+            startScan(state)
         }
 
         // Setup a timer for rescanning periodically
@@ -359,7 +361,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                 }
 
                 Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
-                    R.id.action_deviceScannerFragment_to_deviceConnectedFragment // TODO - This sometimes errors with invalid reference...why???
+                    R.id.action_deviceScannerFragment_to_deviceConnectedFragment
                 )
             }
             ScanState.SCAN_DEVICES_NOT_FOUND -> {
