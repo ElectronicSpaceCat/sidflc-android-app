@@ -30,62 +30,62 @@ object ConvertLength: IConvert<ConvertLength.Unit> {
         when(from){
             Unit.MM -> {
                 return when(to){
-                    Unit.MM ->{ input }
-                    Unit.CM ->{ input / 10.0 }
-                    Unit.M ->{ input / 1000.0 }
-                    Unit.IN ->{ input / 25.4 }
-                    Unit.FT ->{ input / 304.8 }
-                    Unit.YD ->{ input / 914.4 }
+                    Unit.MM -> { input }
+                    Unit.CM -> { input * 0.1 }
+                    Unit.M  -> { input * 0.001 }
+                    Unit.IN -> { input * 0.03937 }
+                    Unit.FT -> { input * 0.00328 }
+                    Unit.YD -> { input * 0.001093 }
                 }
             }
             Unit.CM -> {
                 return when(to){
-                    Unit.MM ->{ input * 10.0 }
-                    Unit.CM ->{ input }
-                    Unit.M ->{ input / 100.0 }
-                    Unit.IN ->{ input / 2.54 }
-                    Unit.FT ->{ input * 0.03281 }
-                    Unit.YD ->{ input / 91.44 }
+                    Unit.MM -> { input * 10.0 }
+                    Unit.CM -> { input }
+                    Unit.M  -> { input * 0.01 }
+                    Unit.IN -> { input * 0.3937 }
+                    Unit.FT -> { input * 0.03281 }
+                    Unit.YD -> { input * 0.0109361 }
                 }
             }
             Unit.M -> {
                 return when(to){
-                    Unit.IN ->{ input * 39.37 }
-                    Unit.FT ->{ input * 3.28084 }
-                    Unit.YD ->{ input / 0.9144 }
-                    Unit.MM ->{ input * 1000.0 }
-                    Unit.CM ->{ input * 100.0 }
-                    Unit.M ->{ input }
+                    Unit.IN -> { input * 39.37 }
+                    Unit.FT -> { input * 3.28084 }
+                    Unit.YD -> { input * 1.0936133 }
+                    Unit.MM -> { input * 1000.0 }
+                    Unit.CM -> { input * 100.0 }
+                    Unit.M  -> { input }
                 }
             }
             Unit.IN -> {
                 return when(to){
-                    Unit.MM ->{ input * 25.4 }
-                    Unit.CM ->{ input * 2.54 }
-                    Unit.M ->{ input * 0.0254 }
-                    Unit.IN ->{ input }
-                    Unit.FT ->{ input / 12.0 }
-                    Unit.YD ->{ input / 36.0 }
+                    Unit.MM -> { input * 25.4 }
+                    Unit.CM -> { input * 2.54 }
+                    Unit.M  -> { input * 0.0254 }
+                    Unit.IN -> { input }
+                    Unit.FT -> { input * 0.0833333 }
+                    Unit.YD -> { input * 0.2777777 }
                 }
             }
             Unit.FT -> {
                 return when(to){
-                    Unit.MM ->{ input * 304.8 }
-                    Unit.CM ->{ input * 30.48 }
-                    Unit.M ->{ input * 0.3048 }
-                    Unit.IN ->{ input * 12.0 }
-                    Unit.FT ->{ input }
-                    Unit.YD ->{ input / 3.0 }
+                    Unit.MM -> { input * 304.8 }
+                    Unit.CM -> { input * 30.48 }
+                    Unit.M  -> { input * 0.3048 }
+                    Unit.IN -> { input * 12.0 }
+                    Unit.FT -> { input }
+                    Unit.YD -> { input * 0.33333 }
                 }
             }
             Unit.YD -> {
                 return when(to){
-                    Unit.MM ->{ input * 914.4 }
-                    Unit.CM ->{ input * 91.44 }
-                    Unit.M ->{ input * 0.9144 }
-                    Unit.IN ->{ input * 36.0 }
-                    Unit.FT ->{ input * 3.0 }
-                    Unit.YD ->{ input }
+                    Unit.MM -> { input * 914.4 }
+                    Unit.CM -> { input * 91.44 }
+                    Unit.M  -> { input * 0.9144 }
+                    Unit.IN -> { input * 36.0 }
+                    Unit.FT -> { input * 3.0 }
+                    Unit.YD -> { input }
                 }
             }
         }

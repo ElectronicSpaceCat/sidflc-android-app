@@ -23,7 +23,7 @@ package com.android.app.fragments.device.deviceScanner
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
@@ -56,6 +56,7 @@ import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import java.util.Timer
 import java.util.TimerTask
+
 
 internal enum class ScanState {
     SCAN_NO_BLUETOOTH,
@@ -172,34 +173,26 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
             Toast.LENGTH_SHORT).show()
     }
 
-    @SuppressLint("MissingPermission")
     private fun onEnableBluetoothClicked() {
-        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        requestEnableBluetooth.launch(enableBtIntent)
-        requireContext().sendBroadcast(enableBtIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requestMultiplePermissions.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                )
+            )
+        }
+        else {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            requestEnableBluetooth.launch(enableBtIntent)
+        }
     }
 
     private val requestEnableBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if(result.resultCode == RESULT_OK) {
-                // check android 12+
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    requestMultiplePermissions.launch(
-                        arrayOf(
-                            Manifest.permission.BLUETOOTH_SCAN,
-                            Manifest.permission.BLUETOOTH_CONNECT,
-                        )
-                    )
-                }
-                else {
-                    Toast.makeText(requireActivity(),
-                        "${Manifest.permission.BLUETOOTH} granted",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            else {
-                Toast.makeText(requireActivity(),
+            if(result.resultCode != Activity.RESULT_OK) {
+                Toast.makeText(
+                    requireActivity(),
                     "${Manifest.permission.BLUETOOTH} denied",
                     Toast.LENGTH_SHORT
                 ).show()
@@ -208,12 +201,21 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
 
     private val requestMultiplePermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            var result = true
             permissions.entries.forEach {
-                val resultStr = if(it.value) "granted" else "denied"
-                Toast.makeText(requireActivity(),
-                    "${it.key} = $resultStr",
-                    Toast.LENGTH_SHORT
-                ).show()
+                if(!it.value) {
+                    result = it.value
+
+                    Toast.makeText(requireActivity(),
+                        "${it.key} denied",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            if(result) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                requestEnableBluetooth.launch(enableBtIntent)
             }
         }
 

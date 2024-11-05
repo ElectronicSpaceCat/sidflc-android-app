@@ -17,6 +17,7 @@
 package com.android.app
 
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.navigation.ui.AppBarConfiguration
@@ -55,6 +56,9 @@ class MainActivity : AppCompatActivity() {
 
         // Keep screen from going to sleep
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // Force orientation to portrait
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         // Hide the status bar
         Utils.hideActionAndNavBar(this, Utils.SysBarView.HIDE_STATUS_BAR)

@@ -62,11 +62,11 @@ class UnitEditorFragment : Fragment() {
         val adapterLengthsShort = ArrayAdapter(requireContext(), simple_spinner_dropdown_item, unitLengthsReduced)
 
         // Assign the adapter to the spinners - lengths
-        var idx = unitLengthsReduced.indexOf(DataShared.lensOffset.unitStr())
+        var idx = unitLengthsReduced.indexOf(DataShared.lensOffsetFromBase.unitStr())
         fragmentUnitEditorBinding.lensOffsetUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.lensOffsetUnitSelector.setSelection(0.coerceAtLeast(idx))
 
-        idx = unitLengthsReduced.indexOf(DataShared.deviceOffset.unitStr())
+        idx = unitLengthsReduced.indexOf(DataShared.deviceOffsetFromBase.unitStr())
         fragmentUnitEditorBinding.deviceOffsetUnitSelector.adapter = adapterLengthsShort
         fragmentUnitEditorBinding.deviceOffsetUnitSelector.setSelection(0.coerceAtLeast(idx))
 
@@ -93,9 +93,9 @@ class UnitEditorFragment : Fragment() {
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
-                if(selectedUnit != DataShared.lensOffset.unit){
-                    DataShared.lensOffset.setUnit(selectedUnit)
-                    DataShared.lensOffset.storeToPrefs(requireContext())
+                if(selectedUnit != DataShared.lensOffsetFromBase.unit){
+                    DataShared.lensOffsetFromBase.setUnit(selectedUnit)
+                    DataShared.lensOffsetFromBase.storeToPrefs(requireContext())
                 }
             }
         }
@@ -106,9 +106,9 @@ class UnitEditorFragment : Fragment() {
             }
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val selectedUnit = ConvertLength.Unit.valueOf(unitLengthsReduced[p2].uppercase())
-                if(selectedUnit != DataShared.deviceOffset.unit){
-                    DataShared.deviceOffset.setUnit(selectedUnit)
-                    DataShared.deviceOffset.storeToPrefs(requireContext())
+                if(selectedUnit != DataShared.deviceOffsetFromBase.unit){
+                    DataShared.deviceOffsetFromBase.setUnit(selectedUnit)
+                    DataShared.deviceOffsetFromBase.storeToPrefs(requireContext())
                 }
             }
         }

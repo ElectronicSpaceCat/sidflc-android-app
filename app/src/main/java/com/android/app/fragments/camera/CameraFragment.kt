@@ -57,7 +57,7 @@ class CameraFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        checkCameraPermissions()
+        //checkCameraPermissions() // TODO - Test if this really isn't needed
     }
 
     override fun onResume() {

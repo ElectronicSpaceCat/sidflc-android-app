@@ -26,7 +26,6 @@ import androidx.preference.*
 import com.android.app.dataShared.DataShared
 import com.android.app.utils.misc.Utils
 import com.android.app.R
-import com.android.app.utils.converters.ConvertLength
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsMainFragment : PreferenceFragmentCompat() {
@@ -131,18 +130,18 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
          * Lens Offset
          */
         // Set the lensOffset title units appropriately
-        lensOffset.title = getString(R.string.pref_title_lens_offset) + " (" + DataShared.lensOffset.unitStr() + ")"
-        lensOffset.text = DataShared.lensOffset.valueStr()
-        DataShared.lensOffset.unitOnChange.observe(viewLifecycleOwner){
-            lensOffset.title = getString(R.string.pref_title_lens_offset) + " (" + DataShared.lensOffset.unitStr() + ")"
+        lensOffset.title = getString(R.string.pref_title_lens_offset) + " (" + DataShared.lensOffsetFromBase.unitStr() + ")"
+        lensOffset.text = DataShared.lensOffsetFromBase.valueStr()
+        DataShared.lensOffsetFromBase.unitOnChange.observe(viewLifecycleOwner){
+            lensOffset.title = getString(R.string.pref_title_lens_offset) + " (" + DataShared.lensOffsetFromBase.unitStr() + ")"
         }
         lensOffset.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 if (lensOffset.text != newValue as String) {
                     val value = Utils.convertStrToDouble(newValue)
-                    DataShared.lensOffset.setValue(value)
-                    DataShared.lensOffset.storeToPrefs(requireContext())
+                    DataShared.lensOffsetFromBase.setValue(value)
+                    DataShared.lensOffsetFromBase.storeToPrefs(requireContext())
                     retVal = true
                 }
                 retVal
@@ -152,18 +151,18 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
          * Device Offset
          */
         // Set the lensOffset title units appropriately
-        deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffset.unitStr() + ")"
-        deviceOffset.text = DataShared.deviceOffset.valueStr()
-        DataShared.deviceOffset.unitOnChange.observe(viewLifecycleOwner){
-            deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffset.unitStr() + ")"
+        deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffsetFromBase.unitStr() + ")"
+        deviceOffset.text = DataShared.deviceOffsetFromBase.valueStr()
+        DataShared.deviceOffsetFromBase.unitOnChange.observe(viewLifecycleOwner){
+            deviceOffset.title = getString(R.string.pref_title_device_offset) + " (" + DataShared.deviceOffsetFromBase.unitStr() + ")"
         }
         deviceOffset.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _ : Preference, newValue: Any ->
                 var retVal = false
                 if (deviceOffset.text != newValue as String) {
                     val value = Utils.convertStrToDouble(newValue)
-                    DataShared.deviceOffset.setValue(value)
-                    DataShared.deviceOffset.storeToPrefs(requireContext())
+                    DataShared.deviceOffsetFromBase.setValue(value)
+                    DataShared.deviceOffsetFromBase.storeToPrefs(requireContext())
                     retVal = true
                 }
                 retVal

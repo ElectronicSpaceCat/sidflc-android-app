@@ -35,7 +35,6 @@ object CalcTrig {
      * (This is for right triangle only)
      *
      * c = a / sin(ά)
-     *
      * c = b / sin(β)
      *
      * @param sideOpposite
@@ -52,7 +51,6 @@ object CalcTrig {
      * (This is for right triangle only)
      *
      * a = b * tan(ά)
-     *
      * b = a * tan(β)
      *
      * @param sideOpposite
@@ -67,7 +65,6 @@ object CalcTrig {
      * Get angleOpposite given sideHypotenuse and sideOpposite
      *
      * ά = asin(a/c)
-     *
      * β = asin(b/c)
      *
      * @param sideHypotenuse
@@ -82,7 +79,6 @@ object CalcTrig {
      * Get angleOpposite given sideHypotenuse and sideAdjacent
      *
      * ά = acos(b/c)
-     *
      * β = acos(a/c)
      *
      * @param sideHypotenuse
@@ -97,7 +93,6 @@ object CalcTrig {
      * Get angleOpposite given sideOpposite and sideAdjacent
      *
      * β = atan(b/a)
-     *
      * α = atan(a/b)
      *
      * @param sideOpposite
@@ -109,17 +104,16 @@ object CalcTrig {
     }
 
     /**
-     * Get sideOpposite given sideHypotenuse and angleOpposite
+     * Get side given sideHypotenuse and angleOpposite
      *
      * a = c * sin(ά)
-     *
      * b = c × sin(β)
      *
      * @param sideHypotenuse
      * @param angleOpposite
      * @return sideOpposite
      */
-    fun getSideOppositeGivenSideHypotenuseAngleOpposite(sideHypotenuse: Double, angleOpposite: Double): Double {
+    fun getSideGivenSideHypotenuseAngleOpposite(sideHypotenuse: Double, angleOpposite: Double): Double {
         return (sideHypotenuse * sin(Math.toRadians((angleOpposite))))
     }
 
@@ -127,7 +121,6 @@ object CalcTrig {
      * Get side given sideHypotenuse and angleAdjacent
      *
      * a = c × cos(β)
-     *
      * b = c × cos(α)
      *
      * @param sideHypotenuse
@@ -136,21 +129,6 @@ object CalcTrig {
      */
     fun getSideGivenSideHypotenuseAngleAdjacent(sideHypotenuse: Double, angleAdjacent: Double): Double {
         return (sideHypotenuse * cos(Math.toRadians((angleAdjacent))))
-    }
-
-    /**
-     * Get sideOpposite given sideHypotenuse and angleOpposite
-     *
-     * a = c × sin(α)
-     *
-     * b = c × sin(β)
-     *
-     * @param sideHypotenuse
-     * @param angleOpposite
-     * @return sideOpposite
-     */
-    fun getSideGivenSideHypotenuseAngleOpposite(sideHypotenuse: Double, angleOpposite: Double): Double {
-        return (sideHypotenuse * cos(Math.toRadians((angleOpposite))))
     }
 
     /**

@@ -350,6 +350,154 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         }
 
         /**
+         * OnLongClick for switching from manual to auto carriage position.
+         */
+        fragmentCameraOverlayBinding.carriagePosition.setOnLongClickListener {
+            viewModel.isPositionAutoMode = !viewModel.isPositionAutoMode
+            val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            prefs.edit().putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE), viewModel.isPositionAutoMode).apply()
+            true
+        }
+
+        /**
+         * Set onClick for sensors available prompt
+         */
+        fragmentCameraOverlayBinding.sensorsAvailablePrompt.btnSensorsOk.setOnClickListener {
+            fragmentCameraOverlayBinding.sensorsAvailablePrompt.root.visibility = View.GONE
+        }
+
+        /**
+         * Observe the device connection status
+         * NOTE: Make sure this observable is before the others since
+         *       to prevent resetting some parameters set by other observables.
+         */
+        DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
+            when (state.state) {
+                ConnectionState.State.CONNECTING -> {
+                    // NOTE: Will hit this when set to autoConnect even if user turned off device
+                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnected)
+                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = false
+                }
+                ConnectionState.State.INITIALIZING -> {
+                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_initializing)
+                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = true
+                }
+                ConnectionState.State.READY -> {
+                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_connected)
+                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = true
+                    fragmentCameraOverlayBinding.battery.visibility = View.VISIBLE
+                    resetBallisticButtons()
+                }
+                ConnectionState.State.DISCONNECTING -> {
+                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnecting)
+                }
+                ConnectionState.State.DISCONNECTED -> {
+                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnected)
+                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = false
+                    fragmentCameraOverlayBinding.battery.visibility = View.INVISIBLE
+                    fragmentCameraOverlayBinding.usb.visibility = View.INVISIBLE
+                    DataShared.carriagePosition.setValue(0.0)
+                    fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
+                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
+                    if(viewModel.isPositionAutoMode){
+                        fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
+                        fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
+                        clearEngData()
+                        clearEngBallisticsData()
+                    }
+                    resetBallisticButtons()
+                }
+                else -> {}
+            }
+        }
+
+        /**
+         * Observe the dataToGet for enabling/disabling the button data
+         * NOTE: This only updates when value is different than last
+         */
+        viewModel.dataToGetLive.observe(viewLifecycleOwner) { data ->
+            // Update the button visuals and select sensor if needed
+            when (data!!) {
+                DataType.DEVICE_HEIGHT -> {
+                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(1)
+                    if (DataShared.device.connectionState.value?.isReady!!) {
+                        if (btnPhoneHeight.acquisitionMode == BallisticsButton.Mode.AUTO) {
+                            DataShared.device.setSensor(DeviceData.Sensor.Id.LONG)
+                            DataShared.device.setSensorEnable(true)
+                        }
+                        else{
+                            DataShared.device.setSensorEnable(false)
+                        }
+                    }
+                }
+                DataType.TARGET_HEIGHT -> {
+                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(2)
+                    if (DataShared.device.connectionState.value?.isReady!!) {
+                        DataShared.device.setSensorEnable(false)
+                    }
+                }
+                DataType.TARGET_DISTANCE -> {
+                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
+                    if (DataShared.device.connectionState.value?.isReady!!) {
+                        DataShared.device.setSensorEnable(false)
+                    }
+                }
+                DataType.NONE -> {
+                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
+                    if (DataShared.device.connectionState.value?.isReady!!) {
+                        DataShared.device.setSensor(DeviceData.Sensor.Id.SHORT)
+                        DataShared.device.setSensorEnable(true)
+                    }
+                }
+                DataType.NA -> {
+                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
+                    if (DataShared.device.connectionState.value?.isReady!!) {
+                        DataShared.device.setSensorEnable(false)
+                    }
+                }
+            }
+
+            // Clear the carriage position data
+            if (data != DataType.NONE) {
+                fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
+                if (viewModel.isPositionAutoMode) {
+                    fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
+                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
+                }
+            }
+
+            // Clear the ballistics visual data
+            clearEngData()
+            clearEngBallisticsData()
+        }
+
+        /**
+         * Observe the calculation flag which drives visual effects
+         * NOTE: This only updates when value is different than last
+         */
+        viewModel.isCalculationPausedLive.observe(viewLifecycleOwner) { paused ->
+            // Update the button visuals
+            when (viewModel.dataToGet) {
+                DataType.DEVICE_HEIGHT -> {
+                    btnPhoneHeight.dataUpdateEnable = !paused
+                }
+                DataType.TARGET_DISTANCE -> {
+                    btnTargetDistance.dataUpdateEnable = !paused
+                }
+                DataType.TARGET_HEIGHT -> {
+                    btnTargetHeight.dataUpdateEnable = !paused
+                }
+                DataType.NONE,
+                DataType.NA, -> {
+                }
+            }
+
+            // Clear the engineer data
+            clearEngData()
+            clearEngBallisticsData()
+        }
+
+        /**
          * Observe the carriage position unit type
          */
         DataShared.carriagePosition.unitOnChange.observe(viewLifecycleOwner) { unit ->
@@ -427,98 +575,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             } else {
                 fragmentCameraOverlayBinding.engineerView.visibility = View.INVISIBLE
             }
-        }
-
-        /**
-         * OnLongClick for switching from manual to auto carriage position.
-         */
-        fragmentCameraOverlayBinding.carriagePosition.setOnLongClickListener {
-            viewModel.isPositionAutoMode = !viewModel.isPositionAutoMode
-            val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            prefs.edit().putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE), viewModel.isPositionAutoMode).apply()
-            true
-        }
-
-        /**
-         * Set onClick for sensors available prompt
-         */
-        fragmentCameraOverlayBinding.sensorsAvailablePrompt.btnSensorsOk.setOnClickListener {
-            fragmentCameraOverlayBinding.sensorsAvailablePrompt.root.visibility = View.GONE
-        }
-
-        /**
-         * Observe the dataToGet for enabling/disabling the button data
-         * NOTE: This only updates when value is different than last
-         */
-        viewModel.dataToGetLive.observe(viewLifecycleOwner) { data ->
-            // Update the button visuals and select sensor if needed
-            when (data!!) {
-                DataType.DEVICE_HEIGHT -> {
-                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(1)
-                    if (DataShared.device.connectionState.value?.isReady!!
-                        && btnPhoneHeight.acquisitionMode == BallisticsButton.Mode.AUTO
-                    ) {
-                        DataShared.device.setSensor(DeviceData.Sensor.Id.LONG)
-                        DataShared.device.setSensorEnable(true)
-                    }
-                }
-                DataType.TARGET_HEIGHT -> {
-                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(2)
-                    DataShared.device.setSensorEnable(false)
-                }
-                DataType.TARGET_DISTANCE -> {
-                    DataShared.device.setSensorEnable(false)
-                }
-                DataType.NONE -> {
-                    fragmentCameraOverlayBinding.reticleDialPitch.setImageLevel(0)
-                    if (DataShared.device.connectionState.value?.isReady!!) {
-                        DataShared.device.setSensor(DeviceData.Sensor.Id.SHORT)
-                        DataShared.device.setSensorEnable(true)
-                    }
-                }
-                DataType.NA -> {
-                    DataShared.device.setSensorEnable(false)
-                }
-            }
-
-            // Clear the carriage position data
-            if (data != DataType.NONE) {
-                fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
-                if (viewModel.isPositionAutoMode) {
-                    fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
-                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
-                }
-            }
-
-            // Clear the ballistics visual data
-            clearEngData()
-            clearEngBallisticsData()
-        }
-
-        /**
-         * Observe the calculation flag which drives visual effects
-         * NOTE: This only updates when value is different than last
-         */
-        viewModel.isCalculationPausedLive.observe(viewLifecycleOwner) { paused ->
-            // Update the button visuals
-            when (viewModel.dataToGet) {
-                DataType.DEVICE_HEIGHT -> {
-                    btnPhoneHeight.dataUpdateEnable = !paused
-                }
-                DataType.TARGET_DISTANCE -> {
-                    btnTargetDistance.dataUpdateEnable = !paused
-                }
-                DataType.TARGET_HEIGHT -> {
-                    btnTargetHeight.dataUpdateEnable = !paused
-                }
-                DataType.NONE,
-                DataType.NA, -> {
-                }
-            }
-
-            // Clear the engineer data
-            clearEngData()
-            clearEngBallisticsData()
         }
 
         /**
@@ -624,49 +680,6 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 else -> {}
             }
         }
-
-        /**
-         * Observe the device connection status
-         */
-        DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            when (state.state) {
-                ConnectionState.State.CONNECTING -> {
-                    // NOTE: Will hit this when set to autoConnect even if user turned off device
-                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnected)
-                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = false
-                }
-                ConnectionState.State.INITIALIZING -> {
-                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_initializing)
-                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = true
-                }
-                ConnectionState.State.READY -> {
-                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_connected)
-                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = true
-                    fragmentCameraOverlayBinding.battery.visibility = View.VISIBLE
-                    resetBallisticButtons()
-                }
-                ConnectionState.State.DISCONNECTING -> {
-                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnecting)
-                }
-                ConnectionState.State.DISCONNECTED -> {
-                    fragmentCameraOverlayBinding.deviceInfo.text = getString(R.string.state_disconnected)
-                    fragmentCameraOverlayBinding.deviceInfo.isEnabled = false
-                    fragmentCameraOverlayBinding.battery.visibility = View.INVISIBLE
-                    fragmentCameraOverlayBinding.usb.visibility = View.INVISIBLE
-                    DataShared.carriagePosition.setValue(0.0)
-                    fragmentCameraOverlayBinding.carriagePositionSeekBarAuto.progress = 0
-                    fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
-                    if(viewModel.isPositionAutoMode){
-                        fragmentCameraOverlayBinding.carriagePositionSeekBarManual.progress = 0
-                        fragmentCameraOverlayBinding.carriagePositionValue.text = getString(R.string.value_unknown)
-                        clearEngData()
-                        clearEngBallisticsData()
-                    }
-                    resetBallisticButtons()
-                }
-                else -> {}
-            }
-        }
     }
 
     /**
@@ -689,7 +702,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                 btnTargetHeight.enable(true)
                 viewModel.dataToGet = DataType.TARGET_HEIGHT
             }
-            else if(!viewModel.isPositionAutoMode || DataShared.device.connectionState.value?.isReady!!){
+            else if(!viewModel.isPositionAutoMode || DataShared.device.connectionState.value?.isReady!!) {
                 viewModel.dataToGet = DataType.NONE
             }
             else {
@@ -698,17 +711,16 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         }
         else {
             btnPhoneHeight.dataStatus = BallisticsButton.DataStatus.NOT_SET
-
             if(DataShared.device.connectionState.value?.isReady!!){
                 btnPhoneHeight.enable(true)
-                viewModel.dataToGet = DataType.DEVICE_HEIGHT
             }
             else{
                 btnPhoneHeight.enable(false)
-                viewModel.dataToGet = DataType.NA
             }
             btnTargetDistance.enable(false)
             btnTargetHeight.enable(false)
+
+            viewModel.dataToGet = DataType.DEVICE_HEIGHT
         }
     }
 

@@ -19,11 +19,6 @@ import com.android.app.databinding.FragmentDeviceMonitorBinding
 import com.android.app.device.bluetooth.pwrmonitor.PwrMonitorData
 import com.android.app.utils.converters.ConvertLength
 import com.android.app.utils.misc.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
@@ -88,10 +83,19 @@ class DeviceMonitorFragment : Fragment() {
         }
 
         /** Register Bluetooth receiver */
-        requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
-
-        /** Attempt to connect device if bluetooth is enabled and device is advertising */
-        connectDeviceIfMatch(requireContext())
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//            CoroutineScope(Dispatchers.IO).launch {
+//                while (!Utils.hasPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT)) {
+//                    Thread.sleep(500)
+//                }
+//
+//                requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+//                connectDeviceIfMatch(requireContext())
+//            }
+//        } else {
+//            requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+//            connectDeviceIfMatch(requireContext())
+//        }
 
         /**
          * Observe the device bond status
@@ -106,8 +110,8 @@ class DeviceMonitorFragment : Fragment() {
          * Observe the device offset for setting the device height sensor target reference
          * which is used for calibration
          */
-        DataShared.deviceOffset.valueOnChange.observe(viewLifecycleOwner) {
-            DataShared.device.sensorDeviceHeight.targetReference = DataShared.deviceOffset.getConverted(ConvertLength.Unit.MM).toInt()
+        DataShared.deviceOffsetFromBase.valueOnChange.observe(viewLifecycleOwner) {
+            DataShared.device.sensorDeviceHeight.targetReference = DataShared.deviceOffsetFromBase.getConverted(ConvertLength.Unit.MM).toInt()
         }
 
         /**
@@ -128,8 +132,8 @@ class DeviceMonitorFragment : Fragment() {
                             ConnectionObserver.REASON_SUCCESS -> { "Success" }
                             ConnectionObserver.REASON_NOT_SUPPORTED -> { "Not Supported" }
                             ConnectionObserver.REASON_CANCELLED -> { "Cancelled" }
-                            ConnectionObserver.REASON_TERMINATE_PEER_USER -> { "Remote Device" }
-                            ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> { "Local Device" }
+                            ConnectionObserver.REASON_TERMINATE_PEER_USER -> { "Peer Device" }
+                            ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> { "Local Host" }
                             ConnectionObserver.REASON_LINK_LOSS -> { "Link Loss" }
                             ConnectionObserver.REASON_TIMEOUT -> { "Timeout" }
                             ConnectionObserver.REASON_UNKNOWN -> { "Unknown" }
@@ -207,6 +211,9 @@ class DeviceMonitorFragment : Fragment() {
         if(_sensorEnablePrev){
             DataShared.device.setSensorEnable(true)
         }
+
+        requireContext().registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+        connectDeviceIfMatch(requireContext())
     }
 
     override fun onPause() {

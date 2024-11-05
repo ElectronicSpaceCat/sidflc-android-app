@@ -17,11 +17,11 @@ class SensorGyro : SensorEventListener {
         private const val TAG_PITCH = "gyro_pitch"
         private const val TAG_ROLL = "gyro_roll"
 
-        private const val IMU_WINDOW_SIZE = 15
+        private const val IMU_WINDOW_SIZE = 15 // Moving average
 
         private const val AZIMUTH = 0
-        private const val PITCH = 2
         private const val ROLL = 1
+        private const val PITCH = 2
 
         private var sensorManager: SensorManager? = null
         private var mAccelerometer: Sensor? = null

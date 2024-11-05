@@ -18,6 +18,7 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
+        app:summary="(offsets start from base of phone)"
         app:title="@string/header_orientation">
 
         <EditTextPreference

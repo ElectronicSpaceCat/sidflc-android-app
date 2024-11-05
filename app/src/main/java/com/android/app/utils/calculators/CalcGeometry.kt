@@ -7,8 +7,9 @@ class TangentPoints(val t1 : Point, val t2 : Point)
 
 object CalcGeometry {
     /**
-     * Get the tangent points where a line from the given point is tangent
-     * to a circle with a given center point and radius.
+     * Get the tangent points of the lines touching
+     * a circle given the circle center point, circle radius,
+     * and the end point of the line outside the circle.
      *
      * @param circleCenter
      * @param radius

@@ -204,6 +204,9 @@ object Utils {
     @SuppressLint("MissingPermission")
     fun getBondedDeviceByName(context: Context, name : String) : BluetoothDevice? {
         val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        if(manager.adapter == null) {
+            return null
+        }
         if(!manager.adapter.isEnabled) {
             return null
         }

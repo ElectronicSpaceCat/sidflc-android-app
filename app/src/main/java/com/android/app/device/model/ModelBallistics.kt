@@ -168,7 +168,7 @@ open class ModelBallistics(model: ModelData) {
      */
     private fun getProjectileHeightOffsetAtAngle(position: Double, launchAngle: Double, launchHeightOffset : Double) : Double {
         val heightOffset = (launchHeightOffset + _model.getMaxCarriagePosition() + _model.getProjectileCenterOfMassPosition(position))
-        return CalcTrig.getSideOppositeGivenSideHypotenuseAngleOpposite(heightOffset, launchAngle)
+        return CalcTrig.getSideGivenSideHypotenuseAngleOpposite(heightOffset, launchAngle)
     }
 
     /**

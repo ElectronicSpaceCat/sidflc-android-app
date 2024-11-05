@@ -307,7 +307,7 @@ class DeviceBallisticsFragment : Fragment() {
      * Plots the calculated impact data using the carriage position range from 10mm to MaxCarriagePosition
      */
     private fun plotCalculatedImpactData() {
-        val lensOffset = DataShared.lensOffset.getConverted(ConvertLength.Unit.MM)
+        val lensOffset = DataShared.lensOffsetFromBase.getConverted(ConvertLength.Unit.MM)
 
         // Create the data set to plot
         var rowId = 0
