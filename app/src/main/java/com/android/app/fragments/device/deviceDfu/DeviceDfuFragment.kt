@@ -26,13 +26,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import com.android.app.R
-import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceDfuBinding
 import com.android.app.fragments.device.deviceDfu.DeviceDfuViewModel.Companion.UpdateStatus
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
