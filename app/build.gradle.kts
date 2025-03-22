@@ -8,10 +8,10 @@ android {
     namespace = "com.android.app"
     compileSdk = 35
 
-    // Note: Need the NDK attribute to ensure library debug symbols get removed.
+    // Note: Need the NDK attribute to ensure Task :app:stripDebugDebugSymbols passes
     //       The version can be found in Tools -> SDK Manager -> SDK Tools -> NDK (Side by side)
     //       Click "Show package details" to view the versions.
-    ndkVersion = "26.3.11579264"
+    ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.android.app"
@@ -37,10 +37,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
 
     buildFeatures {
         viewBinding = true
