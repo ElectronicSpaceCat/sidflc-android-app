@@ -3,6 +3,11 @@ package com.android.app.device.sensor
 import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.device.sensor.ISensorCalibrate.State
 
+/**
+ * TODO: The calibration state machine should have timeouts per transaction.
+ *       Currently it could get stuck in a WAIT_FOR_RESPONSE state.
+ *       For now, if that happens, backing out of the CAL screen would reset it.
+ */
 open class VL53L4CX(override val sensor: Sensor) : ISensor {
     
     override val type: DeviceData.Sensor.Type = DeviceData.Sensor.Type.VL53L4CX
@@ -30,6 +35,7 @@ open class VL53L4CX(override val sensor: Sensor) : ISensor {
     override fun stopCalibration() {
         state = State.NA
     }
+
     override fun startCalibration() {
         sensor.resetFactory()
         state = State.INIT

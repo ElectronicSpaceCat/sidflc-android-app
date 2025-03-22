@@ -74,7 +74,7 @@
     <fragment
         android:id="@+id/gyroCalFragment"
         android:name="com.android.app.fragments.gyroCal.GyroCalFragment"
-        android:label="Gyro Calibrate" />
+        android:label="Gyro Calibration" />
     <fragment
         android:id="@+id/unitEditorFragment"
         android:name="com.android.app.fragments.unitEditor.UnitEditorFragment"
@@ -107,7 +107,7 @@
     <fragment
         android:id="@+id/deviceCalibrateFragment"
         android:name="com.android.app.fragments.device.deviceCalibrate.DeviceCalibrateFragment"
-        android:label="Device Calibrate" />
+        android:label="Device Calibration" />
     <fragment
         android:id="@+id/deviceInfoFragment"
         android:name="com.android.app.fragments.device.deviceInfo.DeviceInfoFragment"

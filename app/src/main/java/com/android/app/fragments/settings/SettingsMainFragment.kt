@@ -26,6 +26,7 @@ import androidx.preference.*
 import com.android.app.dataShared.DataShared
 import com.android.app.utils.misc.Utils
 import com.android.app.R
+import androidx.navigation.findNavController
 
 /** Fragment used to present the user with a gallery of photos taken */
 class SettingsMainFragment : PreferenceFragmentCompat() {
@@ -53,7 +54,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
 
         // Navigate to the units editor when preference clicked
         editUnits.setOnPreferenceClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+            requireActivity().findNavController(R.id.container_nav).navigate(
                 R.id.action_settingsFragment_to_unitEditorFragment
             )
             true
@@ -78,12 +79,12 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
         // Navigate to the device settings when preference clicked
         deviceSettings.setOnPreferenceClickListener {
             if(!DataShared.device.connectionState.value!!.isReady){
-                Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+                requireActivity().findNavController(R.id.container_nav).navigate(
                     R.id.deviceScannerFragment
                 )
             }
             else {
-                Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+                requireActivity().findNavController(R.id.container_nav).navigate(
                     R.id.deviceBallisticsFragment
                 )
             }
@@ -92,7 +93,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
 
         // Navigate to the projectile list editor when preference clicked
         editProjectileList.setOnPreferenceClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+            requireActivity().findNavController(R.id.container_nav).navigate(
                 R.id.action_settingsFragment_to_projectileEditFragment
             )
             true
@@ -102,12 +103,12 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
         // otherwise navigate to the device scanner screen
         sensorCalDevice.setOnPreferenceClickListener {
             if(!DataShared.device.connectionState.value!!.isReady){
-                Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+                requireActivity().findNavController(R.id.container_nav).navigate(
                     R.id.deviceScannerFragment
                 )
             }
             else {
-                Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+                requireActivity().findNavController(R.id.container_nav).navigate(
                     R.id.deviceCalibrateFragment
                 )
             }
@@ -116,7 +117,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
 
         // Navigate to the phone calibration screen when preference clicked
         sensorCalPhone.setOnPreferenceClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+            requireActivity().findNavController(R.id.container_nav).navigate(
                 R.id.action_settingsFragment_to_gyroCalFragment
             )
             true

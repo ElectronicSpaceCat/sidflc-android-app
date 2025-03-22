@@ -10,6 +10,7 @@ import com.android.app.device.bluetooth.device.DeviceData
 import com.android.app.utils.calculators.CalcFilters
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import kotlin.math.abs
+import androidx.core.content.edit
 
 class Sensor(
     context: Context,
@@ -116,7 +117,7 @@ class Sensor(
         _rangeAvgErr = CalcFilters.MovingAverage(_sampleSize)
         _rangeAvg.reset(_rangeFiltered.value!!)
         _rangeAvgErr.reset()
-        _prefs.edit().putInt(_filterTag, _sampleSize).apply()
+        _prefs.edit { putInt(_filterTag, _sampleSize) }
     }
 
     /**

@@ -32,6 +32,8 @@ import com.android.app.device.sensor.ISensorCalibrate
 import com.android.app.device.sensor.ISensorCalibrate.State
 import com.android.app.fragments.device.deviceCalibrate.DeviceCalibrateViewModel.CalSelect
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
+import androidx.navigation.findNavController
+import androidx.core.view.isGone
 
 class DeviceCalibrateFragment : Fragment() {
     private var _fragmentDeviceCalibrateBinding: FragmentDeviceCalibrateBinding? = null
@@ -55,7 +57,7 @@ class DeviceCalibrateFragment : Fragment() {
          * Observe connection state navigate back to scanner page on disconnect
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+            val navController = requireActivity().findNavController(R.id.container_nav)
             if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)
@@ -122,7 +124,7 @@ class DeviceCalibrateFragment : Fragment() {
          * Setup a long-click listener to open the option for individual sensor calibrations (engineer mode)
          */
         fragmentDeviceCalibrateBinding.imageView.setOnLongClickListener {
-            if(fragmentDeviceCalibrateBinding.calBtnAll.visibility == View.GONE){
+            if(fragmentDeviceCalibrateBinding.calBtnAll.isGone){
                 fragmentDeviceCalibrateBinding.calBtnAll.visibility = View.VISIBLE
                 fragmentDeviceCalibrateBinding.calBtnSensor1.visibility = View.GONE
                 fragmentDeviceCalibrateBinding.calBtnSensor2.visibility = View.GONE
@@ -172,7 +174,7 @@ class DeviceCalibrateFragment : Fragment() {
     }
 
     private fun onOkClicked() {
-        Navigation.findNavController(requireActivity(), R.id.container_nav).navigateUp()
+        requireActivity().findNavController(R.id.container_nav).navigateUp()
     }
 
     override fun onResume() {

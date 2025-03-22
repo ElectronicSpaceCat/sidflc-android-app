@@ -38,6 +38,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import com.android.app.R
+import androidx.navigation.findNavController
 
 /**
  * Main fragment for this app. Implements all camera operations including:
@@ -115,7 +116,7 @@ class CameraFragment : Fragment() {
         // Make sure that all permissions are still present, since the
         // user could have removed them while the app was in paused state.
         if (!CameraPermissionsFragment.hasPermission(requireContext())) {
-            Navigation.findNavController(requireActivity(), R.id.container_camera).navigate(
+            requireActivity().findNavController(R.id.container_camera).navigate(
                 R.id.action_permissions_to_camera
             )
         }

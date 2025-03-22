@@ -22,6 +22,7 @@ import com.android.app.utils.misc.Utils
 import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
+import androidx.navigation.findNavController
 
 class DeviceMonitorFragment : Fragment() {
     private var _fragmentDeviceMonitorBinding: FragmentDeviceMonitorBinding? = null
@@ -44,7 +45,9 @@ class DeviceMonitorFragment : Fragment() {
             when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)) {
                 BluetoothAdapter.STATE_TURNING_OFF,
                 BluetoothAdapter.STATE_OFF,
-                BluetoothAdapter.STATE_TURNING_ON, -> {}
+                BluetoothAdapter.STATE_TURNING_ON,
+                    -> {
+                }
                 BluetoothAdapter.STATE_ON -> {
                     connectDeviceIfMatch(requireContext())
                 }
@@ -143,7 +146,8 @@ class DeviceMonitorFragment : Fragment() {
                         // Handle Link Loss
                         if(stateWithReason.reason == ConnectionObserver.REASON_LINK_LOSS) {
                             // Ignore while in the DeviceInfo fragment (where the DFU logic resides, and will handle disconnects)
-                            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+                            val navController =
+                                requireActivity().findNavController(R.id.container_nav)
                             if(navController.currentDestination?.id == R.id.deviceInfoFragment) {
                                 return@observe
                             }

@@ -13,6 +13,7 @@ import com.android.app.R
 import com.android.app.databinding.WidgetBallisticsButtonBinding
 import com.android.app.fragments.dialogs.InputDialogFragment
 import com.android.app.utils.converters.ConverterData
+import androidx.core.content.edit
 
 /**
  * The purpose of this class is a generic handler for
@@ -150,8 +151,9 @@ open class BallisticsButton<K : ConverterData<*, *>>(
 
         // If the requested lock status is not the current then store it
         if(getAutoModeLockStatus() != lockStatus) {
-            val editor = PreferenceManager.getDefaultSharedPreferences(_button.root.context).edit()
-            editor.putInt(title + prefLockTag, lockStatus.ordinal).apply()
+            PreferenceManager.getDefaultSharedPreferences(_button.root.context).edit {
+                putInt(title + prefLockTag, lockStatus.ordinal)
+            }
         }
     }
 
@@ -202,8 +204,9 @@ open class BallisticsButton<K : ConverterData<*, *>>(
 
                 }
             }
-            val editor = PreferenceManager.getDefaultSharedPreferences(_button.root.context).edit()
-            editor.putInt(title + prefModeTag, _acquisitionMode.ordinal).apply()
+            PreferenceManager.getDefaultSharedPreferences(_button.root.context).edit {
+                putInt(title + prefModeTag, _acquisitionMode.ordinal)
+            }
         }
     }
 

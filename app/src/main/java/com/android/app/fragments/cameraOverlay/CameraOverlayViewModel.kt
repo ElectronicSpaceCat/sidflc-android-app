@@ -248,7 +248,7 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun onInactive(){
+    fun onInactive() {
         gyro.onInactive()
         DataShared.device.setSensorEnable(false)
     }
@@ -280,9 +280,5 @@ class CameraOverlayViewModel(application: Application) : AndroidViewModel(applic
                 }
             }
         }
-    }
-
-    companion object {
-        private const val DEFAULT_DELTA_TIME_SECONDS = 0.01
     }
 }

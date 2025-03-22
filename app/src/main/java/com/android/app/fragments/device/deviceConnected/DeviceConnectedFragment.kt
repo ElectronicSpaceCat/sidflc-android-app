@@ -29,6 +29,7 @@ import com.android.app.dataShared.DataShared
 import com.android.app.databinding.FragmentDeviceConnectedBinding
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
+import androidx.navigation.findNavController
 
 class DeviceConnectedFragment : Fragment() {
     private var _fragmentDeviceConnectedBinding: FragmentDeviceConnectedBinding? = null
@@ -50,7 +51,7 @@ class DeviceConnectedFragment : Fragment() {
          * Observe connection state navigate back to scanner page on disconnect
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+            val navController = requireActivity().findNavController(R.id.container_nav)
             if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)

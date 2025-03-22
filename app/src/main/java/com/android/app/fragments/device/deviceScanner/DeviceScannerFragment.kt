@@ -56,6 +56,7 @@ import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import java.util.Timer
 import java.util.TimerTask
+import androidx.navigation.findNavController
 
 
 internal enum class ScanState {
@@ -362,7 +363,7 @@ class DeviceScannerFragment : Fragment(), DevicesAdapter.OnItemClickListener {
                     }
                 }
 
-                Navigation.findNavController(requireActivity(), R.id.container_nav).navigate(
+                requireActivity().findNavController(R.id.container_nav).navigate(
                     R.id.action_deviceScannerFragment_to_deviceConnectedFragment
                 )
             }

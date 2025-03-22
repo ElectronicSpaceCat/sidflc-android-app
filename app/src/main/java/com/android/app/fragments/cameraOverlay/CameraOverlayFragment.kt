@@ -43,6 +43,9 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import java.util.*
 import kotlin.math.roundToInt
+import androidx.navigation.findNavController
+import androidx.core.content.edit
+import androidx.core.view.isVisible
 
 /** Fragment used to overlay the user interface over the camera preview */
 class CameraOverlayFragment internal constructor() : Fragment() {
@@ -322,7 +325,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * OnLongClick for opening Projectile Editor screen
          */
         fragmentCameraOverlayBinding.projectileSelected.setOnLongClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav)
+            requireActivity().findNavController(R.id.container_nav)
                 .navigate(R.id.projectileEditFragment)
             true
         }
@@ -331,7 +334,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
          * OnClick shortcut for opening the Scanner screen
          */
         fragmentCameraOverlayBinding.deviceConnectionStatus.setOnClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav)
+            requireActivity().findNavController(R.id.container_nav)
                 .navigate(R.id.deviceScannerFragment)
         }
 
@@ -341,10 +344,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.hitConfidence.setOnLongClickListener {
             viewModel.isEngViewActive = !viewModel.isEngViewActive
             val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            prefs.edit()
-                .putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_ENGINEERING_VIEW),
-                    viewModel.isEngViewActive)
-                .apply()
+            prefs.edit {
+                putBoolean(
+                    requireContext().getString(R.string.PREFERENCE_FILTER_ENGINEERING_VIEW),
+                    viewModel.isEngViewActive
+                )
+            }
 
             true
         }
@@ -355,7 +360,12 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.carriagePosition.setOnLongClickListener {
             viewModel.isPositionAutoMode = !viewModel.isPositionAutoMode
             val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            prefs.edit().putBoolean(requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE), viewModel.isPositionAutoMode).apply()
+            prefs.edit {
+                putBoolean(
+                    requireContext().getString(R.string.PREFERENCE_FILTER_CARRIAGE_POSITION_MODE),
+                    viewModel.isPositionAutoMode
+                )
+            }
             true
         }
 
@@ -488,7 +498,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
                     btnTargetHeight.dataUpdateEnable = !paused
                 }
                 DataType.NONE,
-                DataType.NA, -> {
+                DataType.NA,
+                    -> {
                 }
             }
 
@@ -665,7 +676,8 @@ class CameraOverlayFragment internal constructor() : Fragment() {
             when(status){
                 PwrMonitorData.BattStatus.OK,
                 PwrMonitorData.BattStatus.LOW,
-                PwrMonitorData.BattStatus.CHARGING_COMPLETE, -> {
+                PwrMonitorData.BattStatus.CHARGING_COMPLETE,
+                    -> {
                     fragmentCameraOverlayBinding.battery.setImageLevel(0)
                 }
                 PwrMonitorData.BattStatus.VERY_LOW -> {
@@ -770,7 +782,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
      * Handler for preferences
      */
     private fun preferencesHandler(context: Context, pref: SharedPreferences?, key: String) {
-        when(key){
+        when(key) {
             /** Preference - Selected Projectile */
             context.getString(R.string.PREFERENCE_FILTER_PROJECTILE_SELECTED) -> {
                 val projectile = ProjectilePrefUtils.getProjectileSelected(context)
@@ -795,7 +807,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
 
     private fun updateEngData(position : Double) {
         // If engineering view is visible then display the data
-        if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
+        if(fragmentCameraOverlayBinding.engineerView.isVisible) {
             fragmentCameraOverlayBinding.engineerData.phoneHeightData.text = DataShared.phoneHeight.valueStr()
 
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = DataShared.targetDistance.valueStr()
@@ -826,7 +838,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         )
 
         // If engineering view is visible then display the data
-        if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
+        if(fragmentCameraOverlayBinding.engineerView.isVisible) {
             fragmentCameraOverlayBinding.engineerData.launchHeightData.text = String.format(
                 Locale.getDefault(),
                 "%.3f",
@@ -868,7 +880,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
         fragmentCameraOverlayBinding.hitConfidenceBar.progress = 0
         fragmentCameraOverlayBinding.hitConfidenceValue.text = getString(R.string.value_unknown)
 
-        if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE){
+        if(fragmentCameraOverlayBinding.engineerView.isVisible){
             fragmentCameraOverlayBinding.engineerData.launchHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceAdjData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.velocityData.text = getString(R.string.value_unknown)
@@ -879,7 +891,7 @@ class CameraOverlayFragment internal constructor() : Fragment() {
     }
 
     private fun clearEngBallisticsData() {
-        if(fragmentCameraOverlayBinding.engineerView.visibility == View.VISIBLE) {
+        if(fragmentCameraOverlayBinding.engineerView.isVisible) {
             fragmentCameraOverlayBinding.engineerData.phoneHeightData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetDistanceData.text = getString(R.string.value_unknown)
             fragmentCameraOverlayBinding.engineerData.targetHeightData.text = getString(R.string.value_unknown)

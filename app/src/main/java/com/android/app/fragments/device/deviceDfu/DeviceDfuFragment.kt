@@ -24,13 +24,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
 import com.android.app.R
 import com.android.app.databinding.FragmentDeviceDfuBinding
 import com.android.app.fragments.device.deviceDfu.DeviceDfuViewModel.Companion.UpdateStatus
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
+import androidx.navigation.findNavController
 
 class DeviceDfuFragment : Fragment() {
     private var _fragmentDfuBinding: FragmentDeviceDfuBinding? = null
@@ -86,7 +86,7 @@ class DeviceDfuFragment : Fragment() {
                         .setPopUpTo(R.id.homeFragment, false)
                         .setLaunchSingleTop(true)
                         .build()
-                    Navigation.findNavController(requireActivity(), R.id.container_nav)
+                    requireActivity().findNavController(R.id.container_nav)
                         .navigate(R.id.deviceScannerFragment, null, options)
                 }
                 ConnectionState.State.READY -> {
@@ -185,7 +185,7 @@ class DeviceDfuFragment : Fragment() {
                     viewModel.checkFirmwareVersion(requireContext())
                 }
             }
-            UpdateStatus.NA, -> {
+            UpdateStatus.NA -> {
                 viewModel.checkFirmwareVersion(requireContext())
             }
             else -> {}

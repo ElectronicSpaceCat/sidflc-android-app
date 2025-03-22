@@ -20,6 +20,7 @@ import no.nordicsemi.android.ble.livedata.state.BondState
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import no.nordicsemi.android.log.Logger
 import java.lang.Float.intBitsToFloat
+import androidx.core.content.edit
 
 class Device(context: Context) {
     // External data configurations
@@ -43,12 +44,12 @@ class Device(context: Context) {
     private var _configIdx = 0
     private var _isInitialized = false
 
-    /** Device sensors */
+    /** Create Device Sensors */
     val sensors : Array<Sensor> = Array(DeviceData.Sensor.Id.NUM_IDS.ordinal) {
         Sensor(context, _bleDeviceManager, DeviceData.Sensor.Id.entries[it])
     }
 
-    /** Associate the sensors to a parameter */
+    /** Create sensor aliases */
     val sensorCarriagePosition = sensors[DeviceData.Sensor.Id.SHORT.ordinal]
     val sensorDeviceHeight = sensors[DeviceData.Sensor.Id.LONG.ordinal]
 
@@ -82,7 +83,7 @@ class Device(context: Context) {
             // Store the model to prefs if new
             val idModel = _prefs.getString(_prefsModelIdKey, Model.Name.V24.name)!!
             if(idModel != _model.value!!.name) {
-                _prefs.edit().putString(_prefsModelIdKey, _model.value!!.name).apply()
+                _prefs.edit { putString(_prefsModelIdKey, _model.value!!.name) }
             }
         }
 

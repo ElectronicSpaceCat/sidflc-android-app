@@ -27,6 +27,7 @@ import com.android.app.R
 import com.android.app.databinding.FragmentGyroCalBinding
 import java.math.RoundingMode
 import java.util.*
+import androidx.navigation.findNavController
 
 class GyroCalFragment : Fragment() {
     private var _fragmentGyroCalBinding: FragmentGyroCalBinding? = null
@@ -66,7 +67,7 @@ class GyroCalFragment : Fragment() {
 
         // Set the Ok button onClick listener
         fragmentGyroCalBinding.btnCalGyroOk.setOnClickListener {
-            Navigation.findNavController(requireActivity(), R.id.container_nav).popBackStack()
+            requireActivity().findNavController(R.id.container_nav).popBackStack()
         }
 
         // Observe the roll value

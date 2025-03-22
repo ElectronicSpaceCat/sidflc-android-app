@@ -36,6 +36,7 @@ import com.android.app.fragments.device.deviceScanner.deviceAdapter.DevicesLiveD
 import no.nordicsemi.android.support.v18.scanner.ScanCallback
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 import no.nordicsemi.android.support.v18.scanner.ScanSettings
+import androidx.core.content.edit
 
 class DeviceScannerViewModel(application: Application) : AndroidViewModel(application) {
     /**
@@ -77,7 +78,7 @@ class DeviceScannerViewModel(application: Application) : AndroidViewModel(applic
      * in the advertising packet.
      */
     fun filterByUuid(uuidRequired: Boolean) {
-        preferences.edit().putBoolean(PREFS_FILTER_UUID_REQUIRED, uuidRequired).apply()
+        preferences.edit { putBoolean(PREFS_FILTER_UUID_REQUIRED, uuidRequired) }
         if (devices.filterByUuid(uuidRequired)) deviceScannerState.recordFound() else deviceScannerState.clearRecords()
     }
 
@@ -89,7 +90,7 @@ class DeviceScannerViewModel(application: Application) : AndroidViewModel(applic
      * @param nearbyOnly if true, the list will show only devices with high RSSI.
      */
     fun filterByDistance(nearbyOnly: Boolean) {
-        preferences.edit().putBoolean(PREFS_FILTER_NEARBY_ONLY, nearbyOnly).apply()
+        preferences.edit { putBoolean(PREFS_FILTER_NEARBY_ONLY, nearbyOnly) }
         if (devices.filterByDistance(nearbyOnly)) deviceScannerState.recordFound() else deviceScannerState.clearRecords()
     }
 

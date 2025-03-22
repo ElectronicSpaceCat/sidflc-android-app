@@ -53,7 +53,7 @@ object Material {
         return materials.getValue(getName(name))
     }
 
-    private fun getName(name : Name) : String{
+    private fun getName(name : Name) : String {
         return name.name
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
 import androidx.preference.PreferenceManager
+import androidx.core.content.edit
 
 object PrefUtils {
     /**
@@ -22,9 +23,9 @@ object PrefUtils {
             newStr = TextUtils.join(delimiter, array)
         }
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        editor.putString(key, newStr)
-        editor.apply()
+        prefs.edit {
+            putString(key, newStr)
+        }
     }
 
     /**
@@ -51,6 +52,6 @@ object PrefUtils {
      */
     fun removeStringArrayFromPrefs(context: Context, key : String){
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.edit().remove(key).apply()
+        prefs.edit { remove(key) }
     }
 }

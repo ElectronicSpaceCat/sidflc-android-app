@@ -31,6 +31,7 @@ import androidx.navigation.Navigation
 import com.android.app.R
 import com.android.app.utils.misc.Utils
 import kotlinx.coroutines.launch
+import androidx.navigation.findNavController
 
 /**
  * The sole purpose of this fragment is to request permissions and, once granted, display the
@@ -84,7 +85,7 @@ class CameraPermissionsFragment : Fragment() {
             // repeatOnLifecycle launches the block in a new coroutine every time the
             // lifecycle is in the STARTED state (or above) and cancels it when it's STOPPED.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                Navigation.findNavController(requireActivity(), R.id.container_camera).navigate(
+                requireActivity().findNavController(R.id.container_camera).navigate(
                     R.id.action_permissions_to_camera
                 )
             }

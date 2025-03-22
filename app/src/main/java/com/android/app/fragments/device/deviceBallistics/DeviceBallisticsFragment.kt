@@ -45,6 +45,7 @@ import com.android.app.utils.plotter.DataPoint
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.livedata.state.ConnectionState
 import kotlin.math.roundToInt
+import androidx.navigation.findNavController
 
 /**
  * TODO: Need way to remove projectile test data if associated projectile does not exist
@@ -116,7 +117,7 @@ class DeviceBallisticsFragment : Fragment() {
          * Observe connection state navigate back to scanner page on disconnect
          */
         DataShared.device.connectionState.observe(viewLifecycleOwner) { state ->
-            val navController = Navigation.findNavController(requireActivity(), R.id.container_nav)
+            val navController = requireActivity().findNavController(R.id.container_nav)
             if (state.state != ConnectionState.State.READY) {
                 val options = NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, false)
