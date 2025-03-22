@@ -1,3 +1,3 @@
-# PlinkApp
+# SIDFLC Android App
 
-Android application that interfaces with the Plink device.
+Android application that interfaces with the SIDFLC device.
